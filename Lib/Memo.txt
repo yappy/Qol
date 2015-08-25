@@ -1,0 +1,7 @@
+Tools -> Options
+
+Text Editor -> All Languages -> General
+	- Line numbers
+
+Text Editor -> C/C++ -> Formatting -> Indentation
+	- Indent namespace contents
