@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "App.h"
+#include <debug.h>
 
 #define MAX_LOADSTRING 100
 
@@ -26,6 +27,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Place code here.
+	{
+		using namespace test::debug;
+
+		enableDebugOutput();
+		enableConsoleOutput();
+		enableFileOutput(L"log.txt");
+
+		writeLine(L"Start application");
+		writeLine(L"‚É‚Ù‚ñ‚²");
+		writef(L"%d 0x%08x %f %.8f", 123, 0x1234abcd, 3.14, 3.14);
+
+		const wchar_t *digit = L"0123456789abcdef";
+		wchar_t large[1024 + 32] = { 0 };
+		for (int i = 0; i < 1024; i++) {
+			large[i] = digit[i & 0xf];
+		}
+		writef(large);
+	}
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -51,6 +70,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             DispatchMessage(&msg);
         }
     }
+
+	{
+		using namespace test::debug;
+
+		shutdownDebugOutput();
+	}
 
     return (int) msg.wParam;
 }

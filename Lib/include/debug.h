@@ -17,9 +17,9 @@ bool enableConsoleOutput() noexcept;
 bool enableFileOutput(const wchar_t *fileName) noexcept;
 void shutdownDebugOutput() noexcept;
 
-void dwrite(const wchar_t *str);
-void dwriteLine(const wchar_t *str);
-void dprintf(const wchar_t *fmt, ...);
+void write(const wchar_t *str, bool newline = false) noexcept;
+inline void writeLine(const wchar_t *str) noexcept { write(str, true); }
+void writef(const wchar_t *fmt, ...) noexcept;
 
 }
 }
