@@ -1,0 +1,31 @@
+- debug
+-- print
+-- assert
+-- exception
+
+- file
+-- real fs
+-- archive
+
+- threading
+-- cancel
+
+- graphics
+-- initialize
+-- texture (transform, alpha)
+
+- input
+-- keyboard
+-- pad
+-- config
+-- delayed layer (for network)
+
+- sound
+-- se
+-- bgm
+
+- network
+-- UDP?
+
+- scripting
+-- lua
