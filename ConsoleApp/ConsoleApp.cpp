@@ -4,13 +4,18 @@
 #include "stdafx.h"
 #include <d3d11.h>
 #include <debug.h>
+#include <file.h>
 #include <exceptions.h>
 #include <iostream>
+
 int main()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	test::debug::enableDebugOutput();
+	test::debug::enableFileOutput(L"log" ".txt");
 
 	try {
+		ASSERT(0);
 		::LoadLibrary(L"notfound.dll");
 		DWORD code = ::GetLastError();
 		throw test::DXError("DXError test", D3D11_ERROR_FILE_NOT_FOUND);

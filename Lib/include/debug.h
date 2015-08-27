@@ -1,12 +1,19 @@
 #pragma once
 
-#define ASSERT(x) //TODO
+#define STR2WSTR0(s) L ## s
+#define STR2WSTR(s) STR2WSTR0(s)
 
-#define ASSERT0(x, file, line) do {	\
-	if (!(x)) {						\
-		::DebugBreak();				\
-		::ExitProcess(1);			\
-	}								\
+#define ASSERT(x) ASSERT0(x,								\
+	L"Assertion failed: " #x,								\
+	STR2WSTR(__FUNCSIG__), __FILEW__,  __LINE__)
+
+#define ASSERT0(x, msg, sig, file, line) do {				\
+	if (!(x)) {												\
+		test::debug::writeLine(msg);						\
+		test::debug::writef(L"%s (%s: %d)", sig, file, line);	\
+		::DebugBreak();										\
+		throw std::logic_error("Assertion failed.");		\
+	}														\
 } while (0)
 
 namespace test {

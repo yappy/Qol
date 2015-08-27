@@ -7,6 +7,13 @@
 namespace test {
 namespace util {
 
+class noncopyable {
+public:
+	noncopyable() = default;
+	noncopyable(const noncopyable &) = delete;
+	noncopyable &operator=(const noncopyable &) = delete;
+};
+
 inline void handleDeleter(HANDLE h) {
 	if (h != INVALID_HANDLE_VALUE) {
 		::CloseHandle(h);
