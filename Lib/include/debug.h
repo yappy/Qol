@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util.h"
+
 #define STR2WSTR0(s) L ## s
 #define STR2WSTR(s) STR2WSTR0(s)
 
@@ -26,6 +28,7 @@ void shutdownDebugOutput() noexcept;
 
 void write(const wchar_t *str, bool newline = false) noexcept;
 inline void writeLine(const wchar_t *str) noexcept { write(str, true); }
+inline void writeLine(const char *str) noexcept { write(util::utf82wc(str).c_str(), true); }
 void writef(const wchar_t *fmt, ...) noexcept;
 
 }

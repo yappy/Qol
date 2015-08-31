@@ -6,6 +6,7 @@
 #include <debug.h>
 #include <file.h>
 #include <exceptions.h>
+#include <network.h>
 #include <iostream>
 
 int main()
@@ -15,7 +16,11 @@ int main()
 	test::debug::enableFileOutput(L"log" ".txt");
 
 	try {
-		ASSERT(0);
+		//ASSERT(0);
+
+		test::network::initialize();
+		test::network::finalize();
+
 		::LoadLibrary(L"notfound.dll");
 		DWORD code = ::GetLastError();
 		throw test::DXError("DXError test", D3D11_ERROR_FILE_NOT_FOUND);
@@ -24,6 +29,8 @@ int main()
 	catch (std::exception &e) {
 		puts(e.what());
 	}
+
+	test::debug::shutdownDebugOutput();
 
     return 0;
 }

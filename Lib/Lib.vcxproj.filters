@@ -43,6 +43,9 @@
     <ClInclude Include="include\file.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
+    <ClInclude Include="include\network.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -58,6 +61,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="network.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
