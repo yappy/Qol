@@ -56,6 +56,7 @@ DInput::~DInput()
 	for (auto &dev : m_pPadDevs) {
 		dev->Unacquire();
 	}
+	debug::writeLine("Finalize DirectInput");
 }
 
 // file local for callback
@@ -119,7 +120,14 @@ void DInput::updateControllers(HWND hwnd)
 		m_pad.push_back(js);
 	}
 
-	debug::writef(L"%u controller(s) found.", m_pPadDevs.size());
+	int i = 0;
+	for (const auto &padInst : m_padInstList) {
+		debug::writef(L"[Controller %d]", i);
+		debug::writef(L"tszInstanceName = %s", padInst.tszInstanceName);
+		debug::writef(L"tszProductName  = %s", padInst.tszProductName);
+		i++;
+	}
+	debug::writef(L"%u controller(s) found", m_pPadDevs.size());
 }
 
 }

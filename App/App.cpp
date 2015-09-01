@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "App.h"
 #include <debug.h>
+#include <input.h>
 
 #define MAX_LOADSTRING 100
 
@@ -150,6 +151,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+	case WM_CREATE:
+	{
+		using namespace test::input;
+		DInput di(hWnd);
+	}
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
