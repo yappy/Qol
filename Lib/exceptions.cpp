@@ -34,17 +34,19 @@ const char *Win32Error::what() const {
 DXError::DXError(const std::string &msg, HRESULT hr) noexcept
 	: runtime_error("")
 {
+	const wchar_t *name;
 	wchar_t desc[1024];
+	name = DXGetErrorString(hr);
 	::DXGetErrorDescription(hr, desc, _countof(desc));
 	if (desc[0] == L'\0') {
 		wcscpy_s(desc, L"<DXGetErrorDescription failed>");
 	}
 
-	// "msg (0x????????: errdesc)"
+	// "msg (0x???????? errname: errdesc)"
 	std::stringstream ss;
 	ss << msg << " (0x";
 	ss << std::hex << std::setw(8) << std::setfill('0') << hr;
-	ss << ": " << util::wc2utf8(desc) << ")";
+	ss << " " << util::wc2utf8(name) <<  ": " << util::wc2utf8(desc) << ")";
 	m_what = ss.str();
 }
 

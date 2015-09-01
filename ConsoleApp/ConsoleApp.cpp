@@ -5,6 +5,7 @@
 #include <d3d11.h>
 #include <debug.h>
 #include <file.h>
+#include <input.h>
 #include <exceptions.h>
 #include <network.h>
 #include <iostream>
@@ -16,10 +17,12 @@ int main()
 	test::debug::enableFileOutput(L"log" ".txt");
 
 	try {
-		//ASSERT(0);
+		ASSERT(0);
 
 		test::network::initialize();
 		test::network::finalize();
+
+		test::input::DInput di(nullptr);
 
 		::LoadLibrary(L"notfound.dll");
 		DWORD code = ::GetLastError();
@@ -27,6 +30,7 @@ int main()
 		throw test::Win32Error("err test", code);
 	}
 	catch (std::exception &e) {
+		test::debug::writeLine(e.what());
 		puts(e.what());
 	}
 

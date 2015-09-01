@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <windows.h>
+#include <Unknwn.h>
 
 namespace test {
 namespace util {
@@ -19,6 +20,10 @@ inline void handleDeleter(HANDLE h) {
 		::CloseHandle(h);
 	}
 };
+
+inline void iunknownDeleter(IUnknown *iu) {
+	iu->Release();
+}
 
 inline std::string wc2utf8(const wchar_t *in) {
 	int len = ::WideCharToMultiByte(CP_UTF8, 0, in, -1, nullptr, 0, nullptr, nullptr);

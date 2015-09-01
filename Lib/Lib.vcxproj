@@ -139,6 +139,7 @@
     <ClInclude Include="include\debug.h" />
     <ClInclude Include="include\exceptions.h" />
     <ClInclude Include="include\file.h" />
+    <ClInclude Include="include\input.h" />
     <ClInclude Include="include\network.h" />
     <ClInclude Include="include\util.h" />
     <ClInclude Include="stdafx.h" />
@@ -149,6 +150,7 @@
     <ClCompile Include="dxerr.cpp" />
     <ClCompile Include="exceptions.cpp" />
     <ClCompile Include="file.cpp" />
+    <ClCompile Include="input.cpp" />
     <ClCompile Include="network.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -24,6 +24,8 @@
 #include <wincodec.h>
 #include <d2d1.h>
 #include <dwrite.h>
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
 
 #define XAUDIO2_E_INVALID_CALL          0x88960001
 #define XAUDIO2_E_XMA_DECODER_ERROR     0x88960002
@@ -3275,6 +3277,22 @@ const WCHAR* WINAPI DXGetErrorStringW( _In_ HRESULT hr )
 // xapo.h error codes
 // -------------------------------------------------------------
         CHK_ERRA(XAPO_E_FORMAT_UNSUPPORTED)
+
+// -------------------------------------------------------------
+// dinput.h error codes
+// -------------------------------------------------------------
+CHK_ERRA(DIERR_INSUFFICIENTPRIVS)
+CHK_ERRA(DIERR_DEVICEFULL)
+CHK_ERRA(DIERR_MOREDATA)
+CHK_ERRA(DIERR_NOTDOWNLOADED)
+CHK_ERRA(DIERR_HASEFFECTS)
+CHK_ERRA(DIERR_NOTEXCLUSIVEACQUIRED)
+CHK_ERRA(DIERR_INCOMPLETEEFFECT)
+CHK_ERRA(DIERR_NOTBUFFERED)
+CHK_ERRA(DIERR_EFFECTPLAYING)
+CHK_ERRA(DIERR_UNPLUGGED)
+CHK_ERRA(DIERR_REPORTFULL)
+CHK_ERRA(DIERR_MAPFILEFAIL)
     }
 
     return L"Unknown";
@@ -3304,12 +3322,12 @@ void WINAPI DXGetErrorDescriptionW( _In_ HRESULT hr, _Out_cap_(count) WCHAR* des
 
     *desc = 0;
 
-	/* // **MODIFIED**
+	//* // **MODIFIED**
     // First try to see if FormatMessage knows this hr
     LPWSTR errorText = nullptr;
 
-    DWORD result = FormatMessageW( FORMAT_MESSAGE_FROM_SYSTEM |FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr, hr, 
-                                   MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&errorText, 0, nullptr );
+    DWORD result = FormatMessageW( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_MAX_WIDTH_MASK, nullptr, hr,
+                                   MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), (LPWSTR)&errorText, 0, nullptr );
 
     if (result > 0 && errorText)
     {
