@@ -5,3 +5,36 @@ Text Editor -> All Languages -> General
 
 Text Editor -> C/C++ -> Formatting -> Indentation
 	- Indent namespace contents
+
+*** TODO list ***
+- debug
+-- print
+-- assert
+-- exception
+
+- file
+-- real fs
+-- archive
+
+- threading
+-- cancel
+
+- graphics
+-- initialize
+-- texture (transform, alpha)
+
+- input
+-- keyboard
+-- pad
+-- config
+-- delayed layer (for network)
+
+- sound
+-- se
+-- bgm
+
+- network
+-- UDP?
+
+- scripting
+-- lua
