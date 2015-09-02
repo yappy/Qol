@@ -13,13 +13,13 @@ class DInput : private util::noncopyable {
 public:
 	static const int AXIS_RANGE = 1000;
 
-	explicit DInput(HWND hwnd);
+	DInput(HWND hwnd, bool foreground = true, bool exclusive = false);
 	~DInput();
-	void updateControllers(HWND hwnd);
+	void updateControllers(HWND hwnd, bool foreground = true, bool exclusive = false);
 	void processFrame();
-	void getKeys(BYTE(&buf)[256]);
-	int getPadCount() const;
-	void getPadState(DIJOYSTATE &out, int index) const;
+	void getKeys(BYTE (&buf)[256]) const noexcept;
+	int getPadCount() const noexcept;
+	void getPadState(DIJOYSTATE &out, int index) const noexcept;
 
 private:
 	std::unique_ptr<IDirectInput8, decltype(&util::iunknownDeleter)> m_pDi;

@@ -13,6 +13,8 @@ HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
+test::input::DInput *g_di;
+
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -153,8 +155,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
 	case WM_CREATE:
 	{
-		using namespace test::input;
-		DInput di(hWnd);
+		g_di = new test::input::DInput(hWnd);
+		SetTimer(hWnd, 1, 16, nullptr);
+		break;
+	}
+	case WM_TIMER:
+	{
+		g_di->processFrame();
+		break;
 	}
     case WM_COMMAND:
         {
@@ -182,6 +190,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_DESTROY:
+		delete g_di;
         PostQuitMessage(0);
         break;
     default:
