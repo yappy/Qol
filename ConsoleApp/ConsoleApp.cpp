@@ -26,8 +26,8 @@ int main()
 
 		::LoadLibrary(L"notfound.dll");
 		DWORD code = ::GetLastError();
-		throw test::DXError("DXError test", D3D11_ERROR_FILE_NOT_FOUND);
-		throw test::Win32Error("err test", code);
+		throw test::error::DXError("DXError test", D3D11_ERROR_FILE_NOT_FOUND);
+		throw test::error::Win32Error("err test", code);
 	}
 	catch (std::exception &e) {
 		test::debug::writeLine(e.what());

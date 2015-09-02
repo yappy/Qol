@@ -7,6 +7,7 @@
 #include <windows.h>
 
 namespace test {
+namespace error {
 
 class Win32Error : public std::runtime_error {
 public:
@@ -22,6 +23,14 @@ public:
 		: Win32Error(msg, static_cast<DWORD>(code)) {}
 };
 
+
+template <class T>
+inline void checkDXResult(HRESULT hr, const std::string &msg) {
+	static_assert(std::is_base_of<DXError, T>::value, "T must inherit DXError");
+	if (FAILED(hr)) {
+		throw T(msg, hr);
+	}
+}
 
 class DXError : public std::runtime_error {
 public:
@@ -49,4 +58,5 @@ public:
 		: DXError(msg, hr) {}
 };
 
+}
 }

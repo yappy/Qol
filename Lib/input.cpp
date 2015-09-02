@@ -9,40 +9,36 @@
 namespace test {
 namespace input {
 
+using error::checkDXResult;
+using error::DIError;
+
 DInput::DInput(HWND hwnd) :
 	m_pDi(nullptr, util::iunknownDeleter),
 	m_pKeyDevice(nullptr, util::iunknownDeleter)
 {
-	HRESULT hr;
-
 	debug::writeLine("Initializing DirectInput...");
 
 	// Initialize DirectInput
 	IDirectInput8 *pdi;
 	HINSTANCE hInst = ::GetModuleHandle(nullptr);
-	hr = ::DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8,
-		reinterpret_cast<void **>(&pdi), NULL);
-	if (FAILED(hr)) {
-		throw DIError("DirectInput8Create() failed", hr);
-	}
+	checkDXResult<DIError>(
+		::DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8,
+			reinterpret_cast<void **>(&pdi), NULL),
+		"DirectInput8Create() failed");
 	m_pDi.reset(pdi);
 
 	// Key Device
 	IDirectInputDevice8 *pKeyDevice;
-	hr = m_pDi->CreateDevice(GUID_SysKeyboard, &pKeyDevice, NULL);
-	if (FAILED(hr)) {
-		throw DIError("IDirectInput8::CreateDevice() failed", hr);
-	}
+	checkDXResult<DIError>(
+		m_pDi->CreateDevice(GUID_SysKeyboard, &pKeyDevice, NULL),
+		"IDirectInput8::CreateDevice() failed");
 	m_pKeyDevice.reset(pKeyDevice);
-	hr = m_pKeyDevice->SetDataFormat(&c_dfDIKeyboard);
-	if (FAILED(hr)) {
-		throw DIError("IDirectInputDevice8::SetDataFormat() failed", hr);
-	}
-	hr = m_pKeyDevice->SetCooperativeLevel(hwnd,
-		DISCL_NONEXCLUSIVE | DISCL_FOREGROUND | DISCL_NOWINKEY);
-	if (FAILED(hr)) {
-		throw DIError("IDirectInputDevice8::SetCooperativeLevel() failed", hr);
-	}
+	checkDXResult<DIError>(
+		m_pKeyDevice->SetDataFormat(&c_dfDIKeyboard),
+		"IDirectInputDevice8::SetDataFormat() failed");
+	checkDXResult<DIError>(
+		m_pKeyDevice->SetCooperativeLevel(hwnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND | DISCL_NOWINKEY),
+		"IDirectInputDevice8::SetCooperativeLevel() failed");
 
 	// GamePad Device
 	updateControllers(hwnd);
@@ -88,39 +84,32 @@ BOOL CALLBACK enumAxesCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef)
 
 void DInput::updateControllers(HWND hwnd)
 {
-	HRESULT hr;
-
 	debug::writeLine(L"Controllers");
 
 	m_padInstList.clear();
 	m_pPadDevs.clear();
 
-	hr = m_pDi->EnumDevices(DI8DEVCLASS_GAMECTRL, enumDevicesCallback,
-		&m_padInstList, DIEDFL_ATTACHEDONLY);
-	if (FAILED(hr)) {
-		throw DIError("IDirectInput8::EnumDevices() failed", hr);
-	}
+	checkDXResult<DIError>(
+		m_pDi->EnumDevices(DI8DEVCLASS_GAMECTRL, enumDevicesCallback,
+			&m_padInstList, DIEDFL_ATTACHEDONLY),
+		"IDirectInput8::EnumDevices() failed");
 
 	for (const auto &padInst : m_padInstList) {
 		IDirectInputDevice8 *pTmp;
-		hr = m_pDi->CreateDevice(padInst.guidInstance, &pTmp, nullptr);
-		if (FAILED(hr)) {
-			throw DIError("IDirectInput8::CreateDevice() failed", hr);
-		}
+		checkDXResult<DIError>(
+			m_pDi->CreateDevice(padInst.guidInstance, &pTmp, nullptr),
+			"IDirectInput8::CreateDevice() failed");
 		std::unique_ptr<IDirectInputDevice8, decltype(&util::iunknownDeleter)>
 			pDevice(pTmp, util::iunknownDeleter);
-		hr = pDevice->SetDataFormat(&c_dfDIJoystick);
-		if (FAILED(hr)) {
-			throw DIError("IDirectInputDevice8::SetDataFormat() failed", hr);
-		}
-		hr = pDevice->SetCooperativeLevel(hwnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
-		if (FAILED(hr)) {
-			throw DIError("IDirectInputDevice8::SetCooperativeLevel() failed", hr);
-		}
-		hr = pDevice->EnumObjects(enumAxesCallback, pDevice.get(), DIDFT_AXIS);
-		if (FAILED(hr)) {
-			throw DIError("IDirectInputDevice8::EnumObjects() failed", hr);
-		}
+		checkDXResult<DIError>(
+			pDevice->SetDataFormat(&c_dfDIJoystick),
+			"IDirectInputDevice8::SetDataFormat() failed");
+		checkDXResult<DIError>(
+			pDevice->SetCooperativeLevel(hwnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND),
+			"IDirectInputDevice8::SetCooperativeLevel() failed");
+		checkDXResult<DIError>(
+			pDevice->EnumObjects(enumAxesCallback, pDevice.get(), DIDFT_AXIS),
+			"IDirectInputDevice8::EnumObjects() failed");
 		m_pPadDevs.push_back(std::move(pDevice));
 		DIJOYSTATE js = { 0 };
 		m_pad.push_back(js);

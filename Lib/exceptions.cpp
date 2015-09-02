@@ -4,6 +4,7 @@
 #include "dxerr.h"
 
 namespace test {
+namespace error {
 
 Win32Error::Win32Error(const std::string &msg, DWORD code) noexcept
 	: runtime_error("")
@@ -46,7 +47,7 @@ DXError::DXError(const std::string &msg, HRESULT hr) noexcept
 	std::stringstream ss;
 	ss << msg << " (0x";
 	ss << std::hex << std::setw(8) << std::setfill('0') << hr;
-	ss << " " << util::wc2utf8(name) <<  ": " << util::wc2utf8(desc) << ")";
+	ss << " " << util::wc2utf8(name) << ": " << util::wc2utf8(desc) << ")";
 	m_what = ss.str();
 }
 
@@ -54,4 +55,5 @@ const char *DXError::what() const {
 	return m_what.c_str();
 }
 
+}
 }

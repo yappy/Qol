@@ -9,6 +9,8 @@
 namespace test {
 namespace network {
 
+using error::WinSockError;
+
 void initialize() {
 	int ret;
 	WSADATA wsaData;
