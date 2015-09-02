@@ -90,10 +90,16 @@ void DInput::updateControllers(HWND hwnd)
 {
 	HRESULT hr;
 
+	debug::writeLine(L"Controllers");
+
 	m_padInstList.clear();
+	m_pPadDevs.clear();
+
 	hr = m_pDi->EnumDevices(DI8DEVCLASS_GAMECTRL, enumDevicesCallback,
 		&m_padInstList, DIEDFL_ATTACHEDONLY);
-	m_pPadDevs.clear();
+	if (FAILED(hr)) {
+		throw DIError("IDirectInput8::EnumDevices() failed", hr);
+	}
 
 	for (const auto &padInst : m_padInstList) {
 		IDirectInputDevice8 *pTmp;
@@ -120,14 +126,16 @@ void DInput::updateControllers(HWND hwnd)
 		m_pad.push_back(js);
 	}
 
-	int i = 0;
-	for (const auto &padInst : m_padInstList) {
-		debug::writef(L"[Controller %d]", i);
-		debug::writef(L"tszInstanceName = %s", padInst.tszInstanceName);
-		debug::writef(L"tszProductName  = %s", padInst.tszProductName);
-		i++;
+	{
+		int i = 0;
+		for (const auto &padInst : m_padInstList) {
+			debug::writef(L"[Controller %d]", i);
+			debug::writef(L"tszInstanceName = %s", padInst.tszInstanceName);
+			debug::writef(L"tszProductName  = %s", padInst.tszProductName);
+			i++;
+		}
+		debug::writef(L"%u controller(s) found", m_pPadDevs.size());
 	}
-	debug::writef(L"%u controller(s) found", m_pPadDevs.size());
 }
 
 }
