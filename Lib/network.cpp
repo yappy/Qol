@@ -11,7 +11,8 @@ namespace network {
 
 using error::WinSockError;
 
-void initialize() {
+void initialize()
+{
 	int ret;
 	WSADATA wsaData;
 
@@ -32,7 +33,8 @@ void initialize() {
 	debug::writef(L"szSystemStatus = %s", util::utf82wc(wsaData.szSystemStatus).c_str());
 }
 
-void finalize() noexcept {
+void finalize() noexcept
+{
 	int ret = ::WSACleanup();
 	if (ret != 0) {
 		int err = ::WSAGetLastError();

@@ -25,7 +25,8 @@ public:
 
 
 template <class T>
-inline void checkDXResult(HRESULT hr, const std::string &msg) {
+inline void checkDXResult(HRESULT hr, const std::string &msg)
+{
 	static_assert(std::is_base_of<DXError, T>::value, "T must inherit DXError");
 	if (FAILED(hr)) {
 		throw T(msg, hr);

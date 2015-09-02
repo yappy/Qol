@@ -16,12 +16,14 @@ HANDLE s_hFile = INVALID_HANDLE_VALUE;
 
 }
 
-bool enableDebugOutput() noexcept {
+bool enableDebugOutput() noexcept
+{
 	s_debugOut = true;
 	return s_debugOut;
 }
 
-bool enableConsoleOutput() noexcept  {
+bool enableConsoleOutput() noexcept 
+{
 	if (s_consoleOut) {
 		return s_consoleOut;
 	}
@@ -32,7 +34,8 @@ bool enableConsoleOutput() noexcept  {
 	return s_consoleOut;
 }
 
-bool enableFileOutput(const wchar_t *fileName) noexcept {
+bool enableFileOutput(const wchar_t *fileName) noexcept
+{
 	if (s_fileOut) {
 		return s_fileOut;
 	}
@@ -45,7 +48,8 @@ bool enableFileOutput(const wchar_t *fileName) noexcept {
 	return s_fileOut;
 }
 
-void shutdownDebugOutput() noexcept {
+void shutdownDebugOutput() noexcept
+{
 	s_debugOut = false;
 
 	if (s_consoleOut) {
@@ -60,7 +64,8 @@ void shutdownDebugOutput() noexcept {
 }
 
 
-void write(const wchar_t *str, bool newline) noexcept {
+void write(const wchar_t *str, bool newline) noexcept
+{
 	// Debug Out
 	if (s_debugOut) {
 		::OutputDebugString(str);
@@ -90,7 +95,8 @@ void write(const wchar_t *str, bool newline) noexcept {
 	}
 }
 
-void writef(const wchar_t *fmt, ...) noexcept {
+void writef(const wchar_t *fmt, ...) noexcept
+{
 	va_list args;
 	va_start(args, fmt);
 	wchar_t buf[1024];

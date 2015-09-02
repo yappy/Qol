@@ -28,7 +28,8 @@ Win32Error::Win32Error(const std::string &msg, DWORD code) noexcept
 	m_what = ss.str();
 }
 
-const char *Win32Error::what() const {
+const char *Win32Error::what() const
+{
 	return m_what.c_str();
 }
 
@@ -51,7 +52,8 @@ DXError::DXError(const std::string &msg, HRESULT hr) noexcept
 	m_what = ss.str();
 }
 
-const char *DXError::what() const {
+const char *DXError::what() const
+{
 	return m_what.c_str();
 }
 

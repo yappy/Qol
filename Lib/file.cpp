@@ -26,28 +26,31 @@ private:
 };
 
 class ArchiveFileLoader : public FileLoader {
-
+	// TODO: impl
 };
 
 std::unique_ptr<FileLoader> s_fileLoader(nullptr);
 
 }	// namespace
 
-void initWithFileSystem(const wchar_t *rootDir) {
+
+void initWithFileSystem(const wchar_t *rootDir)
+{
 	s_fileLoader.reset(new FsFileLoader(rootDir));
 }
 
-void initWithArchiveFile(const wchar_t *archiveFile) {
+void initWithArchiveFile(const wchar_t *archiveFile)
+{
 	// TODO
 	throw std::logic_error("Not implemented");
 }
 
-std::vector<uint8_t> loadFile(const wchar_t *fileName) {
+std::vector<uint8_t> loadFile(const wchar_t *fileName)
+{
 	if (!s_fileLoader) {
 		throw std::logic_error("FileLoader is not initialized.");
 	}
-	// TODO
-	return std::vector<uint8_t>();
+	return s_fileLoader->loadFile(fileName);
 }
 
 }	// namespace file

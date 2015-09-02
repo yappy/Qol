@@ -14,7 +14,6 @@
 		test::debug::writeLine(msg);						\
 		test::debug::writef(L"%s (%s: %d)", sig, file, line);	\
 		::DebugBreak();										\
-		throw std::logic_error("Assertion failed.");		\
 	}														\
 } while (0)
 
