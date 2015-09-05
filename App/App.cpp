@@ -5,6 +5,7 @@
 #include "App.h"
 #include <debug.h>
 #include <input.h>
+#include <array>
 
 #define MAX_LOADSTRING 100
 
@@ -162,6 +163,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_TIMER:
 	{
 		g_di->processFrame();
+		std::array<bool, 256> keys = g_di->getKeys();
+		for (auto i = 0U; i < keys.size(); i++) {
+			if (keys[i]) {
+				test::debug::writef(L"Key 0x%02x", i);
+			}
+		}
+		for (int i = 0; i < g_di->getPadCount(); i++) {
+			DIJOYSTATE state;
+			g_di->getPadState(&state, i);
+			for (int b = 0; b < 32; b++) {
+				if (state.rgbButtons[b] & 0x80) {
+					test::debug::writef(L"pad[%d].button%d", i, b);
+				}
+			}
+			{
+				// left stick
+				if (std::abs(state.lX) > test::input::DInput::AXIS_THRESHOLD) {
+					test::debug::writef(L"pad[%d].x=%ld", i, state.lX);
+				}
+				if (std::abs(state.lY) > test::input::DInput::AXIS_THRESHOLD) {
+					test::debug::writef(L"pad[%d].y=%ld", i, state.lY);
+				}
+				// right stick
+				if (std::abs(state.lZ) > test::input::DInput::AXIS_THRESHOLD) {
+					test::debug::writef(L"pad[%d].z=%ld", i, state.lZ);
+				}
+				if (std::abs(state.lRz) > test::input::DInput::AXIS_THRESHOLD) {
+					test::debug::writef(L"pad[%d].rz=%ld", i, state.lRz);
+				}
+			}
+			for (int b = 0; b < 4; b++) {
+				if (state.rgdwPOV[b] != -1) {
+					test::debug::writef(L"pad[%d].POV%d=%u", i, b, state.rgdwPOV[b]);
+				}
+			}
+		}
 		break;
 	}
     case WM_COMMAND:

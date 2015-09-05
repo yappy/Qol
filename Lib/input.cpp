@@ -139,44 +139,49 @@ void DInput::updateControllers(HWND hwnd, bool foreground, bool exclusive)
 void DInput::processFrame()
 {
 	HRESULT hr;
+
 	// Keyboard
-	ZeroMemory(&m_key, sizeof(m_key));
-	hr = m_pKeyDevice->Acquire();
+	m_key.fill(0);
+	do {
+		hr = m_pKeyDevice->Acquire();
+	} while (hr == DIERR_INPUTLOST);
 	if (hr != DIERR_OTHERAPPHASPRIO) {
-		checkDXResult<DIError>(hr, "IDirectInputDevice8::Acquire() failed");
-		hr = m_pKeyDevice->GetDeviceState(sizeof(m_key), &m_key);
-		if (hr != DIERR_INPUTLOST) {
-			checkDXResult<DIError>(hr, "IDirectInputDevice8::GetDeviceState() failed");
-		}
-		else {
-			debug::writeLine(L"DIERR_INPUTLOST");
+		BYTE tmp[256];
+		hr = m_pKeyDevice->GetDeviceState(sizeof(tmp), &tmp);
+		if (SUCCEEDED(hr)) {
+			for (int i = 0; i < 256; i++) {
+				m_key[i] = ((tmp[i] & 0x80) != 0);
+			}
 		}
 	}
 	else {
 		// DISCL_FOREGROUND and app is background now
 		//debug::writeLine(L"DIERR_OTHERAPPHASPRIO");
 	}
+
 	// Pad
 	// TODO: think twice about error handling
 	// TODO: sudden disconnect?
 	for (unsigned i = 0; i < m_pPadDevs.size(); i++) {
 		ZeroMemory(&m_pad[i], sizeof(m_pad[i]));
-		m_pPadDevs[i]->Acquire();
-		m_pPadDevs[i]->Poll();
-		m_pPadDevs[i]->GetDeviceState(sizeof(m_pad[i]), &m_pad[i]);
-		/*
-		for (int k = 0; k < 32; k++) {
-			if (m_pad[i].rgbButtons[k]) {
-				debug::writef(L"Pad%d Button%d", i, k);
-			}
+		memset(m_pad[i].rgdwPOV, -1, sizeof(m_pad[i].rgdwPOV));
+
+		do {
+			hr = m_pPadDevs[i]->Acquire();
+		} while (hr == DIERR_INPUTLOST);
+		if (hr == DIERR_OTHERAPPHASPRIO) {
+			// ISCL_FOREGROUND and app is background now
+			continue;
 		}
-		//*/
+		hr = m_pPadDevs[i]->Poll();
+		hr = m_pPadDevs[i]->GetDeviceState(sizeof(m_pad[i]), &m_pad[i]);
+		// if error, m_pad[i] will be cleared state
 	}
 }
 
-void DInput::getKeys(BYTE (&buf)[256]) const noexcept
+std::array<bool, 256> DInput::getKeys() const noexcept
 {
-	memcpy(buf, m_key, sizeof(m_key));
+	return m_key;
 }
 
 int DInput::getPadCount() const noexcept
@@ -185,9 +190,9 @@ int DInput::getPadCount() const noexcept
 	return m_pPadDevs.size();
 }
 
-void DInput::getPadState(DIJOYSTATE &out, int index) const noexcept
+void DInput::getPadState(DIJOYSTATE *out, int index) const noexcept
 {
-	out = m_pad.at(index);
+	*out = m_pad.at(index);
 }
 
 }
