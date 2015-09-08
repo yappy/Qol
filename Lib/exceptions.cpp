@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "include/exceptions.h"
 #include "include/util.h"
-#include "dxerr.h"
+#include <DxErr.h>
+
+#pragma comment(lib, "DxErr.lib")
 
 namespace test {
 namespace error {
@@ -36,19 +38,15 @@ const char *Win32Error::what() const
 DXError::DXError(const std::string &msg, HRESULT hr) noexcept
 	: runtime_error("")
 {
-	const wchar_t *name;
-	wchar_t desc[1024];
-	name = DXGetErrorString(hr);
-	::DXGetErrorDescription(hr, desc, _countof(desc));
-	if (desc[0] == L'\0') {
-		wcscpy_s(desc, L"<DXGetErrorDescription failed>");
-	}
+	const char *name, *desc;
+	name = ::DXGetErrorStringA(hr);
+	desc = ::DXGetErrorDescriptionA(hr);
 
 	// "msg (0x???????? errname: errdesc)"
 	std::stringstream ss;
 	ss << msg << " (0x";
 	ss << std::hex << std::setw(8) << std::setfill('0') << hr;
-	ss << " " << util::wc2utf8(name) << ": " << util::wc2utf8(desc) << ")";
+	ss << " " << name << ": " << desc << ")";
 	m_what = ss.str();
 }
 

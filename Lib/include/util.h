@@ -27,6 +27,8 @@ inline void iunknownDeleter(IUnknown *iu)
 	iu->Release();
 }
 
+typedef decltype(&iunknownDeleter) IUnknownDeleterType;
+
 inline std::string wc2utf8(const wchar_t *in)
 {
 	int len = ::WideCharToMultiByte(CP_UTF8, 0, in, -1, nullptr, 0, nullptr, nullptr);

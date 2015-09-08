@@ -25,10 +25,10 @@ public:
 	void getPadState(DIJOYSTATE *out, int index) const noexcept;
 
 private:
-	std::unique_ptr<IDirectInput8, decltype(&util::iunknownDeleter)> m_pDi;
-	std::unique_ptr<IDirectInputDevice8, decltype(&util::iunknownDeleter)> m_pKeyDevice;
+	std::unique_ptr<IDirectInput8, util::IUnknownDeleterType> m_pDi;
+	std::unique_ptr<IDirectInputDevice8, util::IUnknownDeleterType> m_pKeyDevice;
 	std::vector<DIDEVICEINSTANCE> m_padInstList;
-	std::vector<std::unique_ptr<IDirectInputDevice8, decltype(&util::iunknownDeleter)>> m_pPadDevs;
+	std::vector<std::unique_ptr<IDirectInputDevice8, util::IUnknownDeleterType>> m_pPadDevs;
 	std::array<bool, 256> m_key;
 	std::vector<DIJOYSTATE> m_pad;
 };
