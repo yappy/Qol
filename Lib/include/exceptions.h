@@ -17,6 +17,14 @@ private:
 	std::string m_what;
 };
 
+inline void checkWin32Result(bool cond, const std::string &msg)
+{
+	if (!cond) {
+		throw Win32Error(msg, ::GetLastError());
+	}
+}
+
+
 class WinSockError : public Win32Error {
 public:
 	explicit WinSockError(const std::string &msg, int code) noexcept

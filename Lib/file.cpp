@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "include/file.h"
+#include "include/exceptions.h"
 #include <windows.h>
 #include <memory>
 #include <string>
@@ -19,7 +20,7 @@ public:
 class FsFileLoader : public FileLoader {
 public:
 	FsFileLoader(const wchar_t *rootDir) : m_rootDir(rootDir) {}
-	virtual ~FsFileLoader() override;
+	virtual ~FsFileLoader() override {}
 	virtual std::vector<uint8_t> loadFile(const wchar_t *fileName) override;
 private:
 	std::wstring m_rootDir;
@@ -29,6 +30,38 @@ class ArchiveFileLoader : public FileLoader {
 	// TODO: impl
 };
 
+// impls
+std::vector<uint8_t> FsFileLoader::loadFile(const wchar_t *fileName)
+{
+	std::wstring path(m_rootDir);
+	path += L'/';
+	path += fileName;
+
+	// open
+	HANDLE tmphFile = ::CreateFile(
+		path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, nullptr);
+	error::checkWin32Result(tmphFile != INVALID_HANDLE_VALUE, "CreateFile() failed");
+	std::shared_ptr<std::remove_pointer<HANDLE>::type> hFile(tmphFile);
+
+	BOOL b;
+	// get size for avoiding realloc
+	LARGE_INTEGER fileSize;
+	b = ::GetFileSizeEx(hFile.get(), &fileSize);
+	error::checkWin32Result(b != 0, "GetFileSizeEx() failed");
+	error::checkWin32Result(fileSize.HighPart == 0, "File size is too large");
+	// read
+	std::vector<uint8_t> data(fileSize.LowPart);
+	DWORD readSize;
+	b = ::ReadFile(hFile.get(), &data.at(0), fileSize.LowPart, &readSize, nullptr);
+	error::checkWin32Result(b != 0, "ReadFile() failed");
+	error::checkWin32Result(fileSize.LowPart == readSize, "Read size is strange");
+
+	// move return
+	return data;
+}
+
+// variables
 std::unique_ptr<FileLoader> s_fileLoader(nullptr);
 
 }	// namespace
