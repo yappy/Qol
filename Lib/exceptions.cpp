@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "include/exceptions.h"
 #include "include/util.h"
+#include <sstream>
 
 namespace test {
 namespace error {

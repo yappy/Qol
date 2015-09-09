@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include <d3d11.h>
 #include <debug.h>
 #include <file.h>
 #include <input.h>

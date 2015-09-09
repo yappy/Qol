@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 #include <memory>
-#include <sstream>
 #include <iomanip>
 #include <windows.h>
 
