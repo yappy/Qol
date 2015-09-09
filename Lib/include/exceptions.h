@@ -66,5 +66,11 @@ public:
 		: DXError(msg, hr) {}
 };
 
+class XAudioError : public DXError {
+public:
+	explicit XAudioError(const std::string &msg, HRESULT hr) noexcept
+		: DXError(msg, hr) {}
+};
+
 }
 }

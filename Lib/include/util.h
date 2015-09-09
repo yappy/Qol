@@ -15,6 +15,7 @@ public:
 	noncopyable &operator=(const noncopyable &) = delete;
 };
 
+
 inline void handleDeleter(HANDLE h)
 {
 	if (h != INVALID_HANDLE_VALUE) {
@@ -28,6 +29,7 @@ inline void iunknownDeleter(IUnknown *iu)
 }
 
 typedef decltype(&iunknownDeleter) IUnknownDeleterType;
+
 
 inline std::string wc2utf8(const wchar_t *in)
 {
