@@ -187,7 +187,7 @@ std::array<bool, 256> DInput::getKeys() const noexcept
 int DInput::getPadCount() const noexcept
 {
 	ASSERT(m_pad.size() == m_pPadDevs.size());
-	return m_pPadDevs.size();
+	return static_cast<int>(m_pPadDevs.size());
 }
 
 void DInput::getPadState(DIJOYSTATE *out, int index) const noexcept
