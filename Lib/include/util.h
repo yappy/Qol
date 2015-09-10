@@ -16,12 +16,16 @@ public:
 };
 
 
-inline void handleDeleter(HANDLE h)
-{
-	if (h != INVALID_HANDLE_VALUE) {
-		::CloseHandle(h);
+struct handleDeleter {
+	using pointer = HANDLE;
+	void operator()(HANDLE h)
+	{
+		if (h != INVALID_HANDLE_VALUE) {
+			::CloseHandle(h);
+		}
 	}
 };
+
 
 inline void iunknownDeleter(IUnknown *iu)
 {

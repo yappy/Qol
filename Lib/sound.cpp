@@ -1,13 +1,95 @@
 #include "stdafx.h"
 #include "include/sound.h"
+#include "include/file.h"
 #include "include/debug.h"
 #include "include/exceptions.h"
+#include <mmsystem.h>
+#include <algorithm>
+
+#pragma comment(lib, "winmm.lib")
 
 namespace test {
 namespace sound {
 
 using error::checkDXResult;
 using error::XAudioError;
+
+namespace {
+
+void loadWaveFile(SoundEffect *out, const wchar_t *path)
+{
+	file::Bytes data = file::loadFile(path);
+
+	MMIOINFO mmioInfo = { 0 };
+	mmioInfo.pchBuffer = reinterpret_cast<HPSTR>(&data[0]);
+	mmioInfo.fccIOProc = FOURCC_MEM;
+	mmioInfo.cchBuffer = static_cast<LONG>(data.size());
+
+	HMMIO tmpHMmio = mmioOpen(0, &mmioInfo, MMIO_READ);
+	if (tmpHMmio == nullptr) {
+		// TODO exception
+		throw std::runtime_error("mmioOpen() failed");
+	}
+	std::unique_ptr<HMMIO, hmmioDeleter> hMmio(tmpHMmio);
+
+	// enter "WAVE"
+	MMRESULT mmRes;
+	MMCKINFO riffChunk = { 0 };
+	riffChunk.fccType = mmioFOURCC('W', 'A', 'V', 'E');
+	mmRes = mmioDescend(hMmio.get(), &riffChunk, nullptr, MMIO_FINDRIFF);
+	if (mmRes != MMSYSERR_NOERROR) {
+		// TODO exception
+		throw std::runtime_error("mmioDescend() failed");
+	}
+
+	// enter "fmt "
+	MMCKINFO formatChunk = { 0 };
+	formatChunk.ckid = mmioFOURCC('f', 'm', 't', ' ');
+	mmRes = mmioDescend(hMmio.get(), &formatChunk, &riffChunk, MMIO_FINDCHUNK);
+	if (mmRes != MMSYSERR_NOERROR) {
+		// TODO exception
+		throw std::runtime_error("mmioDescend() failed");
+	}
+
+	// read "fmt "
+	::ZeroMemory(&out->format, sizeof(out->format));
+	DWORD fmtSize = std::min(formatChunk.cksize, static_cast<DWORD>(sizeof(out->format)));
+	DWORD size = mmioRead(hMmio.get(), reinterpret_cast<HPSTR>(&out->format), fmtSize);
+	if (size != fmtSize) {
+		// TODO exception
+		throw std::runtime_error("mmioRead() failed");
+	}
+
+	// leave "fmt "
+	mmRes = mmioAscend(hMmio.get(), &formatChunk, 0);
+	if (mmRes != MMSYSERR_NOERROR) {
+		// TODO exception
+		throw std::runtime_error("mmioAscend() failed");
+	}
+
+	// enter "data"
+	MMCKINFO dataChunk = { 0 };
+	dataChunk.ckid = mmioFOURCC('d', 'a', 't', 'a');
+	mmRes = mmioDescend(hMmio.get(), &dataChunk, &riffChunk, MMIO_FINDCHUNK);
+	if (mmRes != MMSYSERR_NOERROR) {
+		// TODO exception
+		throw std::runtime_error("mmioDescend() failed");
+	}
+
+	// read "data"
+	if (dataChunk.cksize > SoundFileSizeMax) {
+		// TODO exception
+		throw std::runtime_error("data size too large");
+	}
+	out->samples.resize(dataChunk.cksize);
+	size = mmioRead(hMmio.get(), reinterpret_cast<HPSTR>(&out->samples[0]), dataChunk.cksize);
+	if (size != dataChunk.cksize) {
+		// TODO exception
+		throw std::runtime_error("mmioRead() failed");
+	}
+}
+
+}	// namespace
 
 XAudio2::XAudio2() :
 	m_pIXAudio(nullptr, util::iunknownDeleter),
@@ -55,6 +137,25 @@ XAudio2::XAudio2() :
 }
 
 XAudio2::~XAudio2() {}
+
+void XAudio2::loadSound(const char *id, const wchar_t *path)
+{
+	// m_selib[id] <- SoundEffect()
+	auto res = m_selib.emplace(std::piecewise_construct,
+		std::forward_as_tuple(id), std::forward_as_tuple());
+	if (!res.second) {
+		throw std::runtime_error("id already exists");
+	}
+	// ((key, val), success?).first.second
+	SoundEffect &value = res.first->second;
+	try {
+		loadWaveFile(&value, path);
+	}
+	catch (std::exception) {
+		m_selib.erase(res.first);
+		throw;
+	}
+}
 
 }
 }

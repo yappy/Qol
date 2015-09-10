@@ -31,18 +31,25 @@ class ArchiveFileLoader : public FileLoader {
 };
 
 // impls
-std::vector<uint8_t> FsFileLoader::loadFile(const wchar_t *fileName)
+Bytes FsFileLoader::loadFile(const wchar_t *fileName)
 {
-	std::wstring path(m_rootDir);
-	path += L'/';
-	path += fileName;
+	std::wstring path;
+	if (fileName[0] == L'/') {
+		// Debug only, abs path
+		path = &fileName[1];
+	}
+	else {
+		path += m_rootDir;
+		path += L'/';
+		path += fileName;
+	}
 
 	// open
 	HANDLE tmphFile = ::CreateFile(
 		path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
 		FILE_ATTRIBUTE_NORMAL, nullptr);
 	error::checkWin32Result(tmphFile != INVALID_HANDLE_VALUE, "CreateFile() failed");
-	std::shared_ptr<std::remove_pointer<HANDLE>::type> hFile(tmphFile);
+	std::unique_ptr<HANDLE, util::handleDeleter> hFile(tmphFile);
 
 	BOOL b;
 	// get size for avoiding realloc
@@ -51,9 +58,9 @@ std::vector<uint8_t> FsFileLoader::loadFile(const wchar_t *fileName)
 	error::checkWin32Result(b != 0, "GetFileSizeEx() failed");
 	error::checkWin32Result(fileSize.HighPart == 0, "File size is too large");
 	// read
-	std::vector<uint8_t> data(fileSize.LowPart);
+	Bytes data(fileSize.LowPart);
 	DWORD readSize;
-	b = ::ReadFile(hFile.get(), &data.at(0), fileSize.LowPart, &readSize, nullptr);
+	b = ::ReadFile(hFile.get(), &data[0], fileSize.LowPart, &readSize, nullptr);
 	error::checkWin32Result(b != 0, "ReadFile() failed");
 	error::checkWin32Result(fileSize.LowPart == readSize, "Read size is strange");
 
@@ -80,7 +87,7 @@ void initWithArchiveFile(const wchar_t *archiveFile)
 
 std::vector<uint8_t> loadFile(const wchar_t *fileName)
 {
-	if (!s_fileLoader) {
+	if (s_fileLoader == nullptr) {
 		throw std::logic_error("FileLoader is not initialized.");
 	}
 	return s_fileLoader->loadFile(fileName);

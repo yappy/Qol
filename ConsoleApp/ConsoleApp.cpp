@@ -17,6 +17,7 @@ int main()
 	test::debug::enableFileOutput(L"log" ".txt");
 
 	try {
+		test::file::initWithFileSystem(L".");
 		//ASSERT(0);
 
 		test::network::initialize();
@@ -36,6 +37,7 @@ int main()
 
 	{
 		test::sound::XAudio2 sound;
+		sound.loadSound("testwav", L"/C:/Windows/Media/chimes.wav");
 	}
 
 	test::debug::shutdownDebugOutput();
