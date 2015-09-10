@@ -112,6 +112,7 @@ XAudio2::XAudio2() :
 	checkDXResult<XAudioError>(hr, "CreateMasteringVoice() failed");
 	m_pMasterVoice.reset(ptmpMasterVoice);
 
+	/*
 	for (int i = 0; i < 1000; i++) {
 		IXAudio2SourceVoice *ptmpSrcVoice;
 		WAVEFORMATEX fmt = { WAVE_FORMAT_PCM, 1, 44100, 44100, 1, 8, 0 };
@@ -134,6 +135,7 @@ XAudio2::XAudio2() :
 		}
 		ptmpSrcVoice->DestroyVoice();
 	}
+	*/
 }
 
 XAudio2::~XAudio2() {}
@@ -155,6 +157,25 @@ void XAudio2::loadSound(const char *id, const wchar_t *path)
 		m_selib.erase(res.first);
 		throw;
 	}
+}
+
+void XAudio2::playSound(const char *id)
+{
+	auto res = m_selib.find(id);
+	if (res == m_selib.end()) {
+		throw std::runtime_error("id not found");
+	}
+	SoundEffect &se = res->second;
+	XAUDIO2_BUFFER buf = { 0 };
+	buf.AudioBytes = se.samples.size();
+	buf.pAudioData = &se.samples[0];
+
+	IXAudio2SourceVoice *ptmpSrcVoice;
+	m_pIXAudio->CreateSourceVoice(&ptmpSrcVoice, &se.format);
+	ptmpSrcVoice->SubmitSourceBuffer(&buf);
+	ptmpSrcVoice->Start();
+	Sleep(3000);
+	ptmpSrcVoice->DestroyVoice();
 }
 
 }
