@@ -12,12 +12,13 @@ inline void voiceDeleter(IXAudio2Voice *iu)
 }
 typedef decltype(&voiceDeleter) VoiceDeleterType;
 
-class DSound : private util::noncopyable {
+class XAudio2 : private util::noncopyable {
 public:
-	DSound();
-	~DSound();
+	XAudio2();
+	~XAudio2();
 
 private:
+	util::Com m_com;
 	std::unique_ptr<IXAudio2, util::IUnknownDeleterType> m_pIXAudio;
 	std::unique_ptr<IXAudio2MasteringVoice, VoiceDeleterType> m_pMasterVoice;
 };

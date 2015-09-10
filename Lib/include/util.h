@@ -47,5 +47,12 @@ inline std::wstring utf82wc(const char *in)
 	return std::wstring(pBuf.get());
 }
 
+
+class Com : private noncopyable {
+public:
+	Com() { ::CoInitializeEx(nullptr, COINIT_MULTITHREADED); }
+	~Com() { ::CoUninitialize(); }
+};
+
 }
 }

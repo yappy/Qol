@@ -5,6 +5,7 @@
 #include <debug.h>
 #include <file.h>
 #include <input.h>
+#include <sound.h>
 #include <exceptions.h>
 #include <network.h>
 #include <iostream>
@@ -16,7 +17,7 @@ int main()
 	test::debug::enableFileOutput(L"log" ".txt");
 
 	try {
-		ASSERT(0);
+		//ASSERT(0);
 
 		test::network::initialize();
 		test::network::finalize();
@@ -31,6 +32,10 @@ int main()
 	catch (std::exception &e) {
 		test::debug::writeLine(e.what());
 		puts(e.what());
+	}
+
+	{
+		test::sound::XAudio2 sound;
 	}
 
 	test::debug::shutdownDebugOutput();
