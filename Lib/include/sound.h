@@ -19,9 +19,9 @@ struct hmmioDeleter {
 	}
 };
 
-inline void voiceDeleter(IXAudio2Voice *iu)
+inline void voiceDeleter(IXAudio2Voice *pv)
 {
-	iu->DestroyVoice();
+	pv->DestroyVoice();
 }
 typedef decltype(&voiceDeleter) VoiceDeleterType;
 
@@ -37,6 +37,7 @@ public:
 	~XAudio2();
 	void loadSoundEffect(const char *id, const wchar_t *path);
 	void playSoundEffect(const char *id);
+	bool isPlayingAny() const noexcept;
 	void stopAllSoundEffect();
 
 private:
@@ -51,7 +52,7 @@ private:
 	std::unordered_map<std::string, SoundEffect> m_seMap;
 	std::vector<SourceVoicePtr> m_playingSeList;
 
-	SourceVoicePtr *findFreeSeEntry();
+	SourceVoicePtr *findFreeSeEntry() noexcept;
 };
 
 }

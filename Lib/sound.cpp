@@ -172,14 +172,30 @@ void XAudio2::playSoundEffect(const char *id)
 	*ppEntry = std::move(pSrcVoice);
 }
 
+bool XAudio2::isPlayingAny() const noexcept
+{
+	for (const auto &pSrcVoice : m_playingSeList) {
+		if (pSrcVoice == nullptr) {
+			continue;
+		}
+		// check if playing is end
+		XAUDIO2_VOICE_STATE state;
+		pSrcVoice->GetState(&state);
+		if (state.BuffersQueued != 0) {
+			return false;
+		}
+	}
+	return true;
+}
+
 void XAudio2::stopAllSoundEffect()
 {
-	for (auto &p : m_playingSeList) {
-		p.reset();
+	for (auto &pSrcVoice : m_playingSeList) {
+		pSrcVoice.reset();
 	}
 }
 
-XAudio2::SourceVoicePtr *XAudio2::findFreeSeEntry()
+XAudio2::SourceVoicePtr *XAudio2::findFreeSeEntry() noexcept
 {
 	for (auto &p : m_playingSeList) {
 		if (p == nullptr) {
