@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 #include <memory>
-#include <iomanip>
 #include <windows.h>
 
 namespace test {
@@ -23,11 +22,19 @@ inline void checkWin32Result(bool cond, const std::string &msg)
 	}
 }
 
-
 class WinSockError : public Win32Error {
 public:
 	explicit WinSockError(const std::string &msg, int code) noexcept
 		: Win32Error(msg, static_cast<DWORD>(code)) {}
+};
+
+
+class MmioError : public std::runtime_error {
+public:
+	explicit MmioError(const std::string &msg, UINT code) noexcept;
+	const char *what() const override;
+private:
+	std::string m_what;
 };
 
 

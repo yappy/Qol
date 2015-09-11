@@ -37,8 +37,8 @@ int main()
 
 	{
 		test::sound::XAudio2 sound;
-		sound.loadSound("testwav", L"/C:/Windows/Media/chimes.wav");
-		sound.playSound("testwav");
+		sound.loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
+		sound.playSoundEffect("testwav");
 	}
 
 	test::debug::shutdownDebugOutput();

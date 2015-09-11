@@ -2,6 +2,7 @@
 #include "include/exceptions.h"
 #include "include/util.h"
 #include <sstream>
+#include <iomanip>
 
 namespace test {
 namespace error {
@@ -29,6 +30,19 @@ Win32Error::Win32Error(const std::string &msg, DWORD code) noexcept
 }
 
 const char *Win32Error::what() const
+{
+	return m_what.c_str();
+}
+
+MmioError::MmioError(const std::string &msg, MMRESULT code) noexcept
+	: runtime_error("")
+{
+	std::stringstream ss;
+	ss << msg << " (" << code << ")";
+	m_what = ss.str();
+}
+
+const char *MmioError::what() const
 {
 	return m_what.c_str();
 }

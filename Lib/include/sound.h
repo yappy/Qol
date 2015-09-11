@@ -9,6 +9,7 @@ namespace sound {
 
 // 3MiB
 const size_t SoundFileSizeMax = 3 * 1024 * 1024;
+const size_t SoundEffectPlayMax = 64;
 
 struct hmmioDeleter {
 	using pointer = HMMIO;
@@ -34,16 +35,23 @@ class XAudio2 : private util::noncopyable {
 public:
 	XAudio2();
 	~XAudio2();
-	void loadSound(const char *id, const wchar_t *path);
-	void playSound(const char *id);
-	void stopAllSound();
+	void loadSoundEffect(const char *id, const wchar_t *path);
+	void playSoundEffect(const char *id);
+	void stopAllSoundEffect();
 
 private:
-	util::Com m_com;
-	std::unique_ptr<IXAudio2, util::IUnknownDeleterType> m_pIXAudio;
-	std::unique_ptr<IXAudio2MasteringVoice, VoiceDeleterType> m_pMasterVoice;
+	using IXAudio2Ptr = std::unique_ptr<IXAudio2, util::IUnknownDeleterType>;
+	using SourceVoicePtr = std::unique_ptr<IXAudio2SourceVoice, VoiceDeleterType>;
+	using MasterVoicePtr = std::unique_ptr<IXAudio2MasteringVoice, VoiceDeleterType>;
 
-	std::unordered_map<std::string, SoundEffect> m_selib;
+	util::Com m_com;
+	IXAudio2Ptr m_pIXAudio;
+	MasterVoicePtr m_pMasterVoice;
+
+	std::unordered_map<std::string, SoundEffect> m_seMap;
+	std::vector<SourceVoicePtr> m_playingSeList;
+
+	SourceVoicePtr *findFreeSeEntry();
 };
 
 }
