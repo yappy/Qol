@@ -1,3 +1,4 @@
+* Visual Studio Settings
 Tools -> Options
 
 Text Editor -> All Languages -> General
@@ -5,6 +6,19 @@ Text Editor -> All Languages -> General
 
 Text Editor -> C/C++ -> Formatting -> Indentation
 	- Indent namespace contents
+
+
+* Sleep/DisplayOff/ScreenSaver tips
+SetThreadExecutionState()
+SendInput() (mouse move)
+http://drang.s4.xrea.com/program/tips/screen_saver.html (may be too old)
+
+
+* Graphics latency tips
+DwmEnableComposition()
+SetMaximumFrameLatency()
+http://www.ouma.jp/ootake/delay-win7vista-j.html
+
 
 *** TODO list ***
 - debug
