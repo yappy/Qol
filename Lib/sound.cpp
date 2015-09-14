@@ -1,12 +1,13 @@
 #include "stdafx.h"
 #include "include/sound.h"
-#include "include/file.h"
 #include "include/debug.h"
 #include "include/exceptions.h"
-#include <mmsystem.h>
 #include <algorithm>
 
+#include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
+
+#include <vorbis/vorbisfile.h>
 
 namespace test {
 namespace sound {
@@ -40,7 +41,6 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 	if (mmRes != MMSYSERR_NOERROR) {
 		throw MmioError("mmioDescend() failed", mmRes);
 	}
-
 	// enter "fmt "
 	MMCKINFO formatChunk = { 0 };
 	formatChunk.ckid = mmioFOURCC('f', 'm', 't', ' ');
@@ -48,7 +48,6 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 	if (mmRes != MMSYSERR_NOERROR) {
 		throw MmioError("mmioDescend() failed", mmRes);
 	}
-
 	// read "fmt "
 	::ZeroMemory(&out->format, sizeof(out->format));
 	DWORD fmtSize = std::min(formatChunk.cksize, static_cast<DWORD>(sizeof(out->format)));
@@ -56,13 +55,11 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 	if (size != fmtSize) {
 		throw MmioError("mmioRead() failed", size);
 	}
-
 	// leave "fmt "
 	mmRes = mmioAscend(hMmio.get(), &formatChunk, 0);
 	if (mmRes != MMSYSERR_NOERROR) {
 		throw MmioError("mmioAscend() failed", mmRes);
 	}
-
 	// enter "data"
 	MMCKINFO dataChunk = { 0 };
 	dataChunk.ckid = mmioFOURCC('d', 'a', 't', 'a');
@@ -70,7 +67,6 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 	if (mmRes != MMSYSERR_NOERROR) {
 		throw MmioError("mmioDescend() failed", mmRes);
 	}
-
 	// read "data"
 	if (dataChunk.cksize > SoundFileSizeMax) {
 		throw MmioError("data size too large", 0);
@@ -211,6 +207,35 @@ XAudio2::SourceVoicePtr *XAudio2::findFreeSeEntry() noexcept
 		}
 	}
 	return nullptr;
+}
+
+
+void XAudio2::playBgm(const wchar_t *path)
+{
+	file::Bytes bytes = file::loadFile(path);
+
+	OggVorbis_File fp;
+	ov_callbacks callbacks = { read, seek, close, tell };
+	ov_open_callbacks(this, &fp, nullptr, 0, callbacks);
+}
+
+void XAudio2::processFrame()
+{
+
+}
+
+size_t XAudio2::read(void *ptr, size_t size, size_t nmemb, void *datasource)
+{
+	return 0;
+}
+int XAudio2::seek(void *datasource, int64_t offset, int whence) {
+	return 0;
+}
+long XAudio2::tell(void *datasource) {
+	return 0;
+}
+int XAudio2::close(void *datasource) {
+	return 0;
 }
 
 }
