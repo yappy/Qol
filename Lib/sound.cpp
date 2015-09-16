@@ -238,6 +238,7 @@ void XAudio2::playBgm(const wchar_t *path)
 		throw OggVorbisError("ov_info() failed", 0);
 	}
 	debug::writef(L"ov_info: channels=%d, rate=%ld", info->channels, info->rate);
+	debug::writef(L"seekable?: %ld", ::ov_seekable(m_pBgmFile.get()));
 	// WAVEFORMAT from ovinfo
 	WAVEFORMATEX format = { 0 };
 	format.wFormatTag = WAVE_FORMAT_PCM;
@@ -295,7 +296,7 @@ void XAudio2::processFrame()
 			break;
 		}
 	}
-	// TODO: readsum == 0 (stream end)
+	// TODO: readsum == 0 (stream end; loop)
 
 	// submit source buffer
 	XAUDIO2_BUFFER buffer = { 0 };
@@ -317,11 +318,34 @@ size_t XAudio2::read(void *ptr, size_t size, size_t nmemb, void *datasource)
 }
 int XAudio2::seek(void *datasource, int64_t offset, int whence)
 {
-	return -1;
+	XAudio2 *obj = static_cast<XAudio2 *>(datasource);
+	switch (whence) {
+	case SEEK_SET:
+		obj->m_readPos = offset;
+		break;
+	case SEEK_CUR:
+		obj->m_readPos += offset;
+		break;
+	case SEEK_END:
+		obj->m_readPos = obj->m_ovFileBin.size() + offset;
+		break;
+	default:
+		return -1;
+	}
+	if (obj->m_readPos > static_cast<long>(obj->m_ovFileBin.size())) {
+		obj->m_readPos = obj->m_ovFileBin.size();
+		return -1;
+	}
+	else if (obj->m_readPos < 0) {
+		obj->m_readPos = 0;
+		return -1;
+	}
+	return 0;
 }
 long XAudio2::tell(void *datasource)
 {
-	return -1;
+	XAudio2 *obj = static_cast<XAudio2 *>(datasource);
+	return obj->m_readPos;
 }
 int XAudio2::close(void *datasource)
 {
