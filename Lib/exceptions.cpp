@@ -34,7 +34,7 @@ const char *Win32Error::what() const
 	return m_what.c_str();
 }
 
-MmioError::MmioError(const std::string &msg, MMRESULT code) noexcept
+MmioError::MmioError(const std::string &msg, UINT code) noexcept
 	: runtime_error("")
 {
 	std::stringstream ss;
@@ -43,6 +43,20 @@ MmioError::MmioError(const std::string &msg, MMRESULT code) noexcept
 }
 
 const char *MmioError::what() const
+{
+	return m_what.c_str();
+}
+
+OggVorbisError::OggVorbisError(const std::string &msg, int code) noexcept
+	: runtime_error("")
+{
+	// signed decimal
+	std::stringstream ss;
+	ss << msg << " (" << code << ")";
+	m_what = ss.str();
+}
+
+const char *OggVorbisError::what() const
 {
 	return m_what.c_str();
 }

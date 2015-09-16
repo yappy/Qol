@@ -7,12 +7,11 @@
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
 
-#include <vorbis/vorbisfile.h>
-
 namespace test {
 namespace sound {
 
 using error::MmioError;
+using error::OggVorbisError;
 using error::checkDXResult;
 using error::XAudioError;
 
@@ -82,7 +81,10 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 
 XAudio2::XAudio2() :
 	m_pIXAudio(nullptr, util::iunknownDeleter),
-	m_pMasterVoice(nullptr, voiceDeleter)
+	m_pMasterVoice(nullptr, voiceDeleter),
+	m_pBgmVoice(nullptr, voiceDeleter),
+	m_pBgmBuffer(new char[BgmBufferSize * BgmBufferCount]),
+	m_pBgmFile(nullptr, oggFileDeleter)
 {
 	HRESULT hr;
 
@@ -212,29 +214,118 @@ XAudio2::SourceVoicePtr *XAudio2::findFreeSeEntry() noexcept
 
 void XAudio2::playBgm(const wchar_t *path)
 {
-	file::Bytes bytes = file::loadFile(path);
+	int ret;
+	HRESULT hr;
 
-	OggVorbis_File fp;
+	debug::writef(L"playBgm: %s", path);
+
+	stopBgm();
+
+	m_ovFileBin = file::loadFile(path);
+	m_readPos = 0;
+
+	// ovfile open
+	static OggVorbis_File fp;
 	ov_callbacks callbacks = { read, seek, close, tell };
-	ov_open_callbacks(this, &fp, nullptr, 0, callbacks);
+	ret = ::ov_open_callbacks(this, &fp, nullptr, 0, callbacks);
+	if (ret != 0) {
+		throw OggVorbisError("ov_open_callbacks() failed", ret);
+	}
+	m_pBgmFile.reset(&fp);
+	// ovinfo
+	vorbis_info *info = ov_info(m_pBgmFile.get(), -1);
+	if (info == nullptr) {
+		throw OggVorbisError("ov_info() failed", 0);
+	}
+	debug::writef(L"ov_info: channels=%d, rate=%ld", info->channels, info->rate);
+	// WAVEFORMAT from ovinfo
+	WAVEFORMATEX format = { 0 };
+	format.wFormatTag = WAVE_FORMAT_PCM;
+	format.nChannels = info->channels;
+	format.nSamplesPerSec = info->rate;
+	format.wBitsPerSample = 16;
+	format.nBlockAlign = info->channels * format.wBitsPerSample / 8;
+	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
+	format.cbSize = 0;
+
+	// create source voice using WAVEFORMAT
+	IXAudio2SourceVoice *ptmpSrcVoice;
+	hr = m_pIXAudio->CreateSourceVoice(&ptmpSrcVoice, &format);
+	checkDXResult<XAudioError>(hr, "IXAudio2::CreateSourceVoice() failed");
+	m_pBgmVoice.reset(ptmpSrcVoice);
+
+	hr = m_pBgmVoice->Start();
+	checkDXResult<XAudioError>(hr, "IXAudio2SourceVoice::Start() failed");
+
+	debug::writeLine(L"playBgm OK");
+}
+
+void XAudio2::stopBgm() noexcept
+{
+	// DestroyVoice(), set nullptr
+	m_pBgmVoice.reset();
+	m_pBgmFile.reset();
 }
 
 void XAudio2::processFrame()
 {
+	HRESULT hr;
+	if (m_pBgmVoice == nullptr) {
+		return;
+	}
+	XAUDIO2_VOICE_STATE state;
+	m_pBgmVoice->GetState(&state);
+	if (state.BuffersQueued >= BgmBufferCount) {
+		debug::writeLine(L"not yet!");
+		return;
+	}
 
+	long readSum = 0;
+	size_t base = m_writePos * BgmBufferSize;
+	while (BgmBufferSize - readSum >= BgmOvReadSize) {
+		long size = ::ov_read(m_pBgmFile.get(),
+			&m_pBgmBuffer[base + readSum],
+			BgmOvReadSize, 0, 2, 1, nullptr);
+		if (size < 0) {
+			throw OggVorbisError("ov_read() failed", size);
+		}
+		readSum += size;
+		if (size == 0) {
+			// stream end
+			break;
+		}
+	}
+	// TODO: readsum == 0 (stream end)
+
+	// submit source buffer
+	XAUDIO2_BUFFER buffer = { 0 };
+	buffer.AudioBytes = static_cast<UINT32>(readSum);
+	buffer.pAudioData = reinterpret_cast<BYTE *>(&m_pBgmBuffer[base]);
+	hr = m_pBgmVoice->SubmitSourceBuffer(&buffer);
+	checkDXResult<XAudioError>(hr, "IXAudio2SourceVoice::SubmitSourceBuffer() failed");
+	debug::writeLine(L"push back!");
 }
 
 size_t XAudio2::read(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
-	return 0;
+	XAudio2 *obj = static_cast<XAudio2 *>(datasource);
+	size_t remainSize = obj->m_ovFileBin.size() - obj->m_readPos;
+	size_t count = std::min(remainSize / size, nmemb);
+	::memcpy(ptr, &obj->m_ovFileBin[obj->m_readPos], size * count);
+	obj->m_readPos += size * count;
+	return count;
 }
-int XAudio2::seek(void *datasource, int64_t offset, int whence) {
-	return 0;
+int XAudio2::seek(void *datasource, int64_t offset, int whence)
+{
+	return -1;
 }
-long XAudio2::tell(void *datasource) {
-	return 0;
+long XAudio2::tell(void *datasource)
+{
+	return -1;
 }
-int XAudio2::close(void *datasource) {
+int XAudio2::close(void *datasource)
+{
+	XAudio2 *obj = static_cast<XAudio2 *>(datasource);
 	return 0;
 }
 
