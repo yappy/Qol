@@ -80,7 +80,7 @@ private:
 	std::unique_ptr<char[]> m_pBgmBuffer;
 	OggFilePtr m_pBgmFile;
 	file::Bytes m_ovFileBin;
-	long m_readPos;
+	size_t m_readPos;
 	size_t m_writePos;
 	// for ogg file callback (datasource==this)
 	static size_t read(void *ptr, size_t size, size_t nmemb, void *datasource);
