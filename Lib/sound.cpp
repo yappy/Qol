@@ -104,7 +104,7 @@ XAudio2::XAudio2() :
 
 	// m_playingSeList[SoundEffectPlayMax] filled by nullptr
 	m_playingSeList.reserve(SoundEffectPlayMax);
-	for (size_t i = 0; i < SoundEffectPlayMax; i++) {
+	for (uint32_t i = 0; i < SoundEffectPlayMax; i++) {
 		m_playingSeList.emplace_back(SourceVoicePtr(nullptr, voiceDeleter));
 	}
 }
@@ -148,6 +148,7 @@ void XAudio2::playSoundEffect(const char *id)
 	ASSERT(*ppEntry == nullptr);
 
 	XAUDIO2_BUFFER buffer = { 0 };
+	ASSERT(se.samples.size() <= file::FileSizeMax);
 	buffer.AudioBytes = static_cast<UINT32>(se.samples.size());
 	buffer.pAudioData = &se.samples[0];
 	buffer.Flags = XAUDIO2_END_OF_STREAM;
@@ -281,8 +282,8 @@ void XAudio2::processFrame()
 		return;
 	}
 
-	long readSum = 0;
-	size_t base = m_writePos * BgmBufferSize;
+	uint32_t readSum = 0;
+	uint32_t base = m_writePos * BgmBufferSize;
 	while (BgmBufferSize - readSum >= BgmOvReadSize) {
 		long size = ::ov_read(m_pBgmFile.get(),
 			&m_pBgmBuffer[base + readSum],
@@ -305,35 +306,45 @@ void XAudio2::processFrame()
 	hr = m_pBgmVoice->SubmitSourceBuffer(&buffer);
 	checkDXResult<XAudioError>(hr, "IXAudio2SourceVoice::SubmitSourceBuffer() failed");
 	debug::writeLine(L"push back!");
+
+	m_writePos = (m_writePos + 1) % BgmBufferCount;
 }
 
 size_t XAudio2::read(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
 	XAudio2 *obj = static_cast<XAudio2 *>(datasource);
-	size_t remainSize = obj->m_ovFileBin.size() - obj->m_readPos;
+	ASSERT(obj->m_ovFileBin.size() <= file::FileSizeMax);
+	uint32_t totalSize = static_cast<uint32_t>(obj->m_ovFileBin.size());
+	ASSERT(totalSize >= obj->m_readPos);
+	uint32_t remainSize = totalSize - obj->m_readPos;
 	size_t count = std::min(remainSize / size, nmemb);
 	::memcpy(ptr, &obj->m_ovFileBin[obj->m_readPos], size * count);
-	obj->m_readPos += size * count;
+	obj->m_readPos += static_cast<uint32_t>(size * count);
 	return count;
 }
+
 int XAudio2::seek(void *datasource, int64_t offset, int whence)
 {
 	XAudio2 *obj = static_cast<XAudio2 *>(datasource);
+	ASSERT(offset < file::FileSizeMax);
+	ASSERT(obj->m_ovFileBin.size() <= file::FileSizeMax);
+	uint32_t totalSize = static_cast<uint32_t>(obj->m_ovFileBin.size());
 	switch (whence) {
 	case SEEK_SET:
-		obj->m_readPos = offset;
+		obj->m_readPos = static_cast<uint32_t>(offset);
 		break;
 	case SEEK_CUR:
-		obj->m_readPos += offset;
+		obj->m_readPos += static_cast<uint32_t>(offset);
 		break;
 	case SEEK_END:
-		obj->m_readPos = obj->m_ovFileBin.size() + offset;
+		ASSERT(offset <= 0);
+		obj->m_readPos = static_cast<uint32_t>(totalSize + offset);
 		break;
 	default:
 		return -1;
 	}
-	if (obj->m_readPos > static_cast<long>(obj->m_ovFileBin.size())) {
-		obj->m_readPos = obj->m_ovFileBin.size();
+	if (obj->m_readPos > totalSize) {
+		obj->m_readPos = totalSize;
 		return -1;
 	}
 	else if (obj->m_readPos < 0) {
@@ -342,11 +353,13 @@ int XAudio2::seek(void *datasource, int64_t offset, int whence)
 	}
 	return 0;
 }
+
 long XAudio2::tell(void *datasource)
 {
 	XAudio2 *obj = static_cast<XAudio2 *>(datasource);
 	return obj->m_readPos;
 }
+
 int XAudio2::close(void *datasource)
 {
 	XAudio2 *obj = static_cast<XAudio2 *>(datasource);

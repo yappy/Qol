@@ -56,7 +56,9 @@ Bytes FsFileLoader::loadFile(const wchar_t *fileName)
 	LARGE_INTEGER fileSize;
 	b = ::GetFileSizeEx(hFile.get(), &fileSize);
 	error::checkWin32Result(b != 0, "GetFileSizeEx() failed");
+	// 2GiB check
 	error::checkWin32Result(fileSize.HighPart == 0, "File size is too large");
+	error::checkWin32Result(fileSize.LowPart < 0x80000000, "File size is too large");
 	// read
 	Bytes data(fileSize.LowPart);
 	DWORD readSize;

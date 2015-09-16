@@ -41,12 +41,12 @@ int main()
 		sound.playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
 
 		sound.loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 4; i++) {
 			sound.playSoundEffect("testwav");
-			Sleep(500);
+			Sleep(300);
 		}
 
-		for (int i = 0; i < 60 * 2; i++) {
+		for (int i = 0; i < 60 * 10; i++) {
 			sound.processFrame();
 			Sleep(16);
 		}
