@@ -5,7 +5,7 @@
 #include <windows.h>
 #include <Unknwn.h>
 
-namespace test {
+namespace yappy {
 namespace util {
 
 class noncopyable {

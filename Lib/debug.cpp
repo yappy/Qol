@@ -3,7 +3,7 @@
 #include "include/debug.h"
 #include "include/util.h"
 
-namespace test {
+namespace yappy {
 namespace debug {
 
 namespace {

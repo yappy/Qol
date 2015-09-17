@@ -7,7 +7,7 @@
 #include <array>
 #include <vector>
 
-namespace test {
+namespace yappy {
 namespace input {
 
 class DInput : private util::noncopyable {

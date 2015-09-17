@@ -4,7 +4,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace test {
+namespace yappy {
 namespace error {
 
 Win32Error::Win32Error(const std::string &msg, DWORD code) noexcept

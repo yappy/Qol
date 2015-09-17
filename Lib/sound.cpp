@@ -7,7 +7,7 @@
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
 
-namespace test {
+namespace yappy {
 namespace sound {
 
 using error::MmioError;

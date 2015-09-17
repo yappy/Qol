@@ -13,30 +13,30 @@
 int main()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	test::debug::enableDebugOutput();
-	test::debug::enableFileOutput(L"log" ".txt");
+	yappy::debug::enableDebugOutput();
+	yappy::debug::enableFileOutput(L"log" ".txt");
 
 	try {
-		test::file::initWithFileSystem(L".");
+		yappy::file::initWithFileSystem(L".");
 		//ASSERT(0);
 
-		test::network::initialize();
-		test::network::finalize();
+		yappy::network::initialize();
+		yappy::network::finalize();
 
-		test::input::DInput di(nullptr);
+		yappy::input::DInput di(nullptr);
 
 		::LoadLibrary(L"notfound.dll");
 		DWORD code = ::GetLastError();
-		throw test::error::DXError("DXError test", D3D11_ERROR_FILE_NOT_FOUND);
-		throw test::error::Win32Error("err test", code);
+		throw yappy::error::DXError("DXError test", D3D11_ERROR_FILE_NOT_FOUND);
+		throw yappy::error::Win32Error("err test", code);
 	}
 	catch (std::exception &e) {
-		test::debug::writeLine(e.what());
+		yappy::debug::writeLine(e.what());
 		puts(e.what());
 	}
 
 	{
-		test::sound::XAudio2 sound;
+		yappy::sound::XAudio2 sound;
 
 		sound.playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
 
@@ -52,7 +52,7 @@ int main()
 		}
 	}
 
-	test::debug::shutdownDebugOutput();
+	yappy::debug::shutdownDebugOutput();
 
     return 0;
 }

@@ -2,7 +2,7 @@
 
 #include "util.h"
 
-namespace test {
+namespace yappy {
 namespace network {
 
 void initialize();

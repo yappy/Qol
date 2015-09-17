@@ -12,13 +12,13 @@
 
 #define ASSERT0(x, msg, sig, file, line) do {				\
 	if (!(x)) {												\
-		test::debug::writeLine(msg);						\
-		test::debug::writef(L"%s (%s: %d)", sig, file, line);	\
+		yappy::debug::writeLine(msg);						\
+		yappy::debug::writef(L"%s (%s: %d)", sig, file, line);	\
 		::DebugBreak();										\
 	}														\
 } while (0)
 
-namespace test {
+namespace yappy {
 namespace debug {
 
 bool enableDebugOutput() noexcept;

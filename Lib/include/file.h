@@ -4,7 +4,7 @@
 #include <vector>
 #include <limits>
 
-namespace test {
+namespace yappy {
 namespace file {
 
 // 0x7fffffff = 2GiB

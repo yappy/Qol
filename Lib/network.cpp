@@ -6,7 +6,7 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-namespace test {
+namespace yappy {
 namespace network {
 
 using error::WinSockError;

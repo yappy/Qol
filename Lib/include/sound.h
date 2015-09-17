@@ -6,7 +6,7 @@
 #include <vorbis/vorbisfile.h>
 #include <unordered_map>
 
-namespace test {
+namespace yappy {
 namespace sound {
 
 // 3MiB

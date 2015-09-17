@@ -4,7 +4,7 @@
 #include <memory>
 #include <windows.h>
 
-namespace test {
+namespace yappy {
 namespace error {
 
 class Win32Error : public std::runtime_error {

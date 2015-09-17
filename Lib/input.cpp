@@ -6,7 +6,7 @@
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
 
-namespace test {
+namespace yappy {
 namespace input {
 
 using error::checkDXResult;

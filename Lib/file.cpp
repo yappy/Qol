@@ -5,12 +5,12 @@
 #include <memory>
 #include <string>
 
-namespace test {
+namespace yappy {
 namespace file {
 
 namespace {
 
-class FileLoader : private test::util::noncopyable {
+class FileLoader : private util::noncopyable {
 public:
 	FileLoader() = default;
 	virtual ~FileLoader() {}
