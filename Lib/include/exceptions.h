@@ -37,6 +37,14 @@ private:
 	std::string m_what;
 };
 
+class OggVorbisError : public std::runtime_error {
+public:
+	explicit OggVorbisError(const std::string &msg, int code) noexcept;
+	const char *what() const override;
+private:
+	std::string m_what;
+};
+
 
 template <class T>
 inline void checkDXResult(HRESULT hr, const std::string &msg)
