@@ -293,11 +293,14 @@ void XAudio2::processFrame()
 		}
 		readSum += size;
 		if (size == 0) {
-			// stream end
-			break;
+			// stream end; seek to loop point
+			// TODO: loop point
+			int ret = ::ov_time_seek(m_pBgmFile.get(), 0.0);
+			if (ret < 0) {
+				throw OggVorbisError("ov_time_seek() failed", ret);
+			}
 		}
 	}
-	// TODO: readsum == 0 (stream end; loop)
 
 	// submit source buffer
 	XAUDIO2_BUFFER buffer = { 0 };
