@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util.h"
 #include <windows.h>
 #pragma warning(disable: 4005)
 #include <d3d11.h>
@@ -28,7 +29,7 @@ struct InitParam {
 	bool windowed = true;
 };
 
-class Application {
+class Application : private util::noncopyable {
 public:
 	Application(const InitParam &param);
 	virtual ~Application();
