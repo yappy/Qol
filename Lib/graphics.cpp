@@ -91,6 +91,8 @@ void Application::initializeD3D(const InitParam &param)
 		sd.SampleDesc.Count = 1;
 		sd.SampleDesc.Quality = 0;
 		sd.Windowed = TRUE;
+		sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+		sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 		ID3D11Device *ptmpDevice = nullptr;
 		ID3D11DeviceContext *ptmpContext = nullptr;
