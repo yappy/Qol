@@ -18,6 +18,10 @@ http://drang.s4.xrea.com/program/tips/screen_saver.html (may be too old)
 DwmEnableComposition()
 SetMaximumFrameLatency()
 http://www.ouma.jp/ootake/delay-win7vista-j.html
+(there is wrong description about SetMaximumFrameLatency)
+** SetMaximumFrameLatency()
+  Valid range is 1-16. (default: 3)
+  SetMaximumFrameLatency(0) will reset latency default.
 
 
 *** TODO list ***

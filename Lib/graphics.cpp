@@ -113,6 +113,16 @@ void Application::initializeD3D(const InitParam &param)
 		m_pSwapChain.reset(ptmpSwapChain);
 	}
 
+	// MaximumFrameLatency
+	{
+		IDXGIDevice1 *ptmpDXGIDevice;
+		hr = m_pDevice->QueryInterface(__uuidof(IDXGIDevice1), (void **)&ptmpDXGIDevice);
+		checkDXResult<D3DError>(hr, "QueryInterface(IDXGIDevice1) failed");
+		util::IUnknownPtr<IDXGIDevice1> pDXGIDevice(ptmpDXGIDevice, util::iunknownDeleter);
+		hr = pDXGIDevice->SetMaximumFrameLatency(1);
+		checkDXResult<D3DError>(hr, "IDXGIDevice1::SetMaximumFrameLatency() failed");
+	}
+
 	// Create a render target view
 	{
 		ID3D11Texture2D *ptmpBackBuffer = nullptr;
