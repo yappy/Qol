@@ -53,8 +53,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		InitParam param;
 		param.hInstance = hInstance;
-		param.w = 640;
-		param.h = 480;
+		param.w = 1024;
+		param.h = 768;
 		param.wndClsName = L"TestAppClass";
 		param.title = L"Test App";
 		param.nCmdShow = SW_MINIMIZE;//nCmdShow;

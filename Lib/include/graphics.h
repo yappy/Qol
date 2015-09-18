@@ -20,8 +20,8 @@ struct hwndDeleter {
 struct InitParam {
 	HINSTANCE hInstance = nullptr;
 	int nCmdShow = SW_SHOW;
-	int w = 640;
-	int h = 480;
+	int w = 1024;
+	int h = 768;
 	const wchar_t *wndClsName = L"GameWndCls";
 	const wchar_t *title = L"GameApp";
 	uint32_t refreshRateNumer = 60;
