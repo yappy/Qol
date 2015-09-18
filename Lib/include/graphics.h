@@ -44,12 +44,12 @@ private:
 	void initializeWindow(const InitParam &param);
 	static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-	ID3D11Device *m_pD3dDevice = nullptr;
-	ID3D11DeviceContext *m_pImmediateContext = nullptr;
-	IDXGISwapChain *m_pSwapChain = nullptr;
-	ID3D11RenderTargetView *m_pRenderTargetView = nullptr;
+	util::IUnknownPtr<ID3D11Device>				m_pDevice;
+	util::IUnknownPtr<ID3D11DeviceContext>		m_pContext;
+	util::IUnknownPtr<IDXGISwapChain>			m_pSwapChain;
+	util::IUnknownPtr<ID3D11RenderTargetView>	m_pRenderTargetView;
 
-	void initializeD3d(const InitParam &param);
+	void initializeD3D(const InitParam &param);
 };
 
 }

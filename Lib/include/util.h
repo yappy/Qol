@@ -31,8 +31,10 @@ inline void iunknownDeleter(IUnknown *iu)
 {
 	iu->Release();
 }
-
 typedef decltype(&iunknownDeleter) IUnknownDeleterType;
+
+template<class T>
+using IUnknownPtr = std::unique_ptr<T, IUnknownDeleterType>;
 
 
 inline std::string wc2utf8(const wchar_t *in)
