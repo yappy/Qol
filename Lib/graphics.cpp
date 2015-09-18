@@ -140,7 +140,15 @@ void Application::initializeD3D(const InitParam &param)
 	}
 }
 
-Application::~Application() {}
+Application::~Application()
+{
+	if (m_pContext != nullptr) {
+		m_pContext->ClearState();
+	}
+	if (m_pSwapChain != nullptr) {
+		m_pSwapChain->SetFullscreenState(FALSE, nullptr);
+	}
+}
 
 LRESULT CALLBACK Application::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -165,9 +173,10 @@ int Application::run()
 		}
 		else {
 			// TODO
+			debug::StopWatch test(L"Present()");
 			float color[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
 			m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), color);
-			m_pSwapChain->Present(0, 0);
+			m_pSwapChain->Present(1, 0);
 		}
 	}
 	return static_cast<int>(msg.wParam);
