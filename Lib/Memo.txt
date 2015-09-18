@@ -17,8 +17,8 @@ http://drang.s4.xrea.com/program/tips/screen_saver.html (may be too old)
 * Graphics latency tips
 DwmEnableComposition()
 SetMaximumFrameLatency()
-http://www.ouma.jp/ootake/delay-win7vista-j.html
-(there is wrong description about SetMaximumFrameLatency)
+http://www.ouma.jp/ootake/delay-win7vista-j.html (there is mistake)
+
 ** SetMaximumFrameLatency()
   Valid range is 1-16. (default: 3)
   SetMaximumFrameLatency(0) will reset latency default.
@@ -39,6 +39,9 @@ http://www.ouma.jp/ootake/delay-win7vista-j.html
 
 - graphics
 -- initialize
+-- wait by timer for not vsync-ed situation (e.g. window minimized)
+-- fps
+-- frame skip mechanism
 -- texture (transform, alpha)
 
 - input
