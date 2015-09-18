@@ -90,7 +90,7 @@ void Application::initializeD3D(const InitParam &param)
 		sd.OutputWindow = m_hWnd.get();
 		sd.SampleDesc.Count = 1;
 		sd.SampleDesc.Quality = 0;
-		sd.Windowed = param.windowed;
+		sd.Windowed = TRUE;
 
 		ID3D11Device *ptmpDevice = nullptr;
 		ID3D11DeviceContext *ptmpContext = nullptr;
@@ -137,6 +137,26 @@ void Application::initializeD3D(const InitParam &param)
 		vp.MinDepth = 0.0f;
 		vp.MaxDepth = 1.0f;
 		m_pContext->RSSetViewports(1, &vp);
+	}
+
+	// fullscreen initially
+	/*
+	DXGI_ERROR_NOT_CURRENTLY_AVAILABLE (quote from dx11 document)
+	For instance:
+	- The application is running over Terminal Server.
+	- The output window is occluded.
+	- The output window does not have keyboard focus.
+	- Another application is already in full-screen mode.
+	*/
+	if (param.fullScreen) {
+		hr = m_pSwapChain->SetFullscreenState(TRUE, nullptr);
+		if (hr == DXGI_ERROR_NOT_CURRENTLY_AVAILABLE) {
+			debug::writeLine(L"Fullscreen mode is currently unavailable");
+			debug::writeLine(L"Launch on window mode...");
+		}
+		else {
+			checkDXResult<D3DError>(hr, "IDXGISwapChain::SetFullscreenState() failed");
+		}
 	}
 }
 

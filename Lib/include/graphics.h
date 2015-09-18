@@ -26,7 +26,7 @@ struct InitParam {
 	const wchar_t *title = L"GameApp";
 	uint32_t refreshRateNumer = 60;
 	uint32_t refreshRateDenom = 1;
-	bool windowed = true;
+	bool fullScreen = false;
 };
 
 class Application : private util::noncopyable {
