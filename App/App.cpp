@@ -57,7 +57,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		param.h = 768;
 		param.wndClsName = L"TestAppClass";
 		param.title = L"Test App";
-		param.nCmdShow = SW_MINIMIZE;//nCmdShow;
+		param.nCmdShow = nCmdShow;
 
 		Application app(param);
 		result = app.run();

@@ -38,18 +38,25 @@ public:
 protected:
 
 private:
+	const DXGI_FORMAT BufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+	const DXGI_SWAP_CHAIN_FLAG SwapChainFlag = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+	const float ClearColor[4] = { 0.9f, 0.9f, 0.9f, 1.0f };
+
 	using HWndPtr = std::unique_ptr<HWND, hwndDeleter>;
 	HWndPtr m_hWnd;
 
-	void initializeWindow(const InitParam &param);
-	static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
+	InitParam m_initParam;
 	util::IUnknownPtr<ID3D11Device>				m_pDevice;
 	util::IUnknownPtr<ID3D11DeviceContext>		m_pContext;
 	util::IUnknownPtr<IDXGISwapChain>			m_pSwapChain;
 	util::IUnknownPtr<ID3D11RenderTargetView>	m_pRenderTargetView;
 
+	void initializeWindow(const InitParam &param);
+	static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	LRESULT onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 	void initializeD3D(const InitParam &param);
+	void initBackBuffer();
 };
 
 }

@@ -14,6 +14,7 @@ using error::D3DError;
 using error::checkDXResult;
 
 Application::Application(const InitParam &param) :
+	m_initParam(param),
 	m_pDevice(nullptr, util::iunknownDeleter),
 	m_pContext(nullptr, util::iunknownDeleter),
 	m_pSwapChain(nullptr, util::iunknownDeleter),
@@ -21,6 +22,8 @@ Application::Application(const InitParam &param) :
 {
 	initializeWindow(param);
 	initializeD3D(param);
+	::ShowWindow(m_hWnd.get(), param.nCmdShow);
+	::UpdateWindow(m_hWnd.get());
 }
 
 void Application::initializeWindow(const InitParam &param)
@@ -35,7 +38,7 @@ void Application::initializeWindow(const InitParam &param)
 	cls.hInstance = param.hInstance;
 	cls.hIcon = nullptr;	//TODO
 	cls.hCursor = LoadCursor(NULL, IDC_ARROW);
-	cls.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BACKGROUND);
+	cls.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
 	cls.lpszMenuName = nullptr;
 	cls.lpszClassName = param.wndClsName;
 	cls.hIconSm = nullptr;	//TODO
@@ -49,11 +52,9 @@ void Application::initializeWindow(const InitParam &param)
 
 	HWND hWnd = ::CreateWindow(param.wndClsName, param.title, wndStyle,
 		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
-		nullptr, nullptr, param.hInstance, nullptr);
+		nullptr, nullptr, param.hInstance, this);
 	checkWin32Result(hWnd != nullptr, "CreateWindow() failed");
 	m_hWnd.reset(hWnd);
-
-	::ShowWindow(m_hWnd.get(), param.nCmdShow);
 }
 
 void Application::initializeD3D(const InitParam &param)
@@ -91,8 +92,7 @@ void Application::initializeD3D(const InitParam &param)
 		sd.SampleDesc.Count = 1;
 		sd.SampleDesc.Quality = 0;
 		sd.Windowed = TRUE;
-		sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-		sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+		sd.Flags = SwapChainFlag;
 
 		ID3D11Device *ptmpDevice = nullptr;
 		ID3D11DeviceContext *ptmpContext = nullptr;
@@ -123,6 +123,33 @@ void Application::initializeD3D(const InitParam &param)
 		checkDXResult<D3DError>(hr, "IDXGIDevice1::SetMaximumFrameLatency() failed");
 	}
 
+	initBackBuffer();
+
+	// fullscreen initially
+	/*
+	DXGI_ERROR_NOT_CURRENTLY_AVAILABLE (quote from dx11 document)
+	For instance:
+	- The application is running over Terminal Server.
+	- The output window is occluded.
+	- The output window does not have keyboard focus.
+	- Another application is already in full-screen mode.
+	*/
+	if(param.fullScreen) {
+		hr = m_pSwapChain->SetFullscreenState(TRUE, nullptr);
+		if (hr == DXGI_ERROR_NOT_CURRENTLY_AVAILABLE) {
+			debug::writeLine(L"Fullscreen mode is currently unavailable");
+			debug::writeLine(L"Launch on window mode...");
+		}
+		else {
+			checkDXResult<D3DError>(hr, "IDXGISwapChain::SetFullscreenState() failed");
+		}
+	}
+}
+
+void Application::initBackBuffer()
+{
+	HRESULT hr = S_OK;
+
 	// Create a render target view
 	{
 		ID3D11Texture2D *ptmpBackBuffer = nullptr;
@@ -144,31 +171,11 @@ void Application::initializeD3D(const InitParam &param)
 		D3D11_VIEWPORT vp;
 		vp.TopLeftX = 0;
 		vp.TopLeftY = 0;
-		vp.Width = static_cast<float>(param.w);
-		vp.Height = static_cast<float>(param.h);
+		vp.Width = static_cast<float>(m_initParam.w);
+		vp.Height = static_cast<float>(m_initParam.h);
 		vp.MinDepth = 0.0f;
 		vp.MaxDepth = 1.0f;
 		m_pContext->RSSetViewports(1, &vp);
-	}
-
-	// fullscreen initially
-	/*
-	DXGI_ERROR_NOT_CURRENTLY_AVAILABLE (quote from dx11 document)
-	For instance:
-	- The application is running over Terminal Server.
-	- The output window is occluded.
-	- The output window does not have keyboard focus.
-	- Another application is already in full-screen mode.
-	*/
-	if (param.fullScreen) {
-		hr = m_pSwapChain->SetFullscreenState(TRUE, nullptr);
-		if (hr == DXGI_ERROR_NOT_CURRENTLY_AVAILABLE) {
-			debug::writeLine(L"Fullscreen mode is currently unavailable");
-			debug::writeLine(L"Launch on window mode...");
-		}
-		else {
-			checkDXResult<D3DError>(hr, "IDXGISwapChain::SetFullscreenState() failed");
-		}
 	}
 }
 
@@ -184,15 +191,45 @@ Application::~Application()
 
 LRESULT CALLBACK Application::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	if (msg == WM_CREATE) {
+		// Associate this ptr with hWnd
+		void *userData = reinterpret_cast<LPCREATESTRUCT>(lParam)->lpCreateParams;
+		::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(userData));
+	}
+
+	LONG_PTR user = ::GetWindowLongPtr(hWnd, GWLP_USERDATA);
+	Application *self = reinterpret_cast<Application *>(user);
+
 	switch (msg) {
 	case WM_SIZE:
-		debug::writeLine(L"WM_SIZE");
-		break;
+		return self->onSize(hWnd, msg, wParam, lParam);
+	case WM_CLOSE:
+		self->m_hWnd.reset();
+		return 0;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
 	}
 	return ::DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+LRESULT Application::onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (m_pSwapChain == nullptr || wParam == SIZE_MINIMIZED) {
+		debug::writeLine(L"!!!");
+		return 0;
+	}
+	debug::writef(L"WM_SIZE %d %d", LOWORD(lParam), HIWORD(lParam));
+
+	HRESULT hr;
+	m_pContext->OMSetRenderTargets(0, nullptr, nullptr);
+	m_pRenderTargetView.reset();
+	hr = m_pSwapChain->ResizeBuffers(1, 0, 0, BufferFormat, SwapChainFlag);
+	checkDXResult<D3DError>(hr, "IDXGISwapChain::ResizeBuffers() failed");
+
+	initBackBuffer();
+
+	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
 int Application::run()
@@ -205,9 +242,8 @@ int Application::run()
 		}
 		else {
 			// TODO
-			debug::StopWatch test(L"Present()");
-			float color[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
-			m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), color);
+			//debug::StopWatch test(L"Present()");
+			m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
 			m_pSwapChain->Present(1, 0);
 		}
 	}
