@@ -13,8 +13,45 @@ using error::checkWin32Result;
 using error::D3DError;
 using error::checkDXResult;
 
+FrameControl::FrameControl(int64_t fpsNumer, int64_t fpsDenom) :
+	m_prev(0)
+{
+	// counter/sec
+	LARGE_INTEGER freq;
+	BOOL b = ::QueryPerformanceFrequency(&freq);
+	error::checkWin32Result(b != FALSE, "QueryPerformanceFrequency() failed");
+	m_freq = freq.QuadPart;
+
+	// counter/frame = (counter/sec) / (frame/sec)
+	//               = m_freq / (fpsNumer / fpsDenom)
+	//               = m_freq * fpsDenom / fpsNumer
+	m_target = m_freq * fpsDenom / fpsNumer;
+	m_target = static_cast<int64_t>(m_target * SCALE);
+}
+
+void FrameControl::endFrame()
+{
+	LARGE_INTEGER cur;
+	do {
+		BOOL b = ::QueryPerformanceCounter(&cur);
+		error::checkWin32Result(b != 0, "QueryPerformanceCounter() failed");
+	} while (cur.QuadPart < m_prev + m_target);
+
+	m_fpsCount++;
+	m_fpsAcc += cur.QuadPart - m_prev;
+	if (m_fpsCount >= 60) {
+		double sec = static_cast<double>(m_fpsAcc) / m_freq;
+		debug::writef(L"fps=%.2f", m_fpsCount / sec);
+		m_fpsCount = 0;
+		m_fpsAcc = 0;
+	}
+
+	m_prev = cur.QuadPart;
+}
+
 Application::Application(const InitParam &param) :
 	m_initParam(param),
+	m_frameCtrl(param.refreshRateNumer, param.refreshRateDenom),
 	m_pDevice(nullptr, util::iunknownDeleter),
 	m_pContext(nullptr, util::iunknownDeleter),
 	m_pSwapChain(nullptr, util::iunknownDeleter),
@@ -245,6 +282,7 @@ int Application::run()
 			//debug::StopWatch test(L"Present()");
 			m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
 			m_pSwapChain->Present(1, 0);
+			m_frameCtrl.endFrame();
 		}
 	}
 	return static_cast<int>(msg.wParam);

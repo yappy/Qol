@@ -17,6 +17,25 @@ struct hwndDeleter {
 	}
 };
 
+class FrameControl : private util::noncopyable {
+public:
+	FrameControl(int64_t fpsNumer, int64_t fpsDenom);
+	~FrameControl() = default;
+	bool shouldSkip();
+	void endFrame();
+	double getFps();
+
+private:
+	const double SCALE = 0.95;
+
+	int64_t m_target;
+	int64_t m_freq;
+	int64_t m_prev;
+
+	int m_fpsCount = 0;
+	int64_t m_fpsAcc = 0;
+};
+
 struct InitParam {
 	HINSTANCE hInstance = nullptr;
 	int nCmdShow = SW_SHOW;
@@ -46,6 +65,7 @@ private:
 	HWndPtr m_hWnd;
 
 	InitParam m_initParam;
+	FrameControl m_frameCtrl;
 	util::IUnknownPtr<ID3D11Device>				m_pDevice;
 	util::IUnknownPtr<ID3D11DeviceContext>		m_pContext;
 	util::IUnknownPtr<IDXGISwapChain>			m_pSwapChain;
