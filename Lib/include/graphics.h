@@ -21,19 +21,24 @@ class FrameControl : private util::noncopyable {
 public:
 	FrameControl(int64_t fpsNumer, int64_t fpsDenom);
 	~FrameControl() = default;
-	bool shouldSkip();
+	bool shouldSkipFrame();
 	void endFrame();
 	double getFps();
 
 private:
-	const double SCALE = 0.95;
+	const double Scale = 0.95;
+	const uint32_t MaxSkipCount = 5;
 
-	int64_t m_target;
 	int64_t m_freq;
-	int64_t m_prev;
+	int64_t m_countPerFrame;
+	int64_t m_base;
+	uint32_t m_skipCount;
 
+	int m_fpsPeriod;
 	int m_fpsCount = 0;
-	int64_t m_fpsAcc = 0;
+	int64_t m_fpsBase = 0;
+	int m_fpsFrameAcc = 0;
+	int m_fpsSkipAcc = 0;
 };
 
 struct InitParam {

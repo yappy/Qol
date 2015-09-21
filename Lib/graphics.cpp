@@ -13,8 +13,21 @@ using error::checkWin32Result;
 using error::D3DError;
 using error::checkDXResult;
 
+namespace {
+
+inline int64_t getTimeCounter()
+{
+	LARGE_INTEGER cur;
+	BOOL b = ::QueryPerformanceCounter(&cur);
+	error::checkWin32Result(b != 0, "QueryPerformanceCounter() failed");
+	return cur.QuadPart;
+}
+
+}	// namespace
+
 FrameControl::FrameControl(int64_t fpsNumer, int64_t fpsDenom) :
-	m_prev(0)
+	m_base(0), m_skipCount(0),
+	m_fpsPeriod(static_cast<int>(fpsNumer / fpsDenom))
 {
 	// counter/sec
 	LARGE_INTEGER freq;
@@ -25,28 +38,49 @@ FrameControl::FrameControl(int64_t fpsNumer, int64_t fpsDenom) :
 	// counter/frame = (counter/sec) / (frame/sec)
 	//               = m_freq / (fpsNumer / fpsDenom)
 	//               = m_freq * fpsDenom / fpsNumer
-	m_target = m_freq * fpsDenom / fpsNumer;
-	m_target = static_cast<int64_t>(m_target * SCALE);
+	m_countPerFrame = m_freq * fpsDenom / fpsNumer;
+	//m_countPerFrame = static_cast<int64_t>(m_countPerFrame * 1.05);
+}
+
+bool FrameControl::shouldSkipFrame()
+{
+	return m_skipCount > 0;
 }
 
 void FrameControl::endFrame()
 {
-	LARGE_INTEGER cur;
-	do {
-		BOOL b = ::QueryPerformanceCounter(&cur);
-		error::checkWin32Result(b != 0, "QueryPerformanceCounter() failed");
-	} while (cur.QuadPart < m_prev + m_target);
-
-	m_fpsCount++;
-	m_fpsAcc += cur.QuadPart - m_prev;
-	if (m_fpsCount >= 60) {
-		double sec = static_cast<double>(m_fpsAcc) / m_freq;
-		debug::writef(L"fps=%.2f", m_fpsCount / sec);
-		m_fpsCount = 0;
-		m_fpsAcc = 0;
+	if (shouldSkipFrame()) {
+		m_fpsSkipAcc++;
+	}
+	else {
+		m_fpsFrameAcc++;
 	}
 
-	m_prev = cur.QuadPart;
+	int64_t target = m_base + m_countPerFrame * (m_skipCount + 1);
+	int64_t cur = getTimeCounter();
+	if (cur < target || m_base == 0 || m_skipCount > MaxSkipCount) {
+		// OK, wait for next frame
+		while (cur < target && m_base != 0 && m_skipCount <= MaxSkipCount) {
+			cur = getTimeCounter();
+			::Sleep(1);
+		}
+		m_base = cur;
+		m_skipCount = 0;
+	}
+	else {
+		// too late, skip the next frame
+		m_skipCount++;
+	}
+
+	m_fpsCount++;
+	if (m_fpsCount >= m_fpsPeriod) {
+		double sec = static_cast<double>(cur - m_fpsBase) / m_freq;
+		debug::writef(L"fps=%.2f (%d)", m_fpsFrameAcc / sec, m_fpsSkipAcc);
+		m_fpsCount = 0;
+		m_fpsFrameAcc = 0;
+		m_fpsSkipAcc = 0;
+		m_fpsBase = cur;
+	}
 }
 
 Application::Application(const InitParam &param) :
@@ -279,9 +313,14 @@ int Application::run()
 		}
 		else {
 			// TODO
-			//debug::StopWatch test(L"Present()");
-			m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
-			m_pSwapChain->Present(1, 0);
+			// 30fps by frame skip test
+			// update() = 0 ms
+			// render() > 16.67 ms
+			if (!m_frameCtrl.shouldSkipFrame()) {
+				::Sleep(17);
+				m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
+				m_pSwapChain->Present(1, 0);
+			}
 			m_frameCtrl.endFrame();
 		}
 	}

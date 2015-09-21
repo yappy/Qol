@@ -32,8 +32,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		using namespace yappy::debug;
 
 		enableDebugOutput();
+#ifdef _DEBUG
 		enableConsoleOutput();
 		enableFileOutput(L"log.txt");
+#endif
 
 		writeLine(L"Start application");
 		writeLine(L"‚É‚Ù‚ñ‚²");
