@@ -303,6 +303,31 @@ LRESULT Application::onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
+void Application::onIdle()
+{
+	updateInternal();
+	if (!m_frameCtrl.shouldSkipFrame()) {
+		renderInternal();
+	}
+	m_frameCtrl.endFrame();
+}
+
+void Application::updateInternal()
+{
+	// TEST
+	// update() = 0 ms
+}
+
+void Application::renderInternal()
+{
+	// TEST
+	// 30fps by frame skip test
+	// render() > 16.67 ms
+	::Sleep(17);
+	m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
+	m_pSwapChain->Present(1, 0);
+}
+
 int Application::run()
 {
 	MSG msg = { 0 };
@@ -312,16 +337,7 @@ int Application::run()
 			::DispatchMessage(&msg);
 		}
 		else {
-			// TODO
-			// 30fps by frame skip test
-			// update() = 0 ms
-			// render() > 16.67 ms
-			if (!m_frameCtrl.shouldSkipFrame()) {
-				::Sleep(17);
-				m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
-				m_pSwapChain->Present(1, 0);
-			}
-			m_frameCtrl.endFrame();
+			onIdle();
 		}
 	}
 	return static_cast<int>(msg.wParam);

@@ -79,6 +79,9 @@ private:
 	void initializeWindow(const InitParam &param);
 	static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	void onIdle();
+	void updateInternal();
+	void renderInternal();
 
 	void initializeD3D(const InitParam &param);
 	void initBackBuffer();
