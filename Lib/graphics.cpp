@@ -126,6 +126,9 @@ void Application::initializeWindow(const InitParam &param)
 		nullptr, nullptr, param.hInstance, this);
 	checkWin32Result(hWnd != nullptr, "CreateWindow() failed");
 	m_hWnd.reset(hWnd);
+
+	// for frame processing while window drugging etc.
+	::SetTimer(m_hWnd.get(), TIMER_EVENT_ID, 1, nullptr);
 }
 
 void Application::initializeD3D(const InitParam &param)
@@ -272,6 +275,9 @@ LRESULT CALLBACK Application::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 	Application *self = reinterpret_cast<Application *>(user);
 
 	switch (msg) {
+	case WM_TIMER:
+		self->onIdle();
+		return 0;
 	case WM_SIZE:
 		return self->onSize(hWnd, msg, wParam, lParam);
 	case WM_CLOSE:
