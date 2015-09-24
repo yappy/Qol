@@ -144,7 +144,7 @@ void Application::initializeWindow(const InitParam &param)
 	m_hWnd.reset(hWnd);
 
 	// for frame processing while window drugging etc.
-	::SetTimer(m_hWnd.get(), TIMER_EVENT_ID, 1, nullptr);
+	::SetTimer(m_hWnd.get(), TimerEventId, 1, nullptr);
 }
 
 void Application::initializeD3D(const InitParam &param)

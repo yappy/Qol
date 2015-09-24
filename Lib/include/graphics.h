@@ -65,7 +65,7 @@ public:
 protected:
 
 private:
-	const UINT_PTR TIMER_EVENT_ID = 0xffff0001;
+	const UINT_PTR TimerEventId = 0xffff0001;
 	const DXGI_FORMAT BufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	const DXGI_SWAP_CHAIN_FLAG SwapChainFlag = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	const float ClearColor[4] = { 0.9f, 0.9f, 0.9f, 1.0f };
