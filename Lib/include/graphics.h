@@ -69,6 +69,8 @@ private:
 	const DXGI_FORMAT BufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	const DXGI_SWAP_CHAIN_FLAG SwapChainFlag = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	const float ClearColor[4] = { 0.9f, 0.9f, 0.9f, 1.0f };
+	const wchar_t * const VS_FileName = L"@VertexShader.cso";
+	const wchar_t * const PS_FileName = L"@PixelShader.cso";
 
 	using HWndPtr = std::unique_ptr<HWND, hwndDeleter>;
 	HWndPtr m_hWnd;

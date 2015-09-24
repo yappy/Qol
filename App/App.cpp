@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "App.h"
 #include <debug.h>
+#include <file.h>
 #include <graphics.h>
 #include <input.h>
 #include <array>
@@ -50,6 +51,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 		writef(large);
 	}
+
+	yappy::file::initWithFileSystem(L".");
 
 	int result = 0;
 	{

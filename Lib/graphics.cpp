@@ -2,6 +2,7 @@
 #include "include/graphics.h"
 #include "include/debug.h"
 #include "include/exceptions.h"
+#include "include/file.h"
 #include <array>
 
 #pragma comment(lib, "d3d11.lib")
@@ -214,6 +215,20 @@ void Application::initializeD3D(const InitParam &param)
 	}
 
 	initBackBuffer();
+
+	// Load shader
+	{
+		file::Bytes bin = file::loadFile(VS_FileName);
+		ID3D11VertexShader *ptmpVS;
+		hr = m_pDevice->CreateVertexShader(bin.data(), bin.size(), nullptr, &ptmpVS);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateVertexShader() failed");
+	}
+	{
+		file::Bytes bin = file::loadFile(PS_FileName);
+		ID3D11PixelShader *ptmpPS;
+		hr = m_pDevice->CreatePixelShader(bin.data(), bin.size(), nullptr, &ptmpPS);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreatePixelShader() failed");
+	}
 
 	// fullscreen initially
 	/*
