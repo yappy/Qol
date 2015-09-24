@@ -24,6 +24,14 @@ http://www.ouma.jp/ootake/delay-win7vista-j.html (there is mistake)
   SetMaximumFrameLatency(0) will reset latency default.
 
 
+*** TODO (to remember) ***
+- hIcon
+- hide cursor
+- supress screen saver etc.
+- DwmEnableComposition() ?
+- should use enum-ed display_mode
+
+
 *** TODO list ***
 - debug
 -- print

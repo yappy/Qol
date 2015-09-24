@@ -23,7 +23,8 @@ public:
 	~FrameControl() = default;
 	bool shouldSkipFrame();
 	void endFrame();
-	double getFps();
+	double getFramePerSec();
+	int getSkipPerSec();
 
 private:
 	const double Scale = 0.95;
@@ -34,6 +35,8 @@ private:
 	int64_t m_base;
 	uint32_t m_skipCount;
 
+	double m_fps = 0.0;
+	int m_sps = 0;
 	int m_fpsPeriod;
 	int m_fpsCount = 0;
 	int64_t m_fpsBase = 0;

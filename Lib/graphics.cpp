@@ -39,7 +39,6 @@ FrameControl::FrameControl(int64_t fpsNumer, int64_t fpsDenom) :
 	//               = m_freq / (fpsNumer / fpsDenom)
 	//               = m_freq * fpsDenom / fpsNumer
 	m_countPerFrame = m_freq * fpsDenom / fpsNumer;
-	//m_countPerFrame = static_cast<int64_t>(m_countPerFrame * 1.05);
 }
 
 bool FrameControl::shouldSkipFrame()
@@ -58,6 +57,9 @@ void FrameControl::endFrame()
 
 	int64_t target = m_base + m_countPerFrame * (m_skipCount + 1);
 	int64_t cur = getTimeCounter();
+	// cur < target					OK
+	// m_base == 0					the first frame, force OK
+	// m_skipCount > MaxSkipCount	force OK
 	if (cur < target || m_base == 0 || m_skipCount > MaxSkipCount) {
 		// OK, wait for next frame
 		while (cur < target && m_base != 0 && m_skipCount <= MaxSkipCount) {
@@ -75,12 +77,26 @@ void FrameControl::endFrame()
 	m_fpsCount++;
 	if (m_fpsCount >= m_fpsPeriod) {
 		double sec = static_cast<double>(cur - m_fpsBase) / m_freq;
-		debug::writef(L"fps=%.2f (%d)", m_fpsFrameAcc / sec, m_fpsSkipAcc);
+		m_fps = m_fpsFrameAcc / sec;
+		m_sps = m_fpsSkipAcc;
+
 		m_fpsCount = 0;
 		m_fpsFrameAcc = 0;
 		m_fpsSkipAcc = 0;
 		m_fpsBase = cur;
+
+		debug::writef(L"fps=%.2f (%d)", getFramePerSec(), getSkipPerSec());
 	}
+}
+
+double FrameControl::getFramePerSec()
+{
+	return m_fps;
+}
+
+int FrameControl::getSkipPerSec()
+{
+	return m_sps;
 }
 
 Application::Application(const InitParam &param) :
