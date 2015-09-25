@@ -431,6 +431,11 @@ void Application::renderInternal()
 	// render() > 16.67 ms
 	::Sleep(17);
 	m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
+
+	m_pContext->VSSetShader(m_pVertexShader.get(), nullptr, 0);
+	m_pContext->PSSetShader(m_pPixelShader.get(), nullptr, 0);
+	m_pContext->Draw(3, 0);
+
 	m_pSwapChain->Present(1, 0);
 }
 
