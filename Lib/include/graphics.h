@@ -81,6 +81,8 @@ private:
 	util::IUnknownPtr<ID3D11DeviceContext>		m_pContext;
 	util::IUnknownPtr<IDXGISwapChain>			m_pSwapChain;
 	util::IUnknownPtr<ID3D11RenderTargetView>	m_pRenderTargetView;
+	util::IUnknownPtr<ID3D11VertexShader>		m_pVertexShader;
+	util::IUnknownPtr<ID3D11PixelShader>		m_pPixelShader;
 
 	void initializeWindow(const InitParam &param);
 	static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

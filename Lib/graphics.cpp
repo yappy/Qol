@@ -3,6 +3,7 @@
 #include "include/debug.h"
 #include "include/exceptions.h"
 #include "include/file.h"
+#include <xnamath.h>
 #include <array>
 
 #pragma comment(lib, "d3d11.lib")
@@ -13,6 +14,10 @@ namespace graphics {
 using error::checkWin32Result;
 using error::D3DError;
 using error::checkDXResult;
+
+///////////////////////////////////////////////////////////////////////////////
+// class FrameControl impl
+///////////////////////////////////////////////////////////////////////////////
 
 namespace {
 
@@ -100,13 +105,28 @@ int FrameControl::getSkipPerSec()
 	return m_sps;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// class Application impl
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+struct SpriteVertex
+{
+	XMFLOAT3 Pos;
+};
+
+}
+
 Application::Application(const InitParam &param) :
 	m_initParam(param),
 	m_frameCtrl(param.refreshRateNumer, param.refreshRateDenom),
 	m_pDevice(nullptr, util::iunknownDeleter),
 	m_pContext(nullptr, util::iunknownDeleter),
 	m_pSwapChain(nullptr, util::iunknownDeleter),
-	m_pRenderTargetView(nullptr, util::iunknownDeleter)
+	m_pRenderTargetView(nullptr, util::iunknownDeleter),
+	m_pVertexShader(nullptr, util::iunknownDeleter),
+	m_pPixelShader(nullptr, util::iunknownDeleter)
 {
 	initializeWindow(param);
 	initializeD3D(param);
@@ -216,18 +236,20 @@ void Application::initializeD3D(const InitParam &param)
 
 	initBackBuffer();
 
-	// Load shader
+	// Shaders
 	{
 		file::Bytes bin = file::loadFile(VS_FileName);
 		ID3D11VertexShader *ptmpVS;
 		hr = m_pDevice->CreateVertexShader(bin.data(), bin.size(), nullptr, &ptmpVS);
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreateVertexShader() failed");
+		m_pVertexShader.reset(ptmpVS);
 	}
 	{
 		file::Bytes bin = file::loadFile(PS_FileName);
 		ID3D11PixelShader *ptmpPS;
 		hr = m_pDevice->CreatePixelShader(bin.data(), bin.size(), nullptr, &ptmpPS);
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreatePixelShader() failed");
+		m_pPixelShader.reset(ptmpPS);
 	}
 
 	// fullscreen initially
