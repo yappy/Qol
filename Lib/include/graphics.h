@@ -83,6 +83,7 @@ private:
 	util::IUnknownPtr<ID3D11RenderTargetView>	m_pRenderTargetView;
 	util::IUnknownPtr<ID3D11VertexShader>		m_pVertexShader;
 	util::IUnknownPtr<ID3D11PixelShader>		m_pPixelShader;
+	util::IUnknownPtr<ID3D11InputLayout>		m_pInputLayout;
 
 	void initializeWindow(const InitParam &param);
 	static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

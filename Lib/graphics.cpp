@@ -129,7 +129,8 @@ Application::Application(const InitParam &param) :
 	m_pSwapChain(nullptr, util::iunknownDeleter),
 	m_pRenderTargetView(nullptr, util::iunknownDeleter),
 	m_pVertexShader(nullptr, util::iunknownDeleter),
-	m_pPixelShader(nullptr, util::iunknownDeleter)
+	m_pPixelShader(nullptr, util::iunknownDeleter),
+	m_pInputLayout(nullptr, util::iunknownDeleter)
 {
 	initializeWindow(param);
 	initializeD3D(param);
@@ -229,7 +230,7 @@ void Application::initializeD3D(const InitParam &param)
 
 	// MaximumFrameLatency
 	{
-		IDXGIDevice1 *ptmpDXGIDevice;
+		IDXGIDevice1 *ptmpDXGIDevice = nullptr;
 		hr = m_pDevice->QueryInterface(__uuidof(IDXGIDevice1), (void **)&ptmpDXGIDevice);
 		checkDXResult<D3DError>(hr, "QueryInterface(IDXGIDevice1) failed");
 		util::IUnknownPtr<IDXGIDevice1> pDXGIDevice(ptmpDXGIDevice, util::iunknownDeleter);
@@ -242,14 +243,26 @@ void Application::initializeD3D(const InitParam &param)
 	// Shaders
 	{
 		file::Bytes bin = file::loadFile(VS_FileName);
-		ID3D11VertexShader *ptmpVS;
+		ID3D11VertexShader *ptmpVS = nullptr;
 		hr = m_pDevice->CreateVertexShader(bin.data(), bin.size(), nullptr, &ptmpVS);
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreateVertexShader() failed");
 		m_pVertexShader.reset(ptmpVS);
+
+		// Create input layout
+		D3D11_INPUT_ELEMENT_DESC layout[] = {
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+		ID3D11InputLayout *ptmpInputLayout = nullptr;
+		hr = m_pDevice->CreateInputLayout(layout, _countof(layout), bin.data(),
+			bin.size(), &ptmpInputLayout);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateInputLayout() failed");
+		m_pInputLayout.reset(ptmpInputLayout);
+		// Set input layout
+		m_pContext->IASetInputLayout(m_pInputLayout.get());
 	}
 	{
 		file::Bytes bin = file::loadFile(PS_FileName);
-		ID3D11PixelShader *ptmpPS;
+		ID3D11PixelShader *ptmpPS = nullptr;
 		hr = m_pDevice->CreatePixelShader(bin.data(), bin.size(), nullptr, &ptmpPS);
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreatePixelShader() failed");
 		m_pPixelShader.reset(ptmpPS);
