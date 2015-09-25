@@ -3,8 +3,11 @@
 #include "include/debug.h"
 #include "include/exceptions.h"
 #include "include/file.h"
-#include <xnamath.h>
 #include <array>
+#pragma warning(push)
+#pragma warning(disable: 4838)
+#include <xnamath.h>
+#pragma warning(pop)
 
 #pragma comment(lib, "d3d11.lib")
 
