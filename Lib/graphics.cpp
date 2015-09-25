@@ -130,7 +130,8 @@ Application::Application(const InitParam &param) :
 	m_pRenderTargetView(nullptr, util::iunknownDeleter),
 	m_pVertexShader(nullptr, util::iunknownDeleter),
 	m_pPixelShader(nullptr, util::iunknownDeleter),
-	m_pInputLayout(nullptr, util::iunknownDeleter)
+	m_pInputLayout(nullptr, util::iunknownDeleter),
+	m_pVertexBuffer(nullptr, util::iunknownDeleter)
 {
 	initializeWindow(param);
 	initializeD3D(param);
@@ -240,7 +241,7 @@ void Application::initializeD3D(const InitParam &param)
 
 	initBackBuffer();
 
-	// Shaders
+	// Vertex Shader
 	{
 		file::Bytes bin = file::loadFile(VS_FileName);
 		ID3D11VertexShader *ptmpVS = nullptr;
@@ -260,12 +261,42 @@ void Application::initializeD3D(const InitParam &param)
 		// Set input layout
 		m_pContext->IASetInputLayout(m_pInputLayout.get());
 	}
+	// Pixel Shader
 	{
 		file::Bytes bin = file::loadFile(PS_FileName);
 		ID3D11PixelShader *ptmpPS = nullptr;
 		hr = m_pDevice->CreatePixelShader(bin.data(), bin.size(), nullptr, &ptmpPS);
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreatePixelShader() failed");
 		m_pPixelShader.reset(ptmpPS);
+	}
+
+	// Create vertex buffer
+	{
+		SpriteVertex vertices[] = {
+			XMFLOAT3(0.0f, 0.5f, 0.5f),
+			XMFLOAT3(0.5f, -0.5f, 0.5f),
+			XMFLOAT3(-0.5f, -0.5f, 0.5f),
+		};
+		D3D11_BUFFER_DESC bd = { 0 };
+		bd.Usage = D3D11_USAGE_DEFAULT;
+		bd.ByteWidth = sizeof(vertices);
+		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bd.CPUAccessFlags = 0;
+		D3D11_SUBRESOURCE_DATA initData = { 0 };
+		initData.pSysMem = vertices;
+		ID3D11Buffer *ptmpVertexBuffer = nullptr;
+		hr = m_pDevice->CreateBuffer(&bd, &initData, &ptmpVertexBuffer);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBuffer() failed");
+		m_pVertexBuffer.reset(ptmpVertexBuffer);
+
+		// Set vertex buffer
+		ID3D11Buffer *pVertexBuffer = m_pVertexBuffer.get();
+		UINT stride = sizeof(SpriteVertex);
+		UINT offset = 0;
+		m_pContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &stride, &offset);
+		// Set primitive topology
+		m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 	}
 
 	// fullscreen initially
