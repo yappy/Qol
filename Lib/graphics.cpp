@@ -4,12 +4,14 @@
 #include "include/exceptions.h"
 #include "include/file.h"
 #include <array>
+#include <d3dx11.h>
 #pragma warning(push)
 #pragma warning(disable: 4838)
 #include <xnamath.h>
 #pragma warning(pop)
 
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dx11.lib")
 
 namespace yappy {
 namespace graphics {
@@ -21,6 +23,7 @@ using error::checkDXResult;
 ///////////////////////////////////////////////////////////////////////////////
 // class FrameControl impl
 ///////////////////////////////////////////////////////////////////////////////
+#pragma region FrameControl
 
 namespace {
 
@@ -108,15 +111,19 @@ int FrameControl::getSkipPerSec()
 	return m_sps;
 }
 
+#pragma endregion
+
 ///////////////////////////////////////////////////////////////////////////////
 // class Application impl
 ///////////////////////////////////////////////////////////////////////////////
+#pragma region Application
 
 namespace {
 
 struct SpriteVertex
 {
 	XMFLOAT3 Pos;
+	XMFLOAT2 Tex;
 };
 
 }
@@ -252,6 +259,7 @@ void Application::initializeD3D(const InitParam &param)
 		// Create input layout
 		D3D11_INPUT_ELEMENT_DESC layout[] = {
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 		ID3D11InputLayout *ptmpInputLayout = nullptr;
 		hr = m_pDevice->CreateInputLayout(layout, _countof(layout), bin.data(),
@@ -273,9 +281,10 @@ void Application::initializeD3D(const InitParam &param)
 	// Create vertex buffer
 	{
 		SpriteVertex vertices[] = {
-			XMFLOAT3(0.0f, 0.5f, 0.5f),
-			XMFLOAT3(0.5f, -0.5f, 0.5f),
-			XMFLOAT3(-0.5f, -0.5f, 0.5f),
+			{ XMFLOAT3(-0.5f,  0.5f, 0.0f) , XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3( 0.5f,  0.5f, 0.0f) , XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(-0.5f, -0.5f, 0.0f) , XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3( 0.5f, -0.5f, 0.0f) , XMFLOAT2(1.0f, 1.0f) },
 		};
 		D3D11_BUFFER_DESC bd = { 0 };
 		bd.Usage = D3D11_USAGE_DEFAULT;
@@ -295,8 +304,36 @@ void Application::initializeD3D(const InitParam &param)
 		UINT offset = 0;
 		m_pContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &stride, &offset);
 		// Set primitive topology
-		m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	}
 
+	// Create sample state
+	{
+		D3D11_SAMPLER_DESC sampDesc;
+		::ZeroMemory(&sampDesc, sizeof(sampDesc));
+		sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sampDesc.MinLOD = 0;
+		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+		ID3D11SamplerState *ptmpSamplerState = nullptr;
+		hr = m_pDevice->CreateSamplerState(&sampDesc, &ptmpSamplerState);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateSamplerState() failed");
+
+		m_pContext->PSSetSamplers(0, 1, &ptmpSamplerState);
+	}
+	// Load texture test
+	{
+		file::Bytes bin = file::loadFile(L"../sampledata/circle.png");
+
+		ID3D11ShaderResourceView *ptmpRV;
+		hr = ::D3DX11CreateShaderResourceViewFromMemory(m_pDevice.get(), bin.data(), bin.size(),
+			nullptr, nullptr, &ptmpRV, nullptr);
+		checkDXResult<D3DError>(hr, "D3DX11CreateShaderResourceViewFromMemory() failed");
+
+		m_pContext->PSSetShaderResources(0, 1, &ptmpRV);
 	}
 
 	// fullscreen initially
@@ -434,7 +471,7 @@ void Application::renderInternal()
 
 	m_pContext->VSSetShader(m_pVertexShader.get(), nullptr, 0);
 	m_pContext->PSSetShader(m_pPixelShader.get(), nullptr, 0);
-	m_pContext->Draw(3, 0);
+	m_pContext->Draw(4, 0);
 
 	m_pSwapChain->Present(1, 0);
 }
@@ -453,6 +490,8 @@ int Application::run()
 	}
 	return static_cast<int>(msg.wParam);
 }
+
+#pragma endregion
 
 }
 }
