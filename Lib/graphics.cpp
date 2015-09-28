@@ -146,6 +146,9 @@ Application::Application(const InitParam &param) :
 	initializeD3D(param);
 	::ShowWindow(m_hWnd.get(), param.nCmdShow);
 	::UpdateWindow(m_hWnd.get());
+
+	// TODO: test
+	loadTexture("testtex", L"../sampledata/circle.png");
 }
 
 void Application::initializeWindow(const InitParam &param)
@@ -345,19 +348,6 @@ void Application::initializeD3D(const InitParam &param)
 		m_pBlendState.reset(ptmpBlendState);
 	}
 
-	// Load texture test
-	// TODO: leak
-	{
-		file::Bytes bin = file::loadFile(L"../sampledata/circle.png");
-
-		ID3D11ShaderResourceView *ptmpRV;
-		hr = ::D3DX11CreateShaderResourceViewFromMemory(m_pDevice.get(), bin.data(), bin.size(),
-			nullptr, nullptr, &ptmpRV, nullptr);
-		checkDXResult<D3DError>(hr, "D3DX11CreateShaderResourceViewFromMemory() failed");
-
-		m_pContext->PSSetShaderResources(0, 1, &ptmpRV);
-	}
-
 	// fullscreen initially
 	/*
 	DXGI_ERROR_NOT_CURRENTLY_AVAILABLE (quote from dx11 document)
@@ -479,12 +469,13 @@ void Application::onIdle()
 
 void Application::updateInternal()
 {
-	// TEST
-	// update() = 0 ms
+	// this->update();
 }
 
 void Application::renderInternal()
 {
+	// this->render();
+
 	// TEST
 	// 30fps by frame skip test
 	// render() > 16.67 ms
@@ -515,6 +506,27 @@ int Application::run()
 		}
 	}
 	return static_cast<int>(msg.wParam);
+}
+
+void Application::loadTexture(const char *id, const wchar_t *path)
+{
+	if (m_texMap.find(id) != m_texMap.end()) {
+		throw std::runtime_error("id already exists");
+	}
+
+	file::Bytes bin = file::loadFile(path);
+
+	HRESULT hr = S_OK;
+	ID3D11ShaderResourceView *ptmpRV;
+	hr = ::D3DX11CreateShaderResourceViewFromMemory(m_pDevice.get(), bin.data(), bin.size(),
+		nullptr, nullptr, &ptmpRV, nullptr);
+	checkDXResult<D3DError>(hr, "D3DX11CreateShaderResourceViewFromMemory() failed");
+
+	m_texMap.emplace(std::piecewise_construct,
+		std::forward_as_tuple(id),
+		std::forward_as_tuple(Texture::ResPtr(ptmpRV, util::iunknownDeleter)));
+	// TODO:
+	//m_pContext->PSSetShaderResources(0, 1, &ptmpRV);
 }
 
 #pragma endregion

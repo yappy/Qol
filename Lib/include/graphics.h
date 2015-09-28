@@ -5,6 +5,7 @@
 #pragma warning(disable: 4005)
 #include <d3d11.h>
 #include <memory>
+#include <unordered_map>
 
 namespace yappy {
 namespace graphics {
@@ -44,6 +45,25 @@ private:
 	int m_fpsSkipAcc = 0;
 };
 
+struct Texture : private util::noncopyable {
+	using ResPtr = util::IUnknownSharedPtr<ID3D11ShaderResourceView>;
+	ResPtr pRV;
+
+	explicit Texture(ResPtr pRV_) :
+		pRV(pRV_)
+	{}
+	~Texture() = default;
+};
+
+struct DrawTask : private util::noncopyable {
+	util::IUnknownSharedPtr<ID3D11ShaderResourceView> pRV;
+
+	explicit DrawTask(decltype(pRV) pRV_) :
+		pRV(pRV_)
+	{}
+	~DrawTask() = default;
+};
+
 struct InitParam {
 	HINSTANCE hInstance = nullptr;
 	int nCmdShow = SW_SHOW;
@@ -61,6 +81,9 @@ public:
 	Application(const InitParam &param);
 	virtual ~Application();
 	int run();
+
+	void loadTexture(const char *id, const wchar_t *path);
+	void drawTexture(const char *id, int x, int y, bool lrMirror = false);
 
 protected:
 
@@ -88,15 +111,17 @@ private:
 	util::IUnknownPtr<ID3D11SamplerState>		m_pSamplerState;
 	util::IUnknownPtr<ID3D11BlendState>			m_pBlendState;
 
+	std::unordered_map<std::string, Texture> m_texMap;
+
 	void initializeWindow(const InitParam &param);
 	static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	void initializeD3D(const InitParam &param);
+	void initBackBuffer();
+
 	void onIdle();
 	void updateInternal();
 	void renderInternal();
-
-	void initializeD3D(const InitParam &param);
-	void initBackBuffer();
 };
 
 }

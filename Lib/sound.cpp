@@ -113,6 +113,7 @@ XAudio2::~XAudio2() {}
 
 void XAudio2::loadSoundEffect(const char *id, const wchar_t *path)
 {
+	// TODO: on error for scripting
 	// m_selib[id] <- SoundEffect()
 	auto res = m_seMap.emplace(std::piecewise_construct,
 		std::forward_as_tuple(id), std::forward_as_tuple());
