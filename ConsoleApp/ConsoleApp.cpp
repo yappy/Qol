@@ -23,7 +23,7 @@ int main()
 		yappy::network::initialize();
 		yappy::network::finalize();
 
-		yappy::input::DInput di(nullptr);
+		yappy::input::DInput di(::GetModuleHandle(nullptr), nullptr);
 
 		::LoadLibrary(L"notfound.dll");
 		DWORD code = ::GetLastError();

@@ -77,7 +77,7 @@ void write(const wchar_t *str, bool newline) noexcept
 	if (s_consoleOut) {
 		HANDLE hOut = ::GetStdHandle(STD_OUTPUT_HANDLE);
 		DWORD len = static_cast<DWORD>(wcslen(str));
-		DWORD written;
+		DWORD written = 0;
 		::WriteConsole(hOut, str, len, &written, NULL);
 		if (newline) {
 			::WriteConsole(hOut, L"\n", 1, &written, NULL);
@@ -89,7 +89,7 @@ void write(const wchar_t *str, bool newline) noexcept
 		if (newline) {
 			mbstr += "\n";
 		}
-		DWORD written;
+		DWORD written = 0;
 		::WriteFile(s_hFile, mbstr.c_str(), static_cast<DWORD>(mbstr.size()), &written, NULL);
 		::FlushFileBuffers(s_hFile);
 	}
