@@ -19,12 +19,12 @@ namespace {
 
 void loadWaveFile(SoundEffect *out, const wchar_t *path)
 {
-	file::Bytes data = file::loadFile(path);
+	file::Bytes bin = file::loadFile(path);
 
 	MMIOINFO mmioInfo = { 0 };
-	mmioInfo.pchBuffer = reinterpret_cast<HPSTR>(&data[0]);
+	mmioInfo.pchBuffer = reinterpret_cast<HPSTR>(bin.data());
 	mmioInfo.fccIOProc = FOURCC_MEM;
-	mmioInfo.cchBuffer = static_cast<LONG>(data.size());
+	mmioInfo.cchBuffer = static_cast<LONG>(bin.size());
 
 	HMMIO tmpHMmio = mmioOpen(0, &mmioInfo, MMIO_READ);
 	if (tmpHMmio == nullptr) {
@@ -33,7 +33,7 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 	std::unique_ptr<HMMIO, hmmioDeleter> hMmio(tmpHMmio);
 
 	// enter "WAVE"
-	MMRESULT mmRes;
+	MMRESULT mmRes = MMSYSERR_NOERROR;
 	MMCKINFO riffChunk = { 0 };
 	riffChunk.fccType = mmioFOURCC('W', 'A', 'V', 'E');
 	mmRes = mmioDescend(hMmio.get(), &riffChunk, nullptr, MMIO_FINDRIFF);
@@ -71,7 +71,7 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 		throw MmioError("data size too large", 0);
 	}
 	out->samples.resize(dataChunk.cksize);
-	size = mmioRead(hMmio.get(), reinterpret_cast<HPSTR>(&out->samples[0]), dataChunk.cksize);
+	size = mmioRead(hMmio.get(), reinterpret_cast<HPSTR>(out->samples.data()), dataChunk.cksize);
 	if (size != dataChunk.cksize) {
 		throw MmioError("mmioRead() failed", size);
 	}
@@ -86,9 +86,9 @@ XAudio2::XAudio2() :
 	m_pBgmBuffer(new char[BgmBufferSize * BgmBufferCount]),
 	m_pBgmFile(nullptr, oggFileDeleter)
 {
-	HRESULT hr;
+	HRESULT hr = S_OK;
 
-	IXAudio2 *ptmpIXAudio2;
+	IXAudio2 *ptmpIXAudio2 = nullptr;
 	UINT32 flags = 0;
 #ifdef _DEBUG
 	flags = XAUDIO2_DEBUG_ENGINE;
@@ -97,7 +97,7 @@ XAudio2::XAudio2() :
 	checkDXResult<XAudioError>(hr, "XAudio2Create() failed");
 	m_pIXAudio.reset(ptmpIXAudio2);
 
-	IXAudio2MasteringVoice *ptmpMasterVoice;
+	IXAudio2MasteringVoice *ptmpMasterVoice = nullptr;
 	hr = m_pIXAudio->CreateMasteringVoice(&ptmpMasterVoice);
 	checkDXResult<XAudioError>(hr, "IXAudio2::CreateMasteringVoice() failed");
 	m_pMasterVoice.reset(ptmpMasterVoice);
@@ -105,7 +105,7 @@ XAudio2::XAudio2() :
 	// m_playingSeList[SoundEffectPlayMax] filled by nullptr
 	m_playingSeList.reserve(SoundEffectPlayMax);
 	for (uint32_t i = 0; i < SoundEffectPlayMax; i++) {
-		m_playingSeList.emplace_back(SourceVoicePtr(nullptr, voiceDeleter));
+		m_playingSeList.emplace_back(nullptr, voiceDeleter);
 	}
 }
 
@@ -150,35 +150,34 @@ void XAudio2::playSoundEffect(const char *id)
 	XAUDIO2_BUFFER buffer = { 0 };
 	ASSERT(se.samples.size() <= file::FileSizeMax);
 	buffer.AudioBytes = static_cast<UINT32>(se.samples.size());
-	buffer.pAudioData = &se.samples[0];
+	buffer.pAudioData = se.samples.data();
 	buffer.Flags = XAUDIO2_END_OF_STREAM;
 
 	// create source voice
-	HRESULT hr;
-	IXAudio2SourceVoice *ptmpSrcVoice;
+	HRESULT hr = S_OK;
+	IXAudio2SourceVoice *ptmpSrcVoice = nullptr;
 	hr = m_pIXAudio->CreateSourceVoice(&ptmpSrcVoice, &se.format);
 	checkDXResult<XAudioError>(hr, "IXAudio2::CreateSourceVoice() failed");
+	SourceVoicePtr pSrcVoice(ptmpSrcVoice, voiceDeleter);
 
 	// submit source buffer
-	std::unique_ptr<IXAudio2SourceVoice, VoiceDeleterType>
-		pSrcVoice(ptmpSrcVoice, voiceDeleter);
 	hr = pSrcVoice->SubmitSourceBuffer(&buffer);
 	checkDXResult<XAudioError>(hr, "IXAudio2SourceVoice::SubmitSourceBuffer() failed");
 	hr = pSrcVoice->Start();
 	checkDXResult<XAudioError>(hr, "IXAudio2SourceVoice::Start() failed");
 
-	// set source voice element
+	// set the source voice element
 	*ppEntry = std::move(pSrcVoice);
 }
 
-bool XAudio2::isPlayingAny() const noexcept
+bool XAudio2::isPlayingAnySoundEffect() const noexcept
 {
 	for (const auto &pSrcVoice : m_playingSeList) {
 		if (pSrcVoice == nullptr) {
 			continue;
 		}
 		// check if playing is end
-		XAUDIO2_VOICE_STATE state;
+		XAUDIO2_VOICE_STATE state = { 0 };
 		pSrcVoice->GetState(&state);
 		if (state.BuffersQueued != 0) {
 			return false;
@@ -201,7 +200,7 @@ XAudio2::SourceVoicePtr *XAudio2::findFreeSeEntry() noexcept
 			return &p;
 		}
 		// check if playing is end
-		XAUDIO2_VOICE_STATE state;
+		XAUDIO2_VOICE_STATE state = { 0 };
 		p->GetState(&state);
 		if (state.BuffersQueued == 0) {
 			// DestroyVoice(), set nullptr, return
