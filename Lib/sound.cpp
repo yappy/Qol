@@ -214,8 +214,8 @@ XAudio2::SourceVoicePtr *XAudio2::findFreeSeEntry() noexcept
 
 void XAudio2::playBgm(const wchar_t *path)
 {
-	int ret;
-	HRESULT hr;
+	int ret = 0;
+	HRESULT hr = S_OK;
 
 	debug::writef(L"playBgm: %s", path);
 
@@ -225,7 +225,7 @@ void XAudio2::playBgm(const wchar_t *path)
 	m_readPos = 0;
 
 	// ovfile open
-	static OggVorbis_File fp;
+	static OggVorbis_File fp = { 0 };
 	ov_callbacks callbacks = { read, seek, close, tell };
 	ret = ::ov_open_callbacks(this, &fp, nullptr, 0, callbacks);
 	if (ret != 0) {
@@ -238,7 +238,6 @@ void XAudio2::playBgm(const wchar_t *path)
 		throw OggVorbisError("ov_info() failed", 0);
 	}
 	debug::writef(L"ov_info: channels=%d, rate=%ld", info->channels, info->rate);
-	debug::writef(L"seekable?: %ld", ::ov_seekable(m_pBgmFile.get()));
 	// WAVEFORMAT from ovinfo
 	WAVEFORMATEX format = { 0 };
 	format.wFormatTag = WAVE_FORMAT_PCM;
@@ -250,7 +249,7 @@ void XAudio2::playBgm(const wchar_t *path)
 	format.cbSize = 0;
 
 	// create source voice using WAVEFORMAT
-	IXAudio2SourceVoice *ptmpSrcVoice;
+	IXAudio2SourceVoice *ptmpSrcVoice = nullptr;
 	hr = m_pIXAudio->CreateSourceVoice(&ptmpSrcVoice, &format);
 	checkDXResult<XAudioError>(hr, "IXAudio2::CreateSourceVoice() failed");
 	m_pBgmVoice.reset(ptmpSrcVoice);
@@ -266,15 +265,17 @@ void XAudio2::stopBgm() noexcept
 	// DestroyVoice(), set nullptr
 	m_pBgmVoice.reset();
 	m_pBgmFile.reset();
+
+	debug::writeLine(L"stopBgm OK");
 }
 
 void XAudio2::processFrame()
 {
-	HRESULT hr;
+	HRESULT hr = S_OK;
 	if (m_pBgmVoice == nullptr) {
 		return;
 	}
-	XAUDIO2_VOICE_STATE state;
+	XAUDIO2_VOICE_STATE state = { 0 };
 	m_pBgmVoice->GetState(&state);
 	if (state.BuffersQueued >= BgmBufferCount) {
 		debug::writeLine(L"not yet!");
