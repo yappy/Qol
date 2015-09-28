@@ -138,7 +138,9 @@ Application::Application(const InitParam &param) :
 	m_pVertexShader(nullptr, util::iunknownDeleter),
 	m_pPixelShader(nullptr, util::iunknownDeleter),
 	m_pInputLayout(nullptr, util::iunknownDeleter),
-	m_pVertexBuffer(nullptr, util::iunknownDeleter)
+	m_pVertexBuffer(nullptr, util::iunknownDeleter),
+	m_pSamplerState(nullptr, util::iunknownDeleter),
+	m_pBlendState(nullptr, util::iunknownDeleter)
 {
 	initializeWindow(param);
 	initializeD3D(param);
@@ -321,12 +323,10 @@ void Application::initializeD3D(const InitParam &param)
 		ID3D11SamplerState *ptmpSamplerState = nullptr;
 		hr = m_pDevice->CreateSamplerState(&sampDesc, &ptmpSamplerState);
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreateSamplerState() failed");
-
-		m_pContext->PSSetSamplers(0, 1, &ptmpSamplerState);
+		m_pSamplerState.reset(ptmpSamplerState);
 	}
 	// Create blend state
 	{
-		ID3D11BlendState* ptmpBlendState = nullptr;
 		D3D11_BLEND_DESC blendDesc;
 		::ZeroMemory(&blendDesc, sizeof(blendDesc));
 		blendDesc.AlphaToCoverageEnable = FALSE;
@@ -339,13 +339,14 @@ void Application::initializeD3D(const InitParam &param)
 		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
 		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-		float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-		m_pDevice->CreateBlendState(&blendDesc, &ptmpBlendState);
-		m_pContext->OMSetBlendState(ptmpBlendState, blendFactor, 0xffffffff);
+		ID3D11BlendState* ptmpBlendState = nullptr;
+		hr = m_pDevice->CreateBlendState(&blendDesc, &ptmpBlendState);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBlendState() failed");
+		m_pBlendState.reset(ptmpBlendState);
 	}
 
 	// Load texture test
+	// TODO: leak
 	{
 		file::Bytes bin = file::loadFile(L"../sampledata/circle.png");
 
@@ -492,6 +493,10 @@ void Application::renderInternal()
 
 	m_pContext->VSSetShader(m_pVertexShader.get(), nullptr, 0);
 	m_pContext->PSSetShader(m_pPixelShader.get(), nullptr, 0);
+	ID3D11SamplerState *pSamplerState = m_pSamplerState.get();
+	m_pContext->PSSetSamplers(0, 1, &pSamplerState);
+	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	m_pContext->OMSetBlendState(m_pBlendState.get(), blendFactor, 0xffffffff);
 	m_pContext->Draw(4, 0);
 
 	m_pSwapChain->Present(1, 0);
