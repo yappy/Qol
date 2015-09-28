@@ -25,14 +25,13 @@ struct handleDeleter {
 		}
 	}
 };
-
+using HandlePtr = std::unique_ptr<HANDLE, handleDeleter>;
 
 inline void iunknownDeleter(IUnknown *iu)
 {
 	iu->Release();
 }
 typedef decltype(&iunknownDeleter) IUnknownDeleterType;
-
 template<class T>
 using IUnknownPtr = std::unique_ptr<T, IUnknownDeleterType>;
 

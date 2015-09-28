@@ -49,25 +49,25 @@ Bytes FsFileLoader::loadFile(const wchar_t *fileName)
 		path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
 		FILE_ATTRIBUTE_NORMAL, nullptr);
 	error::checkWin32Result(tmphFile != INVALID_HANDLE_VALUE, "CreateFile() failed");
-	std::unique_ptr<HANDLE, util::handleDeleter> hFile(tmphFile);
+	util::HandlePtr hFile(tmphFile);
 
-	BOOL b;
-	// get size for avoiding realloc
-	LARGE_INTEGER fileSize;
+	BOOL b = FALSE;
+	// get size to avoid realloc
+	LARGE_INTEGER fileSize = { 0 };
 	b = ::GetFileSizeEx(hFile.get(), &fileSize);
 	error::checkWin32Result(b != 0, "GetFileSizeEx() failed");
 	// 2GiB check
 	error::checkWin32Result(fileSize.HighPart == 0, "File size is too large");
 	error::checkWin32Result(fileSize.LowPart < 0x80000000, "File size is too large");
 	// read
-	Bytes data(fileSize.LowPart);
-	DWORD readSize;
-	b = ::ReadFile(hFile.get(), &data[0], fileSize.LowPart, &readSize, nullptr);
+	Bytes bin(fileSize.LowPart);
+	DWORD readSize = 0;
+	b = ::ReadFile(hFile.get(), bin.data(), fileSize.LowPart, &readSize, nullptr);
 	error::checkWin32Result(b != 0, "ReadFile() failed");
 	error::checkWin32Result(fileSize.LowPart == readSize, "Read size is strange");
 
 	// move return
-	return data;
+	return bin;
 }
 
 // variables
