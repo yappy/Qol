@@ -27,6 +27,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+	hInst = hInstance;
+
     // TODO: Place code here.
 	{
 		using namespace yappy::debug;
@@ -146,7 +148,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
 	case WM_CREATE:
 	{
-		g_di = new yappy::input::DInput(hWnd);
+		g_di = new yappy::input::DInput(hInst, hWnd);
 		SetTimer(hWnd, 1, 16, nullptr);
 		break;
 	}

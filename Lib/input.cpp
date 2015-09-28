@@ -12,41 +12,39 @@ namespace input {
 using error::checkDXResult;
 using error::DIError;
 
-DInput::DInput(HWND hwnd, bool foreground, bool exclusive) :
+DInput::DInput(HINSTANCE hInst, HWND hWnd, bool foreground, bool exclusive) :
 	m_pDi(nullptr, util::iunknownDeleter),
 	m_pKeyDevice(nullptr, util::iunknownDeleter)
 {
 	debug::writeLine(L"Initializing DirectInput...");
 
+	HRESULT hr = S_OK;
+
 	// Initialize DirectInput
-	IDirectInput8 *pdi;
-	HINSTANCE hInst = ::GetModuleHandle(nullptr);
-	checkDXResult<DIError>(
-		::DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8,
-			reinterpret_cast<void **>(&pdi), NULL),
-		"DirectInput8Create() failed");
-	m_pDi.reset(pdi);
+	IDirectInput8 *ptmpDi;
+	hr = ::DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8,
+		reinterpret_cast<void **>(&ptmpDi), NULL);
+	checkDXResult<DIError>(hr, "DirectInput8Create() failed");
+	m_pDi.reset(ptmpDi);
 
 	// Key Device
 	debug::writeLine(L"Get Keyboard...");
-	IDirectInputDevice8 *pKeyDevice;
-	checkDXResult<DIError>(
-		m_pDi->CreateDevice(GUID_SysKeyboard, &pKeyDevice, NULL),
-		"IDirectInput8::CreateDevice() failed");
-	m_pKeyDevice.reset(pKeyDevice);
-	checkDXResult<DIError>(
-		m_pKeyDevice->SetDataFormat(&c_dfDIKeyboard),
-		"IDirectInputDevice8::SetDataFormat() failed");
+	IDirectInputDevice8 *ptmpKeyDevice;
+	hr = m_pDi->CreateDevice(GUID_SysKeyboard, &ptmpKeyDevice, NULL);
+	checkDXResult<DIError>(hr, "IDirectInput8::CreateDevice() failed");
+	m_pKeyDevice.reset(ptmpKeyDevice);
+
+	hr = m_pKeyDevice->SetDataFormat(&c_dfDIKeyboard);
+	checkDXResult<DIError>(hr, "IDirectInputDevice8::SetDataFormat() failed");
 	DWORD coopLevel = DISCL_NOWINKEY;
 	coopLevel |= (foreground ? DISCL_FOREGROUND : DISCL_BACKGROUND);
 	coopLevel |= (exclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE);
-	checkDXResult<DIError>(
-		m_pKeyDevice->SetCooperativeLevel(hwnd, coopLevel),
-		"IDirectInputDevice8::SetCooperativeLevel() failed");
+	hr = m_pKeyDevice->SetCooperativeLevel(hWnd, coopLevel);
+	checkDXResult<DIError>(hr, "IDirectInputDevice8::SetCooperativeLevel() failed");
 	debug::writeLine(L"Get Keyboard OK");
 
 	// GamePad Device
-	updateControllers(hwnd, foreground, exclusive);
+	updateControllers(hWnd, foreground, exclusive);
 
 	debug::writeLine(L"Initializing DirectInput OK");
 }
@@ -66,22 +64,21 @@ namespace {
 
 BOOL CALLBACK enumDevicesCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef)
 {
-	std::vector<DIDEVICEINSTANCE> *devs;
-	devs = reinterpret_cast<std::vector<DIDEVICEINSTANCE> *>(pvRef);
-	devs->push_back(*lpddi);
+	std::vector<DIDEVICEINSTANCE> *devs = reinterpret_cast<decltype(devs)>(pvRef);
+	devs->emplace_back(*lpddi);
 	return DIENUM_CONTINUE;
 }
 
 BOOL CALLBACK enumAxesCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef)
 {
-	DIPROPRANGE range;
+	DIPROPRANGE range = { 0 };
 	range.diph.dwSize = sizeof(range);
 	range.diph.dwHeaderSize = sizeof(range.diph);
 	range.diph.dwHow = DIPH_BYID;
 	range.diph.dwObj = lpddoi->dwType;
 	range.lMax = DInput::AXIS_RANGE;
 	range.lMin = -DInput::AXIS_RANGE;
-	IDirectInputDevice8 *pdev = (IDirectInputDevice8 *)pvRef;
+	IDirectInputDevice8 *pdev = reinterpret_cast<decltype(pdev)>(pvRef);
 	pdev->SetProperty(DIPROP_RANGE, &range.diph);
 	return DIENUM_CONTINUE;
 }
@@ -92,36 +89,34 @@ void DInput::updateControllers(HWND hwnd, bool foreground, bool exclusive)
 {
 	debug::writeLine(L"Get controllers...");
 
+	HRESULT hr = S_OK;
+
 	m_padInstList.clear();
 	m_pPadDevs.clear();
 
-	checkDXResult<DIError>(
-		m_pDi->EnumDevices(DI8DEVCLASS_GAMECTRL, enumDevicesCallback,
-			&m_padInstList, DIEDFL_ATTACHEDONLY),
-		"IDirectInput8::EnumDevices() failed");
+	hr = m_pDi->EnumDevices(DI8DEVCLASS_GAMECTRL, enumDevicesCallback,
+		&m_padInstList, DIEDFL_ATTACHEDONLY);
+	checkDXResult<DIError>(hr, "IDirectInput8::EnumDevices() failed");
 
 	for (const auto &padInst : m_padInstList) {
-		IDirectInputDevice8 *pTmp;
-		checkDXResult<DIError>(
-			m_pDi->CreateDevice(padInst.guidInstance, &pTmp, nullptr),
-			"IDirectInput8::CreateDevice() failed");
-		std::unique_ptr<IDirectInputDevice8, decltype(&util::iunknownDeleter)>
-			pDevice(pTmp, util::iunknownDeleter);
-		checkDXResult<DIError>(
-			pDevice->SetDataFormat(&c_dfDIJoystick),
-			"IDirectInputDevice8::SetDataFormat() failed");
+		IDirectInputDevice8 *ptmpDevice;
+		hr = m_pDi->CreateDevice(padInst.guidInstance, &ptmpDevice, nullptr);
+		checkDXResult<DIError>(hr, "IDirectInput8::CreateDevice() failed");
+		util::IUnknownPtr<IDirectInputDevice8> pDevice(ptmpDevice, util::iunknownDeleter);
+
+		hr = pDevice->SetDataFormat(&c_dfDIJoystick);
+		checkDXResult<DIError>(hr, "IDirectInputDevice8::SetDataFormat() failed");
 		DWORD coopLevel = 0;
 		coopLevel |= (foreground ? DISCL_FOREGROUND : DISCL_BACKGROUND);
 		coopLevel |= (exclusive ? DISCL_EXCLUSIVE : DISCL_NONEXCLUSIVE);
-		checkDXResult<DIError>(
-			pDevice->SetCooperativeLevel(hwnd, coopLevel),
-			"IDirectInputDevice8::SetCooperativeLevel() failed");
-		checkDXResult<DIError>(
-			pDevice->EnumObjects(enumAxesCallback, pDevice.get(), DIDFT_AXIS),
-			"IDirectInputDevice8::EnumObjects() failed");
-		m_pPadDevs.push_back(std::move(pDevice));
+		hr = pDevice->SetCooperativeLevel(hwnd, coopLevel);
+		checkDXResult<DIError>(hr, "IDirectInputDevice8::SetCooperativeLevel() failed");
+		hr = pDevice->EnumObjects(enumAxesCallback, pDevice.get(), DIDFT_AXIS);
+		checkDXResult<DIError>(hr, "IDirectInputDevice8::EnumObjects() failed");
+
+		m_pPadDevs.emplace_back(std::move(pDevice));
 		DIJOYSTATE js = { 0 };
-		m_pad.push_back(js);
+		m_pad.emplace_back(js);
 	}
 
 	{
@@ -132,13 +127,13 @@ void DInput::updateControllers(HWND hwnd, bool foreground, bool exclusive)
 			debug::writef(L"tszProductName  = %s", padInst.tszProductName);
 			i++;
 		}
-		debug::writef(L"%u controller(s) found", m_pPadDevs.size());
+		debug::writef(L"%zu controller(s) found", m_pPadDevs.size());
 	}
 }
 
 void DInput::processFrame()
 {
-	HRESULT hr;
+	HRESULT hr = S_OK;
 
 	// Keyboard
 	m_key.fill(0);
@@ -162,7 +157,7 @@ void DInput::processFrame()
 	// Pad
 	// TODO: think twice about error handling
 	// TODO: sudden disconnect?
-	for (unsigned i = 0; i < m_pPadDevs.size(); i++) {
+	for (size_t i = 0; i < m_pPadDevs.size(); i++) {
 		ZeroMemory(&m_pad[i], sizeof(m_pad[i]));
 		memset(m_pad[i].rgdwPOV, -1, sizeof(m_pad[i].rgdwPOV));
 
@@ -179,7 +174,7 @@ void DInput::processFrame()
 	}
 }
 
-std::array<bool, 256> DInput::getKeys() const noexcept
+DInput::KeyData DInput::getKeys() const noexcept
 {
 	return m_key;
 }

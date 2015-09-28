@@ -16,20 +16,22 @@ public:
 	static const int AXIS_RANGE = 1000;
 	static const int AXIS_THRESHOLD = AXIS_RANGE / 2;
 
-	DInput(HWND hwnd, bool foreground = true, bool exclusive = false);
+	using KeyData = std::array<bool, KEY_NUM>;
+
+	DInput(HINSTANCE hInst, HWND hWnd, bool foreground = true, bool exclusive = false);
 	~DInput();
 	void updateControllers(HWND hwnd, bool foreground = true, bool exclusive = false);
 	void processFrame();
-	std::array<bool, 256> getKeys() const noexcept;
+	KeyData getKeys() const noexcept;
 	int getPadCount() const noexcept;
 	void getPadState(DIJOYSTATE *out, int index) const noexcept;
 
 private:
-	std::unique_ptr<IDirectInput8, util::IUnknownDeleterType> m_pDi;
-	std::unique_ptr<IDirectInputDevice8, util::IUnknownDeleterType> m_pKeyDevice;
+	util::IUnknownPtr<IDirectInput8> m_pDi;
+	util::IUnknownPtr<IDirectInputDevice8> m_pKeyDevice;
 	std::vector<DIDEVICEINSTANCE> m_padInstList;
-	std::vector<std::unique_ptr<IDirectInputDevice8, util::IUnknownDeleterType>> m_pPadDevs;
-	std::array<bool, 256> m_key;
+	std::vector<util::IUnknownPtr<IDirectInputDevice8>> m_pPadDevs;
+	KeyData m_key;
 	std::vector<DIJOYSTATE> m_pad;
 };
 
