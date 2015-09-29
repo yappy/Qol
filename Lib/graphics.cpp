@@ -120,8 +120,7 @@ int FrameControl::getSkipPerSec()
 
 namespace {
 
-struct SpriteVertex
-{
+struct SpriteVertex {
 	XMFLOAT3 Pos;
 	XMFLOAT2 Tex;
 };
