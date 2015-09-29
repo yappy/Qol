@@ -142,6 +142,8 @@ Application::Application(const InitParam &param) :
 	m_pSamplerState(nullptr, util::iunknownDeleter),
 	m_pBlendState(nullptr, util::iunknownDeleter)
 {
+	m_drawTaskList.reserve(DrawListMax);
+
 	initializeWindow(param);
 	initializeD3D(param);
 	::ShowWindow(m_hWnd.get(), param.nCmdShow);
@@ -476,6 +478,13 @@ void Application::updateInternal()
 void Application::renderInternal()
 {
 	// this->render();
+	// TEST
+	static int test = 0;
+	if (test++ & 0x1) {
+		drawTexture("notpow2", 0, 0);
+	} else {
+		drawTexture("testtex", 0, 0);
+	}
 
 	// TEST
 	// 30fps by frame skip test
@@ -483,13 +492,21 @@ void Application::renderInternal()
 	::Sleep(17);
 	m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
 
+	// VS, PS, SamplerState, BlendState
 	m_pContext->VSSetShader(m_pVertexShader.get(), nullptr, 0);
 	m_pContext->PSSetShader(m_pPixelShader.get(), nullptr, 0);
 	ID3D11SamplerState *pSamplerState = m_pSamplerState.get();
 	m_pContext->PSSetSamplers(0, 1, &pSamplerState);
 	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	m_pContext->OMSetBlendState(m_pBlendState.get(), blendFactor, 0xffffffff);
-	m_pContext->Draw(4, 0);
+
+	// Draw and clear list
+	for (auto &task : m_drawTaskList) {
+		ID3D11ShaderResourceView *rv = task.texture->pRV.get();
+		m_pContext->PSSetShaderResources(0, 1, &rv);
+		m_pContext->Draw(4, 0);
+	}
+	m_drawTaskList.clear();
 
 	m_pSwapChain->Present(1, 0);
 }
@@ -536,16 +553,18 @@ void Application::loadTexture(const char *id, const wchar_t *path)
 	m_texMap.emplace(std::piecewise_construct,
 		std::forward_as_tuple(id),
 		std::forward_as_tuple(
-			Texture::ResPtr(ptmpRV, util::iunknownDeleter),
+			ptmpRV, util::iunknownDeleter,
 			imageInfo.Width, imageInfo.Height
 		));
-	// TODO:
-	//m_pContext->PSSetShaderResources(0, 1, &ptmpRV);
 }
 
-void drawTexture(const char *id, int x, int y, bool lrMirror)
+void Application::drawTexture(const char *id, int x, int y, bool lrMirror)
 {
-
+	auto res = m_texMap.find(id);
+	if (res == m_texMap.end()) {
+		throw std::runtime_error("id not found");
+	}
+	m_drawTaskList.emplace_back(&res->second);
 }
 
 #pragma endregion

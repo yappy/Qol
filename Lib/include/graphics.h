@@ -46,24 +46,25 @@ private:
 };
 
 struct Texture : private util::noncopyable {
-	using ResPtr = util::IUnknownSharedPtr<ID3D11ShaderResourceView>;
-	ResPtr pRV;
+	using RvPtr = util::IUnknownPtr<ID3D11ShaderResourceView>;
+	RvPtr pRV;
 	uint32_t w;
 	uint32_t h;
 
-	explicit Texture(ResPtr pRV_, uint32_t w_, uint32_t h_) :
-		pRV(pRV_), w(w_), h(h_)
+	Texture(RvPtr::pointer pRV_, RvPtr::deleter_type dRV_, uint32_t w_, uint32_t h_) :
+		pRV(pRV_, dRV_), w(w_), h(h_)
 	{}
 	~Texture() = default;
 };
 
-struct DrawTask : private util::noncopyable {
-	using ResPtr = util::IUnknownSharedPtr<ID3D11ShaderResourceView>;
-	ResPtr pRV;
+struct DrawTask {
+	Texture *texture;
 
-	explicit DrawTask(ResPtr pRV_) :
-		pRV(pRV_)
+	explicit DrawTask(Texture *texture_) :
+		texture(texture_)
 	{}
+	DrawTask(const DrawTask &) = default;
+	DrawTask &operator=(const DrawTask &) = default;
 	~DrawTask() = default;
 };
 
@@ -95,6 +96,7 @@ private:
 	const DXGI_FORMAT BufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	const DXGI_SWAP_CHAIN_FLAG SwapChainFlag = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	const float ClearColor[4] = { 0.9f, 0.9f, 0.9f, 1.0f };
+	const size_t DrawListMax = 1024;		// not strict limit
 	const wchar_t * const VS_FileName = L"@VertexShader.cso";
 	const wchar_t * const PS_FileName = L"@PixelShader.cso";
 
@@ -115,6 +117,7 @@ private:
 	util::IUnknownPtr<ID3D11BlendState>			m_pBlendState;
 
 	std::unordered_map<std::string, Texture> m_texMap;
+	std::vector<DrawTask> m_drawTaskList;
 
 	void initializeWindow(const InitParam &param);
 	static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
