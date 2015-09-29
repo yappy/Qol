@@ -152,6 +152,7 @@ Application::Application(const InitParam &param) :
 	m_pInputLayout(nullptr, util::iunknownDeleter),
 	m_pVertexBuffer(nullptr, util::iunknownDeleter),
 	m_pCBChanges(nullptr, util::iunknownDeleter),
+	m_pRasterizerState(nullptr, util::iunknownDeleter),
 	m_pSamplerState(nullptr, util::iunknownDeleter),
 	m_pBlendState(nullptr, util::iunknownDeleter)
 {
@@ -306,10 +307,10 @@ void Application::initializeD3D(const InitParam &param)
 	// Create vertex buffer
 	{
 		SpriteVertex vertices[] = {
-			{ XMFLOAT3(-0.5f,  0.5f, 0.0f) , XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3( 0.5f,  0.5f, 0.0f) , XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(-0.5f, -0.5f, 0.0f) , XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3( 0.5f, -0.5f, 0.0f) , XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(0.0f, 1.0f, 0.0f) , XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 0.0f) , XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(0.0f, 0.0f, 0.0f) , XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 0.0f, 0.0f) , XMFLOAT2(1.0f, 1.0f) },
 		};
 		D3D11_BUFFER_DESC bd = { 0 };
 		bd.Usage = D3D11_USAGE_DEFAULT;
@@ -344,6 +345,17 @@ void Application::initializeD3D(const InitParam &param)
 		m_pCBChanges.reset(ptmpCBChanges);
 	}
 
+	// Create rasterizer state
+	{
+		D3D11_RASTERIZER_DESC rasterDesc;
+		::ZeroMemory(&rasterDesc, sizeof(rasterDesc));
+		rasterDesc.FillMode = D3D11_FILL_SOLID;
+		rasterDesc.CullMode = D3D11_CULL_NONE;
+		ID3D11RasterizerState* ptmpRasterizerState = nullptr;
+		hr = m_pDevice->CreateRasterizerState(&rasterDesc, &ptmpRasterizerState);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBuffer() failed");
+		m_pRasterizerState.reset(ptmpRasterizerState);
+	}
 	// Create sample state
 	{
 		D3D11_SAMPLER_DESC sampDesc;
@@ -522,7 +534,8 @@ void Application::renderInternal()
 	m_pContext->PSSetShader(m_pPixelShader.get(), nullptr, 0);
 	ID3D11Buffer *pCB = m_pCBChanges.get();
 	m_pContext->VSSetConstantBuffers(1, 1, &pCB);
-	// SamplerState, BlendState
+	// RasterizerState, SamplerState, BlendState
+	m_pContext->RSSetState(m_pRasterizerState.get());
 	ID3D11SamplerState *pSamplerState = m_pSamplerState.get();
 	m_pContext->PSSetSamplers(0, 1, &pSamplerState);
 	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -535,7 +548,7 @@ void Application::renderInternal()
 	for (auto &task : m_drawTaskList) {
 		// Set constant buffer
 		CBChanges cbChanges;
-		cbChanges.Scale = XMMatrixIdentity();
+		cbChanges.Scale = XMMatrixScaling(static_cast<float>(task.texture->w), -static_cast<float>(task.texture->h), 1.0f);
 		cbChanges.Mirror = XMMatrixIdentity();
 		cbChanges.Translate = XMMatrixIdentity();
 		cbChanges.Projection = XMMatrixIdentity();
