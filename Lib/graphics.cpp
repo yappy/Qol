@@ -148,6 +148,7 @@ Application::Application(const InitParam &param) :
 	::UpdateWindow(m_hWnd.get());
 
 	// TODO: test
+	loadTexture("notpow2", L"../sampledata/test_400_300.png");
 	loadTexture("testtex", L"../sampledata/circle.png");
 }
 
@@ -517,16 +518,34 @@ void Application::loadTexture(const char *id, const wchar_t *path)
 	file::Bytes bin = file::loadFile(path);
 
 	HRESULT hr = S_OK;
-	ID3D11ShaderResourceView *ptmpRV;
+
+	D3DX11_IMAGE_INFO imageInfo = { 0 };
+	hr = ::D3DX11GetImageInfoFromMemory(bin.data(), bin.size(), nullptr,
+		&imageInfo, nullptr);
+	checkDXResult<D3DError>(hr, "D3DX11GetImageInfoFromMemory() failed");
+	if (imageInfo.ResourceDimension != D3D11_RESOURCE_DIMENSION_TEXTURE2D) {
+		throw std::runtime_error("Not 2D Texture");
+	}
+
+	ID3D11ShaderResourceView *ptmpRV = nullptr;
 	hr = ::D3DX11CreateShaderResourceViewFromMemory(m_pDevice.get(), bin.data(), bin.size(),
 		nullptr, nullptr, &ptmpRV, nullptr);
 	checkDXResult<D3DError>(hr, "D3DX11CreateShaderResourceViewFromMemory() failed");
 
+	// add (id, texture(...))
 	m_texMap.emplace(std::piecewise_construct,
 		std::forward_as_tuple(id),
-		std::forward_as_tuple(Texture::ResPtr(ptmpRV, util::iunknownDeleter)));
+		std::forward_as_tuple(
+			Texture::ResPtr(ptmpRV, util::iunknownDeleter),
+			imageInfo.Width, imageInfo.Height
+		));
 	// TODO:
 	//m_pContext->PSSetShaderResources(0, 1, &ptmpRV);
+}
+
+void drawTexture(const char *id, int x, int y, bool lrMirror)
+{
+
 }
 
 #pragma endregion

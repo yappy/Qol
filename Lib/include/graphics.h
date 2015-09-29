@@ -48,17 +48,20 @@ private:
 struct Texture : private util::noncopyable {
 	using ResPtr = util::IUnknownSharedPtr<ID3D11ShaderResourceView>;
 	ResPtr pRV;
+	uint32_t w;
+	uint32_t h;
 
-	explicit Texture(ResPtr pRV_) :
-		pRV(pRV_)
+	explicit Texture(ResPtr pRV_, uint32_t w_, uint32_t h_) :
+		pRV(pRV_), w(w_), h(h_)
 	{}
 	~Texture() = default;
 };
 
 struct DrawTask : private util::noncopyable {
-	util::IUnknownSharedPtr<ID3D11ShaderResourceView> pRV;
+	using ResPtr = util::IUnknownSharedPtr<ID3D11ShaderResourceView>;
+	ResPtr pRV;
 
-	explicit DrawTask(decltype(pRV) pRV_) :
+	explicit DrawTask(ResPtr pRV_) :
 		pRV(pRV_)
 	{}
 	~DrawTask() = default;
