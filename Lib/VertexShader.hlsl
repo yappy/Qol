@@ -52,8 +52,13 @@ VS_OUTPUT main( VS_INPUT input )
 
 	// TODO: rotate
 
+	matrix test = {
+		2.0f / 1024 , 0.0f, 0.0f, 0.0f,
+		0.0f, -2.0f / 768 , 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f, 1.0f };
 	// (0,0)->(winw,winh) => (-1,-1)->(1,1)
-	output.Pos = mul(output.Pos, Projection);
+	output.Pos = mul(output.Pos, /*test*/Projection);
 
 	///////////////////////////////////////
 	// (u, v)

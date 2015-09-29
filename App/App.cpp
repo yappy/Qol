@@ -50,6 +50,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			large[i] = digit[i & 0xf];
 		}
 		writef(large);
+
+		wchar_t dir[MAX_PATH];
+		::GetCurrentDirectory(MAX_PATH, dir);
+		writef(L"Current dir: %s", dir);
 	}
 
 	yappy::file::initWithFileSystem(L".");

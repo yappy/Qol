@@ -9,4 +9,5 @@ SamplerState gSample : register(s0);
 float4 main( VS_OUTPUT input ) : SV_TARGET
 {
 	return gTexture.Sample(gSample, input.Tex);
+	//return float4(1,0,0,1);
 }

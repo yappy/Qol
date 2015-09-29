@@ -307,10 +307,10 @@ void Application::initializeD3D(const InitParam &param)
 	// Create vertex buffer
 	{
 		SpriteVertex vertices[] = {
-			{ XMFLOAT3(0.0f, 1.0f, 0.0f) , XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, 1.0f, 0.0f) , XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(0.0f, 0.0f, 0.0f) , XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(1.0f, 0.0f, 0.0f) , XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(0.0f, 1.0f, 0.0f) , XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 0.0f) , XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(0.0f, 0.0f, 0.0f) , XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 0.0f, 0.0f) , XMFLOAT2(1.0f, 0.0f) },
 		};
 		D3D11_BUFFER_DESC bd = { 0 };
 		bd.Usage = D3D11_USAGE_DEFAULT;
@@ -520,8 +520,8 @@ void Application::renderInternal()
 {
 	// this->render();
 	// TEST
-	drawTexture("notpow2", 0, 0);
-	//	drawTexture("testtex", 0, 0);
+	//drawTexture("notpow2", 0, 0);
+	drawTexture("testtex", 0, 0);
 
 	// TEST
 	// 30fps by frame skip test
@@ -548,13 +548,27 @@ void Application::renderInternal()
 	for (auto &task : m_drawTaskList) {
 		// Set constant buffer
 		CBChanges cbChanges;
-		cbChanges.Scale = XMMatrixScaling(static_cast<float>(task.texture->w), -static_cast<float>(task.texture->h), 1.0f);
+		cbChanges.Scale = XMMatrixIdentity();
+		cbChanges.Scale = XMMatrixScaling(static_cast<float>(task.texture->w), static_cast<float>(task.texture->h), 1.0f);
 		cbChanges.Mirror = XMMatrixIdentity();
 		cbChanges.Translate = XMMatrixIdentity();
 		cbChanges.Projection = XMMatrixIdentity();
+		cbChanges.Projection._14 = -1.0f;
+		cbChanges.Projection._24 = 1.0f;
+		cbChanges.Projection._11 = 2.0f / m_initParam.w;
+		cbChanges.Projection._22 = -2.0f / m_initParam.h;
 		cbChanges.uvOffset = XMFLOAT2(0.5f / 64 * test, 0.5f / 64 * test);
 		cbChanges.uvSize = XMFLOAT2(0.5f, 0.5f);
 		m_pContext->UpdateSubresource(m_pCBChanges.get(), 0, nullptr, &cbChanges, 0, 0);
+
+		XMVECTORF32 fdata1 = { 0, 0,0,1 };
+		XMVECTORF32 fdata2 = { 0, 768,0,1 };
+		XMVECTORF32 fdata3 = { 1024, 0,0,1 };
+		XMVECTORF32 fdata4 = { 1024, 768,0,1 };
+		XMVECTOR result1 = XMVector3TransformCoord(fdata1, cbChanges.Projection);
+		XMVECTOR result2 = XMVector3TransformCoord(fdata2, cbChanges.Projection);
+		XMVECTOR result3 = XMVector3TransformCoord(fdata3, cbChanges.Projection);
+		XMVECTOR result4 = XMVector3TransformCoord(fdata4, cbChanges.Projection);
 
 		ID3D11ShaderResourceView *rv = task.texture->pRV.get();
 		m_pContext->PSSetShaderResources(0, 1, &rv);
