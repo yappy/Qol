@@ -113,6 +113,7 @@ private:
 	util::IUnknownPtr<ID3D11PixelShader>		m_pPixelShader;
 	util::IUnknownPtr<ID3D11InputLayout>		m_pInputLayout;
 	util::IUnknownPtr<ID3D11Buffer>				m_pVertexBuffer;
+	util::IUnknownPtr<ID3D11Buffer>				m_pCBChanges;
 	util::IUnknownPtr<ID3D11SamplerState>		m_pSamplerState;
 	util::IUnknownPtr<ID3D11BlendState>			m_pBlendState;
 

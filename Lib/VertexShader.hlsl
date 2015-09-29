@@ -60,7 +60,7 @@ VS_OUTPUT main( VS_INPUT input )
 	///////////////////////////////////////
 
 	// (0.0f, 1.0f) => (offset, offset+size)
-	output.Tex = uvOffset + uvSize * output.Tex;
+	output.Tex = uvOffset + uvSize * input.Tex;
 
 	return output;
 }

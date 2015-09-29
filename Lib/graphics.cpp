@@ -125,6 +125,19 @@ struct SpriteVertex {
 	XMFLOAT2 Tex;
 };
 
+struct CBNeverChanges {
+	uint32_t dummy;
+};
+
+struct CBChanges {
+	XMMATRIX	Scale;
+	XMMATRIX	Mirror;
+	XMMATRIX	Translate;
+	XMMATRIX	Projection;
+	XMFLOAT2	uvOffset;
+	XMFLOAT2	uvSize;
+};
+
 }
 
 Application::Application(const InitParam &param) :
@@ -138,6 +151,7 @@ Application::Application(const InitParam &param) :
 	m_pPixelShader(nullptr, util::iunknownDeleter),
 	m_pInputLayout(nullptr, util::iunknownDeleter),
 	m_pVertexBuffer(nullptr, util::iunknownDeleter),
+	m_pCBChanges(nullptr, util::iunknownDeleter),
 	m_pSamplerState(nullptr, util::iunknownDeleter),
 	m_pBlendState(nullptr, util::iunknownDeleter)
 {
@@ -190,6 +204,10 @@ void Application::initializeWindow(const InitParam &param)
 void Application::initializeD3D(const InitParam &param)
 {
 	HRESULT hr = S_OK;
+
+	if (!::XMVerifyCPUSupport()) {
+		throw D3DError("XMVerifyCPUSupport() failed", 0);
+	}
 
 	// Create device etc.
 	{
@@ -312,6 +330,18 @@ void Application::initializeD3D(const InitParam &param)
 		m_pContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &stride, &offset);
 		// Set primitive topology
 		m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	}
+	// Create constant buffer
+	{
+		D3D11_BUFFER_DESC bd = { 0 };
+		bd.Usage = D3D11_USAGE_DEFAULT;
+		bd.ByteWidth = sizeof(CBChanges);
+		bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		bd.CPUAccessFlags = 0;
+		ID3D11Buffer *ptmpCBChanges = nullptr;
+		hr = m_pDevice->CreateBuffer(&bd, nullptr, &ptmpCBChanges);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBuffer() failed");
+		m_pCBChanges.reset(ptmpCBChanges);
 	}
 
 	// Create sample state
@@ -478,12 +508,8 @@ void Application::renderInternal()
 {
 	// this->render();
 	// TEST
-	static int test = 0;
-	if (test++ & 0x1) {
-		drawTexture("notpow2", 0, 0);
-	} else {
-		drawTexture("testtex", 0, 0);
-	}
+	drawTexture("notpow2", 0, 0);
+	//	drawTexture("testtex", 0, 0);
 
 	// TEST
 	// 30fps by frame skip test
@@ -491,18 +517,35 @@ void Application::renderInternal()
 	::Sleep(17);
 	m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
 
-	// VS, PS, SamplerState, BlendState
+	// VS, PS, constant buffer
 	m_pContext->VSSetShader(m_pVertexShader.get(), nullptr, 0);
 	m_pContext->PSSetShader(m_pPixelShader.get(), nullptr, 0);
+	ID3D11Buffer *pCB = m_pCBChanges.get();
+	m_pContext->VSSetConstantBuffers(1, 1, &pCB);
+	// SamplerState, BlendState
 	ID3D11SamplerState *pSamplerState = m_pSamplerState.get();
 	m_pContext->PSSetSamplers(0, 1, &pSamplerState);
 	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	m_pContext->OMSetBlendState(m_pBlendState.get(), blendFactor, 0xffffffff);
 
+	static int test = 0;
+	test = (test + 1) % 64;
+
 	// Draw and clear list
 	for (auto &task : m_drawTaskList) {
+		// Set constant buffer
+		CBChanges cbChanges;
+		cbChanges.Scale = XMMatrixIdentity();
+		cbChanges.Mirror = XMMatrixIdentity();
+		cbChanges.Translate = XMMatrixIdentity();
+		cbChanges.Projection = XMMatrixIdentity();
+		cbChanges.uvOffset = XMFLOAT2(0.5f / 64 * test, 0.5f / 64 * test);
+		cbChanges.uvSize = XMFLOAT2(0.5f, 0.5f);
+		m_pContext->UpdateSubresource(m_pCBChanges.get(), 0, nullptr, &cbChanges, 0, 0);
+
 		ID3D11ShaderResourceView *rv = task.texture->pRV.get();
 		m_pContext->PSSetShaderResources(0, 1, &rv);
+
 		m_pContext->Draw(4, 0);
 	}
 	m_drawTaskList.clear();
