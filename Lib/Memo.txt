@@ -36,7 +36,8 @@ http://www.ouma.jp/ootake/delay-win7vista-j.html (there is mistake)
 void drawTexture(const char *id,
 	int dx, int dy, bool lrInv, bool udInv,
 	int sx, int sy, int sw, int sh,
-	int cx, int cy, float scaleX, float scaleY, float angle);
+	int cx, int cy, float scaleX, float scaleY, float angle,
+	float alpha);
 
 - (0, 0) (1, 1)		単位正方形
 -- lrInv ? MatrixReflect(ax+by+cz+d=0, x=0.5) : I

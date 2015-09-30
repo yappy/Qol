@@ -126,16 +126,21 @@ struct SpriteVertex {
 };
 
 struct CBNeverChanges {
-	uint32_t dummy;
+	XMMATRIX	Projection;
 };
 
 struct CBChanges {
-	XMMATRIX	Scale;
-	XMMATRIX	Mirror;
+	XMMATRIX	lrInv;
+	XMMATRIX	udInv;
+	XMMATRIX	DestScale;
+	XMMATRIX	Centering;
+	XMMATRIX	ScaleX;
+	XMMATRIX	ScaleY;
+	XMMATRIX	Rotation;
 	XMMATRIX	Translate;
-	XMMATRIX	Projection;
 	XMFLOAT2	uvOffset;
 	XMFLOAT2	uvSize;
+	float		Alpha;
 };
 
 }
@@ -151,6 +156,7 @@ Application::Application(const InitParam &param) :
 	m_pPixelShader(nullptr, util::iunknownDeleter),
 	m_pInputLayout(nullptr, util::iunknownDeleter),
 	m_pVertexBuffer(nullptr, util::iunknownDeleter),
+	m_pCBNeverChanges(nullptr, util::iunknownDeleter),
 	m_pCBChanges(nullptr, util::iunknownDeleter),
 	m_pRasterizerState(nullptr, util::iunknownDeleter),
 	m_pSamplerState(nullptr, util::iunknownDeleter),
@@ -333,6 +339,25 @@ void Application::initializeD3D(const InitParam &param)
 		m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	}
 	// Create constant buffer
+	{
+		CBNeverChanges buffer;
+		buffer.Projection = XMMatrixIdentity();
+		buffer.Projection._14 = -1.0f;
+		buffer.Projection._24 = 1.0f;
+		buffer.Projection._11 = 2.0f / m_initParam.w;
+		buffer.Projection._22 = -2.0f / m_initParam.h;
+		D3D11_BUFFER_DESC bd = { 0 };
+		bd.Usage = D3D11_USAGE_DEFAULT;
+		bd.ByteWidth = sizeof(CBNeverChanges);
+		bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		bd.CPUAccessFlags = 0;
+		D3D11_SUBRESOURCE_DATA initData = { 0 };
+		initData.pSysMem = &buffer;
+		ID3D11Buffer *ptmpCBNeverChanges = nullptr;
+		hr = m_pDevice->CreateBuffer(&bd, nullptr, &ptmpCBNeverChanges);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBuffer() failed");
+		m_pCBNeverChanges.reset(ptmpCBNeverChanges);
+	}
 	{
 		D3D11_BUFFER_DESC bd = { 0 };
 		bd.Usage = D3D11_USAGE_DEFAULT;
@@ -548,16 +573,19 @@ void Application::renderInternal()
 	for (auto &task : m_drawTaskList) {
 		// Set constant buffer
 		CBChanges cbChanges;
-		cbChanges.Scale = XMMatrixScaling(static_cast<float>(task.texture->w), static_cast<float>(task.texture->h), 1.0f);
-		cbChanges.Mirror = XMMatrixIdentity();
+		cbChanges.lrInv = XMMatrixIdentity();
+		cbChanges.udInv = XMMatrixIdentity();
+		cbChanges.DestScale = XMMatrixScaling(
+			static_cast<float>(task.texture->w),
+			static_cast<float>(task.texture->h), 1.0f);
+		cbChanges.Centering = XMMatrixIdentity();
+		cbChanges.ScaleX = XMMatrixIdentity();
+		cbChanges.ScaleY = XMMatrixIdentity();
+		cbChanges.Rotation = XMMatrixIdentity();
 		cbChanges.Translate = XMMatrixIdentity();
-		cbChanges.Projection = XMMatrixIdentity();
-		cbChanges.Projection._14 = -1.0f;
-		cbChanges.Projection._24 = 1.0f;
-		cbChanges.Projection._11 = 2.0f / m_initParam.w;
-		cbChanges.Projection._22 = -2.0f / m_initParam.h;
 		cbChanges.uvOffset = XMFLOAT2(0.5f / 64 * test, 0.5f / 64 * test);
 		cbChanges.uvSize = XMFLOAT2(0.5f, 0.5f);
+		cbChanges.Alpha = 1.0f;
 		m_pContext->UpdateSubresource(m_pCBChanges.get(), 0, nullptr, &cbChanges, 0, 0);
 
 		ID3D11ShaderResourceView *rv = task.texture->pRV.get();

@@ -1,24 +1,22 @@
 #include "Shader.hlsli"
 
 cbuffer cbNeverChanges : register( b0 ) {
-	uint dummy;
+	float4x4	Projection;
 };
 
 cbuffer cbChanges : register( b1 ) {
-	float4x4	Scale;
-	float4x4	Mirror;
-	float4x4	Translate;
-	/*
+	float4x4	lrInv;
+	float4x4	udInv;
+	float4x4	DestScale;
 	float4x4	Centering;
-	float4x4	Rotate;
-	float4x4	Restore;
-	*/
-	float4x4	Projection;
+	float4x4	ScaleX;
+	float4x4	ScaleY;
+	float4x4	Rotation;
+	float4x4	Translate;
+	/* float4x4	Projection; */
 	float2		uvOffset;
 	float2		uvSize;
-	/*
-	float		alpha;
-	*/
+	float		Alpha;
 };
 
 
@@ -33,17 +31,27 @@ VS_OUTPUT main( VS_INPUT input )
 	// (in.x, in.y, in.z, 1.0f)
 	output.Pos = float4(input.Pos, 1.0f);
 
-	// (0,0)->(1,1) => (0,0)->(w,h)
-	output.Pos = mul(output.Pos, Scale);
+	// LR, UD invert if needed
+	output.Pos = mul(output.Pos, lrInv);
+	output.Pos = mul(output.Pos, udInv);
 
-	// LR reflect if needed
-	output.Pos = mul(output.Pos, Mirror);
+	// (0,0)->(1,1) => (0,0)->(dw,dh)
+	output.Pos = mul(output.Pos, DestScale);
 
-	// (0,0) => (x,y)
+	// Move (cx,cy) in DestBox to (0,0)
+	output.Pos = mul(output.Pos, Centering);
+
+	// Scaling
+	output.Pos = mul(output.Pos, ScaleX);
+	output.Pos = mul(output.Pos, ScaleY);
+
+	// Rotation
+	output.Pos = mul(output.Pos, Rotation);
+
+	// Move (cx,cy) to destination (dx,dy)
 	output.Pos = mul(output.Pos, Translate);
 
-	// TODO: rotate
-
+	// Projection
 	// (0,0)->(winw,winh) => (-1,-1)->(1,1)
 	output.Pos = mul(output.Pos, Projection);
 
@@ -53,6 +61,11 @@ VS_OUTPUT main( VS_INPUT input )
 
 	// (0.0f, 1.0f) => (offset, offset+size)
 	output.Tex = uvOffset + uvSize * input.Tex;
+
+	///////////////////////////////////////
+	// Alpha
+	///////////////////////////////////////
+	output.Alpha = Alpha;
 
 	return output;
 }
