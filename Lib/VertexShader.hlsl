@@ -9,8 +9,7 @@ cbuffer cbChanges : register( b1 ) {
 	float4x4	udInv;
 	float4x4	DestScale;
 	float4x4	Centering;
-	float4x4	ScaleX;
-	float4x4	ScaleY;
+	float4x4	Scale;
 	float4x4	Rotation;
 	float4x4	Translate;
 	/* float4x4	Projection; */
@@ -42,8 +41,7 @@ VS_OUTPUT main( VS_INPUT input )
 	output.Pos = mul(output.Pos, Centering);
 
 	// Scaling
-	output.Pos = mul(output.Pos, ScaleX);
-	output.Pos = mul(output.Pos, ScaleY);
+	output.Pos = mul(output.Pos, Scale);
 
 	// Rotation
 	output.Pos = mul(output.Pos, Rotation);

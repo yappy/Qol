@@ -134,14 +134,39 @@ struct CBChanges {
 	XMMATRIX	udInv;
 	XMMATRIX	DestScale;
 	XMMATRIX	Centering;
-	XMMATRIX	ScaleX;
-	XMMATRIX	ScaleY;
+	XMMATRIX	Scale;
 	XMMATRIX	Rotation;
 	XMMATRIX	Translate;
 	XMFLOAT2	uvOffset;
 	XMFLOAT2	uvSize;
 	float		Alpha;
 };
+
+inline void createCBFromTask(CBChanges *out, const DrawTask &task)
+{
+	// ax + by + cz + d = 0
+	// x = 0.5
+	XMVECTORF32 xMirror = { 1.0f, 0.0f, 0.0f, -0.5f };
+	// y = 0.5
+	XMVECTORF32 yMirror = { 0.0f, 1.0f, 0.0f, -0.5f };
+	out->lrInv = task.lrInv ? XMMatrixReflect(xMirror) : XMMatrixIdentity();
+	out->udInv = task.udInv ? XMMatrixReflect(yMirror) : XMMatrixIdentity();
+	out->DestScale = XMMatrixScaling(
+		static_cast<float>(task.sw), static_cast<float>(task.sh), 1.0f);
+	out->Centering = XMMatrixTranslation(
+		-static_cast<float>(task.cx), -static_cast<float>(task.cy), 0.0f);
+	out->Scale = XMMatrixScaling(task.scaleX, task.scaleY, 1.0f);
+	out->Rotation = XMMatrixRotationZ(task.angle);
+	out->Translate = XMMatrixTranslation(
+		static_cast<float>(task.dx), static_cast<float>(task.dy), 1.0f);
+	out->uvOffset = XMFLOAT2(
+		static_cast<float>(task.sx) / task.texture->w,
+		static_cast<float>(task.sy) / task.texture->h);
+	out->uvSize = XMFLOAT2(
+		static_cast<float>(task.sw) / task.texture->w,
+		static_cast<float>(task.sh) / task.texture->h);
+	out->Alpha = task.alpha;
+}
 
 }
 
@@ -341,6 +366,7 @@ void Application::initializeD3D(const InitParam &param)
 	// Create constant buffer
 	{
 		CBNeverChanges buffer;
+		// Projection matrix: Screen coord -> (-1, -1) .. (1, 1)
 		buffer.Projection = XMMatrixIdentity();
 		buffer.Projection._14 = -1.0f;
 		buffer.Projection._24 = 1.0f;
@@ -545,8 +571,8 @@ void Application::renderInternal()
 {
 	// this->render();
 	// TEST
-	//drawTexture("notpow2", 0, 0, false, false, 0, 0, 400, 300, 0, 0, 1.0f, 1.0f, 0.0f);
-	drawTexture("testtex", 0, 0, false, false, 0, 0, 400, 300, 0, 0, 1.0f, 1.0f, 0.0f);
+	drawTexture("notpow2", 0, 0, false, false, 0, 0, 400, 300, 0, 0, 1.0f, 1.0f, 0.0f, 0.5f);
+	//drawTexture("testtex", 0, 0, false, false, 0, 0, 256, 256, 0, 0, 1.0f, 1.0f, 0.0f, 0.5f);
 
 	// TEST
 	// 30fps by frame skip test
@@ -566,26 +592,11 @@ void Application::renderInternal()
 	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	m_pContext->OMSetBlendState(m_pBlendState.get(), blendFactor, 0xffffffff);
 
-	static int test = 0;
-	test = (test + 1) % 64;
-
 	// Draw and clear list
 	for (auto &task : m_drawTaskList) {
 		// Set constant buffer
 		CBChanges cbChanges;
-		cbChanges.lrInv = XMMatrixIdentity();
-		cbChanges.udInv = XMMatrixIdentity();
-		cbChanges.DestScale = XMMatrixScaling(
-			static_cast<float>(task.texture->w),
-			static_cast<float>(task.texture->h), 1.0f);
-		cbChanges.Centering = XMMatrixIdentity();
-		cbChanges.ScaleX = XMMatrixIdentity();
-		cbChanges.ScaleY = XMMatrixIdentity();
-		cbChanges.Rotation = XMMatrixIdentity();
-		cbChanges.Translate = XMMatrixIdentity();
-		cbChanges.uvOffset = XMFLOAT2(0.5f / 64 * test, 0.5f / 64 * test);
-		cbChanges.uvSize = XMFLOAT2(0.5f, 0.5f);
-		cbChanges.Alpha = 1.0f;
+		createCBFromTask(&cbChanges, task);
 		m_pContext->UpdateSubresource(m_pCBChanges.get(), 0, nullptr, &cbChanges, 0, 0);
 
 		ID3D11ShaderResourceView *rv = task.texture->pRV.get();
@@ -648,7 +659,8 @@ void Application::loadTexture(const char *id, const wchar_t *path)
 void Application::drawTexture(const char *id,
 	int dx, int dy, bool lrInv, bool udInv,
 	int sx, int sy, int sw, int sh,
-	int cx, int cy, float scaleX, float scaleY, float angle)
+	int cx, int cy, float scaleX, float scaleY, float angle,
+	float alpha)
 {
 	auto res = m_texMap.find(id);
 	if (res == m_texMap.end()) {
@@ -656,7 +668,7 @@ void Application::drawTexture(const char *id,
 	}
 	m_drawTaskList.emplace_back(&res->second,
 		dx, dy, lrInv, udInv, sx, sy, sw, sh,
-		cx, cy, scaleX, scaleY, angle);
+		cx, cy, scaleX, scaleY, angle, alpha);
 }
 
 #pragma endregion

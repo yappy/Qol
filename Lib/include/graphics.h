@@ -65,15 +65,18 @@ struct DrawTask {
 	int cx, cy;
 	float scaleX, scaleY;
 	float angle;
+	float alpha;
 
 	explicit DrawTask(Texture *texture_,
 		int dx_, int dy_, bool lrInv_, bool udInv_,
 		int sx_, int sy_, int sw_, int sh_,
-		int cx_, int cy_, float scaleX_, float scaleY_, float angle_) :
+		int cx_, int cy_, float scaleX_, float scaleY_, float angle_,
+		float alpha_) :
 		texture(texture_),
 		dx(dx_), dy(dy_), lrInv(lrInv_), udInv(udInv_),
 		sx(sx_), sy(sy_), sw(sw_), sh(sh_),
-		cx(cx_), cy(cy_), scaleX(scaleX_), scaleY(scaleY_), angle(angle_)
+		cx(cx_), cy(cy_), scaleX(scaleX_), scaleY(scaleY_), angle(angle_),
+		alpha(alpha_)
 	{}
 	DrawTask(const DrawTask &) = default;
 	DrawTask &operator=(const DrawTask &) = default;
@@ -118,7 +121,8 @@ public:
 	void drawTexture(const char *id,
 		int dx, int dy, bool lrInv, bool udInv,
 		int sx, int sy, int sw, int sh,
-		int cx, int cy, float scaleX, float scaleY, float angle);
+		int cx, int cy, float scaleX, float scaleY, float angle,
+		float alpha);
 
 protected:
 
@@ -126,7 +130,7 @@ private:
 	const UINT_PTR TimerEventId = 0xffff0001;
 	const DXGI_FORMAT BufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	const DXGI_SWAP_CHAIN_FLAG SwapChainFlag = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-	const float ClearColor[4] = { 0.9f, 0.9f, 0.9f, 1.0f };
+	const float ClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	const size_t DrawListMax = 1024;		// not strict limit
 	const wchar_t * const VS_FileName = L"@VertexShader.cso";
 	const wchar_t * const PS_FileName = L"@PixelShader.cso";
