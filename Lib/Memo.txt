@@ -45,7 +45,7 @@ void drawTexture(const char *id,
 	x=0.5, y=0.5 平面で反転
 - (0, 0) (1, 1)		反転済みの単位正方形
 -- MatrixScaling(sw, sh, 1)
-	ソースサイズの長方形へ変形, スクリーン座標系へ
+	ソースサイズの長方形へ変形, ピクセル座標系へ
 - (0, 0) (sw, sh) in (0, 0) (screenW, H)
 -- MatrixTranslate(-cx, -cy, 0)
 	(cx, cy) を原点になるように平行移動
@@ -54,12 +54,12 @@ void drawTexture(const char *id,
 	原点中心で拡大と回転
 -- MatrixTranslate(dx, dy, 0)
 	原点が (dx, dy) になるように平行移動
-=== スクリーン座標での変換完了 ===
-- スクリーン座標
+=== ピクセル座標での変換完了 ===
+- ピクセル座標
 -- in (0, 0) (screenW, H) -> in (-1, -1) (1, 1)
 	2D用射影変換(平行移動とスケール)
-		_14 = -1.0f;
-		_24 = 1.0f;
+		_41 = -1.0f;
+		_42 = 1.0f;
 		_11 = 2.0f / screenW;
 		_22 = -2.0f / screenH;
 === END ===

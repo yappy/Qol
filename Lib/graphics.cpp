@@ -149,16 +149,19 @@ inline void createCBFromTask(CBChanges *out, const DrawTask &task)
 	XMVECTORF32 xMirror = { 1.0f, 0.0f, 0.0f, -0.5f };
 	// y = 0.5
 	XMVECTORF32 yMirror = { 0.0f, 1.0f, 0.0f, -0.5f };
-	out->lrInv = task.lrInv ? XMMatrixReflect(xMirror) : XMMatrixIdentity();
-	out->udInv = task.udInv ? XMMatrixReflect(yMirror) : XMMatrixIdentity();
-	out->DestScale = XMMatrixScaling(
-		static_cast<float>(task.sw), static_cast<float>(task.sh), 1.0f);
-	out->Centering = XMMatrixTranslation(
-		-static_cast<float>(task.cx), -static_cast<float>(task.cy), 0.0f);
-	out->Scale = XMMatrixScaling(task.scaleX, task.scaleY, 1.0f);
-	out->Rotation = XMMatrixRotationZ(task.angle);
-	out->Translate = XMMatrixTranslation(
-		static_cast<float>(task.dx), static_cast<float>(task.dy), 1.0f);
+	out->lrInv = XMMatrixTranspose(
+		task.lrInv ? XMMatrixReflect(xMirror) : XMMatrixIdentity());
+	out->udInv = XMMatrixTranspose(
+		task.udInv ? XMMatrixReflect(yMirror) : XMMatrixIdentity());
+	out->DestScale = XMMatrixTranspose(XMMatrixScaling(
+		static_cast<float>(task.sw), static_cast<float>(task.sh), 1.0f));
+	out->Centering = XMMatrixTranspose(XMMatrixTranslation(
+		-static_cast<float>(task.cx), -static_cast<float>(task.cy), 0.0f));
+	out->Scale = XMMatrixTranspose(XMMatrixScaling(
+		task.scaleX, task.scaleY, 1.0f));
+	out->Rotation = XMMatrixTranspose(XMMatrixRotationZ(task.angle));
+	out->Translate = XMMatrixTranspose(XMMatrixTranslation(
+		static_cast<float>(task.dx), static_cast<float>(task.dy), 1.0f));
 	out->uvOffset = XMFLOAT2(
 		static_cast<float>(task.sx) / task.texture->w,
 		static_cast<float>(task.sy) / task.texture->h);
@@ -366,12 +369,13 @@ void Application::initializeD3D(const InitParam &param)
 	// Create constant buffer
 	{
 		CBNeverChanges buffer;
-		// Projection matrix: Screen coord -> (-1, -1) .. (1, 1)
+		// Projection matrix: Window coord -> (-1, -1) .. (1, 1)
 		buffer.Projection = XMMatrixIdentity();
-		buffer.Projection._14 = -1.0f;
-		buffer.Projection._24 = 1.0f;
+		buffer.Projection._41 = -1.0f;
+		buffer.Projection._42 = 1.0f;
 		buffer.Projection._11 = 2.0f / m_initParam.w;
 		buffer.Projection._22 = -2.0f / m_initParam.h;
+		buffer.Projection = XMMatrixTranspose(buffer.Projection);
 		D3D11_BUFFER_DESC bd = { 0 };
 		bd.Usage = D3D11_USAGE_DEFAULT;
 		bd.ByteWidth = sizeof(CBNeverChanges);
@@ -571,13 +575,13 @@ void Application::renderInternal()
 {
 	// this->render();
 	// TEST
-	drawTexture("notpow2", 0, 0, false, false, 0, 0, 400, 300, 0, 0, 1.0f, 1.0f, 0.0f, 0.5f);
+	drawTexture("notpow2", 1024 / 2, 768 / 2, true, false, 50, 50, 300, 200, 150, 100, 1.0f, 2.0f, 3.14f/3, 0.5f);
 	//drawTexture("testtex", 0, 0, false, false, 0, 0, 256, 256, 0, 0, 1.0f, 1.0f, 0.0f, 0.5f);
 
 	// TEST
 	// 30fps by frame skip test
 	// render() > 16.67 ms
-	::Sleep(17);
+	//::Sleep(17);
 	m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
 
 	// VS, PS, constant buffer
