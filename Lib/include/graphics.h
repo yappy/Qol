@@ -88,6 +88,26 @@ public:
 
 	void loadTexture(const char *id, const wchar_t *path);
 	void drawTexture(const char *id, int x, int y, bool lrMirror = false);
+	/**
+	* @param id string id
+	* @param dx destination X (center pos)
+	* @param dy destination Y (center pos)
+	* @param lrInv left-right invert
+	* @param udInv up-down invert
+	* @param sx source X
+	* @param sy source Y
+	* @param sw source width
+	* @param sh source height
+	* @param cx center X from (sx, sy)
+	* @param cy center Y from (sx, sy)
+	* @param scaleX size scaling factor X
+	* @param scaleY size scaling factor Y
+	* @param angle rotation angle [rad] (using center pos)
+	*/
+	void drawTexture(const char *id,
+		int dx, int dy, bool lrInv, bool udInv,
+		int sx, int sy, int sw, int sh,
+		int cx, int cy, float scaleX, float scaleY, float angle);
 
 protected:
 
