@@ -354,7 +354,7 @@ void Application::initializeD3D(const InitParam &param)
 		D3D11_SUBRESOURCE_DATA initData = { 0 };
 		initData.pSysMem = &buffer;
 		ID3D11Buffer *ptmpCBNeverChanges = nullptr;
-		hr = m_pDevice->CreateBuffer(&bd, nullptr, &ptmpCBNeverChanges);
+		hr = m_pDevice->CreateBuffer(&bd, &initData, &ptmpCBNeverChanges);
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBuffer() failed");
 		m_pCBNeverChanges.reset(ptmpCBNeverChanges);
 	}
@@ -545,8 +545,8 @@ void Application::renderInternal()
 {
 	// this->render();
 	// TEST
-	//drawTexture("notpow2", 0, 0);
-	drawTexture("testtex", 0, 0);
+	//drawTexture("notpow2", 0, 0, false, false, 0, 0, 400, 300, 0, 0, 1.0f, 1.0f, 0.0f);
+	drawTexture("testtex", 0, 0, false, false, 0, 0, 400, 300, 0, 0, 1.0f, 1.0f, 0.0f);
 
 	// TEST
 	// 30fps by frame skip test
@@ -557,8 +557,8 @@ void Application::renderInternal()
 	// VS, PS, constant buffer
 	m_pContext->VSSetShader(m_pVertexShader.get(), nullptr, 0);
 	m_pContext->PSSetShader(m_pPixelShader.get(), nullptr, 0);
-	ID3D11Buffer *pCB = m_pCBChanges.get();
-	m_pContext->VSSetConstantBuffers(1, 1, &pCB);
+	ID3D11Buffer *pCBs[2] = { m_pCBNeverChanges.get(), m_pCBChanges.get() };
+	m_pContext->VSSetConstantBuffers(0, 2, pCBs);
 	// RasterizerState, SamplerState, BlendState
 	m_pContext->RSSetState(m_pRasterizerState.get());
 	ID3D11SamplerState *pSamplerState = m_pSamplerState.get();
@@ -645,13 +645,18 @@ void Application::loadTexture(const char *id, const wchar_t *path)
 		));
 }
 
-void Application::drawTexture(const char *id, int x, int y, bool lrMirror)
+void Application::drawTexture(const char *id,
+	int dx, int dy, bool lrInv, bool udInv,
+	int sx, int sy, int sw, int sh,
+	int cx, int cy, float scaleX, float scaleY, float angle)
 {
 	auto res = m_texMap.find(id);
 	if (res == m_texMap.end()) {
 		throw std::runtime_error("id not found");
 	}
-	m_drawTaskList.emplace_back(&res->second);
+	m_drawTaskList.emplace_back(&res->second,
+		dx, dy, lrInv, udInv, sx, sy, sw, sh,
+		cx, cy, scaleX, scaleY, angle);
 }
 
 #pragma endregion

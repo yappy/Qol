@@ -59,9 +59,21 @@ struct Texture : private util::noncopyable {
 
 struct DrawTask {
 	Texture *texture;
+	int dx, dy;
+	bool lrInv, udInv;
+	int sx, sy, sw, sh;
+	int cx, cy;
+	float scaleX, scaleY;
+	float angle;
 
-	explicit DrawTask(Texture *texture_) :
-		texture(texture_)
+	explicit DrawTask(Texture *texture_,
+		int dx_, int dy_, bool lrInv_, bool udInv_,
+		int sx_, int sy_, int sw_, int sh_,
+		int cx_, int cy_, float scaleX_, float scaleY_, float angle_) :
+		texture(texture_),
+		dx(dx_), dy(dy_), lrInv(lrInv_), udInv(udInv_),
+		sx(sx_), sy(sy_), sw(sw_), sh(sh_),
+		cx(cx_), cy(cy_), scaleX(scaleX_), scaleY(scaleY_), angle(angle_)
 	{}
 	DrawTask(const DrawTask &) = default;
 	DrawTask &operator=(const DrawTask &) = default;
@@ -87,7 +99,6 @@ public:
 	int run();
 
 	void loadTexture(const char *id, const wchar_t *path);
-	void drawTexture(const char *id, int x, int y, bool lrMirror = false);
 	/**
 	* @param id string id
 	* @param dx destination X (center pos)
