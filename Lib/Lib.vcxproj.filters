@@ -91,4 +91,9 @@
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader.hlsli">
+      <Filter>Shader Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

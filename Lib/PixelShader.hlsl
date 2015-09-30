@@ -1,7 +1,4 @@
-struct VS_OUTPUT {
-	float4 Pos : SV_POSITION;
-	float2 Tex : TEXCOORD0;
-};
+#include "Shader.hlsli"
 
 Texture2D gTexture : register(t0);
 SamplerState gSample : register(s0);

@@ -1,3 +1,5 @@
+#include "Shader.hlsli"
+
 cbuffer cbNeverChanges : register( b0 ) {
 	uint dummy;
 };
@@ -17,16 +19,6 @@ cbuffer cbChanges : register( b1 ) {
 	/*
 	float		alpha;
 	*/
-};
-
-
-struct VS_INPUT {
-	float3 Pos : POSITION;
-	float2 Tex : TEXCOORD0;
-};
-struct VS_OUTPUT {
-	float4 Pos : SV_POSITION;
-	float2 Tex : TEXCOORD0;
 };
 
 
