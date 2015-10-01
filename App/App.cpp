@@ -7,26 +7,25 @@
 #include <file.h>
 #include <graphics.h>
 #include <input.h>
+#include <sound.h>
 #include <array>
 
-
-using yappy::graphics::Application;
-using yappy::input::DInput;
 using namespace yappy;
 
-
-class MyApp : public Application {
+class MyApp : public graphics::Application {
 public:
 	MyApp(const InitParam &param) :
 		Application(param),
-		m_di(param.hInstance, getHWnd())
+		m_input(param.hInstance, getHWnd()),
+		m_sound()
 	{}
 protected:
 	void init() override;
 	void update() override;
 	void render() override;
 private:
-	DInput m_di;
+	input::DInput m_input;
+	sound::XAudio2 m_sound;
 };
 
 
@@ -34,6 +33,10 @@ void MyApp::init()
 {
 	loadTexture("notpow2", L"../sampledata/test_400_300.png");
 	loadTexture("testtex", L"../sampledata/circle.png");
+
+	m_sound.loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
+
+	m_sound.playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
 }
 
 void MyApp::render()
@@ -46,34 +49,38 @@ void MyApp::render()
 
 void MyApp::update()
 {
-	m_di.processFrame();
-	std::array<bool, 256> keys = m_di.getKeys();
+	m_input.processFrame();
+	m_sound.processFrame();
+
+	std::array<bool, 256> keys = m_input.getKeys();
 	for (size_t i = 0U; i < keys.size(); i++) {
 		if (keys[i]) {
 			debug::writef(L"Key 0x%02x", i);
+			m_sound.playSoundEffect("testwav");
 		}
 	}
-	for (int i = 0; i < m_di.getPadCount(); i++) {
+	for (int i = 0; i < m_input.getPadCount(); i++) {
 		DIJOYSTATE state;
-		m_di.getPadState(&state, i);
+		m_input.getPadState(&state, i);
 		for (int b = 0; b < 32; b++) {
 			if (state.rgbButtons[b] & 0x80) {
 				debug::writef(L"pad[%d].button%d", i, b);
+				m_sound.playSoundEffect("testwav");
 			}
 		}
 		{
 			// left stick
-			if (std::abs(state.lX) > DInput::AXIS_THRESHOLD) {
+			if (std::abs(state.lX) > input::DInput::AXIS_THRESHOLD) {
 				debug::writef(L"pad[%d].x=%ld", i, state.lX);
 			}
-			if (std::abs(state.lY) > DInput::AXIS_THRESHOLD) {
+			if (std::abs(state.lY) > input::DInput::AXIS_THRESHOLD) {
 				debug::writef(L"pad[%d].y=%ld", i, state.lY);
 			}
 			// right stick
-			if (std::abs(state.lZ) > DInput::AXIS_THRESHOLD) {
+			if (std::abs(state.lZ) > input::DInput::AXIS_THRESHOLD) {
 				debug::writef(L"pad[%d].z=%ld", i, state.lZ);
 			}
-			if (std::abs(state.lRz) > DInput::AXIS_THRESHOLD) {
+			if (std::abs(state.lRz) > input::DInput::AXIS_THRESHOLD) {
 				debug::writef(L"pad[%d].rz=%ld", i, state.lRz);
 			}
 		}
@@ -91,6 +98,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
 	// debug test
 	{
 		debug::enableDebugOutput();
@@ -119,7 +128,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	try {
 		file::initWithFileSystem(L".");
 
-		Application::InitParam param;
+		graphics::Application::InitParam param;
 		param.hInstance = hInstance;
 		param.w = 1024;
 		param.h = 768;

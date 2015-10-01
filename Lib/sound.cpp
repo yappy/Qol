@@ -279,7 +279,7 @@ void XAudio2::processFrame()
 	XAUDIO2_VOICE_STATE state = { 0 };
 	m_pBgmVoice->GetState(&state);
 	if (state.BuffersQueued >= BgmBufferCount) {
-		debug::writeLine(L"not yet!");
+		//debug::writeLine(L"not yet!");
 		return;
 	}
 
@@ -309,7 +309,7 @@ void XAudio2::processFrame()
 	buffer.pAudioData = reinterpret_cast<BYTE *>(&m_pBgmBuffer[base]);
 	hr = m_pBgmVoice->SubmitSourceBuffer(&buffer);
 	checkDXResult<XAudioError>(hr, "IXAudio2SourceVoice::SubmitSourceBuffer() failed");
-	debug::writeLine(L"push back!");
+	//debug::writeLine(L"push back!");
 
 	m_writePos = (m_writePos + 1) % BgmBufferCount;
 }

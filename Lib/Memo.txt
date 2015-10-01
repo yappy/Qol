@@ -76,15 +76,6 @@ void drawTexture(const char *id,
 === END ===
 
 
-*** TODO (reminder) ***
-- hIcon
-- hide cursor
-- supress screen saver etc.
-- DwmEnableComposition() ?
-- should use enum-ed display_mode
-- Alt+Enter 怪しすぎ
-
-
 *** TODO list ***
 - debug
 -- print
