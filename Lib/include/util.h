@@ -34,6 +34,8 @@ inline void iunknownDeleter(IUnknown *iu)
 typedef decltype(&iunknownDeleter) IUnknownDeleterType;
 template<class T>
 using IUnknownPtr = std::unique_ptr<T, IUnknownDeleterType>;
+template<class T>
+using IUnknownSharedPtr = std::shared_ptr<T>;
 
 
 inline std::string wc2utf8(const wchar_t *in)

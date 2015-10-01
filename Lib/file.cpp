@@ -3,10 +3,13 @@
 #include "include/exceptions.h"
 #include <windows.h>
 #include <memory>
+#include <array>
 #include <string>
 
 namespace yappy {
 namespace file {
+
+using error::checkWin32Result;
 
 namespace {
 
@@ -38,6 +41,15 @@ Bytes FsFileLoader::loadFile(const wchar_t *fileName)
 		// Debug only, abs path
 		path = &fileName[1];
 	}
+	else if (fileName[0] == L'@') {
+		// Debug only, relative to executable
+		std::array<wchar_t, MAX_PATH> dir;
+		DWORD ret = ::GetModuleFileName(nullptr, dir.data(), static_cast<DWORD>(dir.size()));
+		checkWin32Result(ret != 0, "GetModuleFileName() failed");
+		*(::wcsrchr(dir.data(), L'\\') + 1) = L'\0';
+		path = dir.data();
+		path += &fileName[1];
+	}
 	else {
 		path += m_rootDir;
 		path += L'/';
@@ -48,17 +60,17 @@ Bytes FsFileLoader::loadFile(const wchar_t *fileName)
 	HANDLE tmphFile = ::CreateFile(
 		path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
 		FILE_ATTRIBUTE_NORMAL, nullptr);
-	error::checkWin32Result(tmphFile != INVALID_HANDLE_VALUE, "CreateFile() failed");
+	checkWin32Result(tmphFile != INVALID_HANDLE_VALUE, "CreateFile() failed");
 	util::HandlePtr hFile(tmphFile);
 
 	BOOL b = FALSE;
 	// get size to avoid realloc
 	LARGE_INTEGER fileSize = { 0 };
 	b = ::GetFileSizeEx(hFile.get(), &fileSize);
-	error::checkWin32Result(b != 0, "GetFileSizeEx() failed");
+	checkWin32Result(b != 0, "GetFileSizeEx() failed");
 	// 2GiB check
-	error::checkWin32Result(fileSize.HighPart == 0, "File size is too large");
-	error::checkWin32Result(fileSize.LowPart < 0x80000000, "File size is too large");
+	checkWin32Result(fileSize.HighPart == 0, "File size is too large");
+	checkWin32Result(fileSize.LowPart < 0x80000000, "File size is too large");
 	// read
 	Bytes bin(fileSize.LowPart);
 	DWORD readSize = 0;

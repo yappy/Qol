@@ -1,4 +1,6 @@
+﻿************************
 * Visual Studio Settings
+************************
 Tools -> Options
 
 Text Editor -> All Languages -> General
@@ -8,13 +10,17 @@ Text Editor -> C/C++ -> Formatting -> Indentation
 	- Indent namespace contents
 
 
+***********************************
 * Sleep/DisplayOff/ScreenSaver tips
+***********************************
 SetThreadExecutionState()
 SendInput() (mouse move)
 http://drang.s4.xrea.com/program/tips/screen_saver.html (may be too old)
 
 
+***********************
 * Graphics latency tips
+***********************
 DwmEnableComposition()
 SetMaximumFrameLatency()
 http://www.ouma.jp/ootake/delay-win7vista-j.html (there is mistake)
@@ -24,12 +30,59 @@ http://www.ouma.jp/ootake/delay-win7vista-j.html (there is mistake)
   SetMaximumFrameLatency(0) will reset latency default.
 
 
-*** TODO (to remember) ***
+***********************************
+* Drawing texture
+***********************************
+void drawTexture(const char *id,
+	int dx, int dy, bool lrInv, bool udInv,
+	int sx, int sy, int sw, int sh,
+	int cx, int cy, float angle, float scaleX, float scaleY,
+	float alpha)
+
+- (0, 0) (1, 1)		単位正方形
+-- lrInv ? MatrixReflect(ax+by+cz+d=0, x=0.5) : I
+-- udInv ? MatrixReflect(ax+by+cz+d=0, y=0.5) : I
+	x=0.5, y=0.5 平面で反転
+- (0, 0) (1, 1)		反転済みの単位正方形
+-- MatrixScaling(sw, sh, 1)
+	ソースサイズの長方形へ変形, ピクセル座標系へ
+- (0, 0) (sw, sh) in (0, 0) (screenW, H)
+-- MatrixTranslate(-cx, -cy, 0)
+	(cx, cy) を原点になるように平行移動
+-- MatrixScaling(scaleX, scaleY, 1)
+-- MatrixRotationZ(angle)
+	原点中心で拡大と回転
+-- MatrixTranslate(dx, dy, 0)
+	原点が (dx, dy) になるように平行移動
+=== ピクセル座標での変換完了 ===
+- ピクセル座標
+-- in (0, 0) (screenW, H) -> in (-1, -1) (1, 1)
+	2D用射影変換(平行移動とスケール)
+		_41 = -1.0f;
+		_42 = 1.0f;
+		_11 = 2.0f / screenW;
+		_22 = -2.0f / screenH;
+=== END ===
+
+- UV: (0, 0) (1, 1)		入力頂点は 0.0 ~ 1.0
+-- sx, sy, sw, sh をピクセル座標からUV座標に
+--- offset = (sx / texW, sy / texH)
+--- size   = (sw / texW, sh / texH)
+-- (0.0f, 1.0f) => (offset, offset+size)
+	output.Tex = uvOffset + uvSize * input.Tex;
+	// input=0: output = offset
+	// input=1: output = offset + size
+	// になるように
+=== END ===
+
+
+*** TODO (reminder) ***
 - hIcon
 - hide cursor
 - supress screen saver etc.
 - DwmEnableComposition() ?
 - should use enum-ed display_mode
+- Alt+Enter 怪しすぎ
 
 
 *** TODO list ***

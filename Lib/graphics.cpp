@@ -2,9 +2,16 @@
 #include "include/graphics.h"
 #include "include/debug.h"
 #include "include/exceptions.h"
+#include "include/file.h"
 #include <array>
+#include <d3dx11.h>
+#pragma warning(push)
+#pragma warning(disable: 4838)
+#include <xnamath.h>
+#pragma warning(pop)
 
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dx11.lib")
 
 namespace yappy {
 namespace graphics {
@@ -12,6 +19,11 @@ namespace graphics {
 using error::checkWin32Result;
 using error::D3DError;
 using error::checkDXResult;
+
+///////////////////////////////////////////////////////////////////////////////
+// class FrameControl impl
+///////////////////////////////////////////////////////////////////////////////
+#pragma region FrameControl
 
 namespace {
 
@@ -99,18 +111,89 @@ int FrameControl::getSkipPerSec()
 	return m_sps;
 }
 
+#pragma endregion
+
+///////////////////////////////////////////////////////////////////////////////
+// class Application impl
+///////////////////////////////////////////////////////////////////////////////
+#pragma region Application
+
+namespace {
+
+struct SpriteVertex {
+	XMFLOAT3 Pos;
+	XMFLOAT2 Tex;
+};
+
+struct CBNeverChanges {
+	XMMATRIX	Projection;
+};
+
+struct CBChanges {
+	XMMATRIX	lrInv;
+	XMMATRIX	udInv;
+	XMMATRIX	DestScale;
+	XMMATRIX	Centering;
+	XMMATRIX	Scale;
+	XMMATRIX	Rotation;
+	XMMATRIX	Translate;
+	XMFLOAT2	uvOffset;
+	XMFLOAT2	uvSize;
+	float		Alpha;
+};
+
+inline void createCBFromTask(CBChanges *out, const DrawTask &task)
+{
+	// ax + by + cz + d = 0
+	// x = 0.5
+	XMVECTORF32 xMirror = { 1.0f, 0.0f, 0.0f, -0.5f };
+	// y = 0.5
+	XMVECTORF32 yMirror = { 0.0f, 1.0f, 0.0f, -0.5f };
+	out->lrInv = XMMatrixTranspose(
+		task.lrInv ? XMMatrixReflect(xMirror) : XMMatrixIdentity());
+	out->udInv = XMMatrixTranspose(
+		task.udInv ? XMMatrixReflect(yMirror) : XMMatrixIdentity());
+	out->DestScale = XMMatrixTranspose(XMMatrixScaling(
+		static_cast<float>(task.sw), static_cast<float>(task.sh), 1.0f));
+	out->Centering = XMMatrixTranspose(XMMatrixTranslation(
+		-static_cast<float>(task.cx), -static_cast<float>(task.cy), 0.0f));
+	out->Scale = XMMatrixTranspose(XMMatrixScaling(
+		task.scaleX, task.scaleY, 1.0f));
+	out->Rotation = XMMatrixTranspose(XMMatrixRotationZ(task.angle));
+	out->Translate = XMMatrixTranspose(XMMatrixTranslation(
+		static_cast<float>(task.dx), static_cast<float>(task.dy), 1.0f));
+	out->uvOffset = XMFLOAT2(
+		static_cast<float>(task.sx) / task.texture->w,
+		static_cast<float>(task.sy) / task.texture->h);
+	out->uvSize = XMFLOAT2(
+		static_cast<float>(task.sw) / task.texture->w,
+		static_cast<float>(task.sh) / task.texture->h);
+	out->Alpha = task.alpha;
+}
+
+}
+
 Application::Application(const InitParam &param) :
 	m_initParam(param),
 	m_frameCtrl(param.refreshRateNumer, param.refreshRateDenom),
 	m_pDevice(nullptr, util::iunknownDeleter),
 	m_pContext(nullptr, util::iunknownDeleter),
 	m_pSwapChain(nullptr, util::iunknownDeleter),
-	m_pRenderTargetView(nullptr, util::iunknownDeleter)
+	m_pRenderTargetView(nullptr, util::iunknownDeleter),
+	m_pVertexShader(nullptr, util::iunknownDeleter),
+	m_pPixelShader(nullptr, util::iunknownDeleter),
+	m_pInputLayout(nullptr, util::iunknownDeleter),
+	m_pVertexBuffer(nullptr, util::iunknownDeleter),
+	m_pCBNeverChanges(nullptr, util::iunknownDeleter),
+	m_pCBChanges(nullptr, util::iunknownDeleter),
+	m_pRasterizerState(nullptr, util::iunknownDeleter),
+	m_pSamplerState(nullptr, util::iunknownDeleter),
+	m_pBlendState(nullptr, util::iunknownDeleter)
 {
+	m_drawTaskList.reserve(DrawListMax);
+
 	initializeWindow(param);
 	initializeD3D(param);
-	::ShowWindow(m_hWnd.get(), param.nCmdShow);
-	::UpdateWindow(m_hWnd.get());
 }
 
 void Application::initializeWindow(const InitParam &param)
@@ -123,12 +206,12 @@ void Application::initializeWindow(const InitParam &param)
 	cls.cbClsExtra = 0;
 	cls.cbWndExtra = 0;
 	cls.hInstance = param.hInstance;
-	cls.hIcon = nullptr;	//TODO
+	cls.hIcon = param.hIcon;
 	cls.hCursor = LoadCursor(NULL, IDC_ARROW);
 	cls.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
 	cls.lpszMenuName = nullptr;
 	cls.lpszClassName = param.wndClsName;
-	cls.hIconSm = nullptr;	//TODO
+	cls.hIconSm = param.hIconSm;
 	checkWin32Result(::RegisterClassEx(&cls) != 0, "RegisterClassEx() failed");
 
 	const DWORD wndStyle = WS_OVERLAPPEDWINDOW & ~WS_SIZEBOX & ~WS_MAXIMIZEBOX;
@@ -150,6 +233,10 @@ void Application::initializeWindow(const InitParam &param)
 void Application::initializeD3D(const InitParam &param)
 {
 	HRESULT hr = S_OK;
+
+	if (!::XMVerifyCPUSupport()) {
+		throw D3DError("XMVerifyCPUSupport() failed", 0);
+	}
 
 	// Create device etc.
 	{
@@ -205,7 +292,7 @@ void Application::initializeD3D(const InitParam &param)
 
 	// MaximumFrameLatency
 	{
-		IDXGIDevice1 *ptmpDXGIDevice;
+		IDXGIDevice1 *ptmpDXGIDevice = nullptr;
 		hr = m_pDevice->QueryInterface(__uuidof(IDXGIDevice1), (void **)&ptmpDXGIDevice);
 		checkDXResult<D3DError>(hr, "QueryInterface(IDXGIDevice1) failed");
 		util::IUnknownPtr<IDXGIDevice1> pDXGIDevice(ptmpDXGIDevice, util::iunknownDeleter);
@@ -214,6 +301,145 @@ void Application::initializeD3D(const InitParam &param)
 	}
 
 	initBackBuffer();
+
+	// Vertex Shader
+	{
+		file::Bytes bin = file::loadFile(VS_FileName);
+		ID3D11VertexShader *ptmpVS = nullptr;
+		hr = m_pDevice->CreateVertexShader(bin.data(), bin.size(), nullptr, &ptmpVS);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateVertexShader() failed");
+		m_pVertexShader.reset(ptmpVS);
+
+		// Create input layout
+		D3D11_INPUT_ELEMENT_DESC layout[] = {
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		};
+		ID3D11InputLayout *ptmpInputLayout = nullptr;
+		hr = m_pDevice->CreateInputLayout(layout, _countof(layout), bin.data(),
+			bin.size(), &ptmpInputLayout);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateInputLayout() failed");
+		m_pInputLayout.reset(ptmpInputLayout);
+		// Set input layout
+		m_pContext->IASetInputLayout(m_pInputLayout.get());
+	}
+	// Pixel Shader
+	{
+		file::Bytes bin = file::loadFile(PS_FileName);
+		ID3D11PixelShader *ptmpPS = nullptr;
+		hr = m_pDevice->CreatePixelShader(bin.data(), bin.size(), nullptr, &ptmpPS);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreatePixelShader() failed");
+		m_pPixelShader.reset(ptmpPS);
+	}
+
+	// Create vertex buffer
+	{
+		SpriteVertex vertices[] = {
+			{ XMFLOAT3(0.0f, 1.0f, 0.0f) , XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(1.0f, 1.0f, 0.0f) , XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(0.0f, 0.0f, 0.0f) , XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(1.0f, 0.0f, 0.0f) , XMFLOAT2(1.0f, 0.0f) },
+		};
+		D3D11_BUFFER_DESC bd = { 0 };
+		bd.Usage = D3D11_USAGE_DEFAULT;
+		bd.ByteWidth = sizeof(vertices);
+		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		bd.CPUAccessFlags = 0;
+		D3D11_SUBRESOURCE_DATA initData = { 0 };
+		initData.pSysMem = vertices;
+		ID3D11Buffer *ptmpVertexBuffer = nullptr;
+		hr = m_pDevice->CreateBuffer(&bd, &initData, &ptmpVertexBuffer);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBuffer() failed");
+		m_pVertexBuffer.reset(ptmpVertexBuffer);
+
+		// Set vertex buffer
+		ID3D11Buffer *pVertexBuffer = m_pVertexBuffer.get();
+		UINT stride = sizeof(SpriteVertex);
+		UINT offset = 0;
+		m_pContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &stride, &offset);
+		// Set primitive topology
+		m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	}
+	// Create constant buffer
+	{
+		CBNeverChanges buffer;
+		// Projection matrix: Window coord -> (-1, -1) .. (1, 1)
+		buffer.Projection = XMMatrixIdentity();
+		buffer.Projection._41 = -1.0f;
+		buffer.Projection._42 = 1.0f;
+		buffer.Projection._11 = 2.0f / m_initParam.w;
+		buffer.Projection._22 = -2.0f / m_initParam.h;
+		buffer.Projection = XMMatrixTranspose(buffer.Projection);
+		D3D11_BUFFER_DESC bd = { 0 };
+		bd.Usage = D3D11_USAGE_DEFAULT;
+		bd.ByteWidth = sizeof(CBNeverChanges);
+		bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		bd.CPUAccessFlags = 0;
+		D3D11_SUBRESOURCE_DATA initData = { 0 };
+		initData.pSysMem = &buffer;
+		ID3D11Buffer *ptmpCBNeverChanges = nullptr;
+		hr = m_pDevice->CreateBuffer(&bd, &initData, &ptmpCBNeverChanges);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBuffer() failed");
+		m_pCBNeverChanges.reset(ptmpCBNeverChanges);
+	}
+	{
+		D3D11_BUFFER_DESC bd = { 0 };
+		bd.Usage = D3D11_USAGE_DEFAULT;
+		bd.ByteWidth = sizeof(CBChanges);
+		bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		bd.CPUAccessFlags = 0;
+		ID3D11Buffer *ptmpCBChanges = nullptr;
+		hr = m_pDevice->CreateBuffer(&bd, nullptr, &ptmpCBChanges);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBuffer() failed");
+		m_pCBChanges.reset(ptmpCBChanges);
+	}
+
+	// Create rasterizer state
+	{
+		D3D11_RASTERIZER_DESC rasterDesc;
+		::ZeroMemory(&rasterDesc, sizeof(rasterDesc));
+		rasterDesc.FillMode = D3D11_FILL_SOLID;
+		rasterDesc.CullMode = D3D11_CULL_NONE;
+		ID3D11RasterizerState* ptmpRasterizerState = nullptr;
+		hr = m_pDevice->CreateRasterizerState(&rasterDesc, &ptmpRasterizerState);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBuffer() failed");
+		m_pRasterizerState.reset(ptmpRasterizerState);
+	}
+	// Create sample state
+	{
+		D3D11_SAMPLER_DESC sampDesc;
+		::ZeroMemory(&sampDesc, sizeof(sampDesc));
+		sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sampDesc.MinLOD = 0;
+		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+		ID3D11SamplerState *ptmpSamplerState = nullptr;
+		hr = m_pDevice->CreateSamplerState(&sampDesc, &ptmpSamplerState);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateSamplerState() failed");
+		m_pSamplerState.reset(ptmpSamplerState);
+	}
+	// Create blend state
+	{
+		D3D11_BLEND_DESC blendDesc;
+		::ZeroMemory(&blendDesc, sizeof(blendDesc));
+		blendDesc.AlphaToCoverageEnable = FALSE;
+		blendDesc.IndependentBlendEnable = FALSE;
+		blendDesc.RenderTarget[0].BlendEnable = TRUE;
+		blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+		blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+		blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+		blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		ID3D11BlendState* ptmpBlendState = nullptr;
+		hr = m_pDevice->CreateBlendState(&blendDesc, &ptmpBlendState);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBlendState() failed");
+		m_pBlendState.reset(ptmpBlendState);
+	}
 
 	// fullscreen initially
 	/*
@@ -336,22 +562,56 @@ void Application::onIdle()
 
 void Application::updateInternal()
 {
-	// TEST
-	// update() = 0 ms
+	// Call user code
+	update();
 }
 
 void Application::renderInternal()
 {
-	// TEST
-	// 30fps by frame skip test
-	// render() > 16.67 ms
-	::Sleep(17);
+	// Call user code
+	render();
+
+	// Clear target
 	m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
+
+	// VS, PS, constant buffer
+	m_pContext->VSSetShader(m_pVertexShader.get(), nullptr, 0);
+	m_pContext->PSSetShader(m_pPixelShader.get(), nullptr, 0);
+	ID3D11Buffer *pCBs[2] = { m_pCBNeverChanges.get(), m_pCBChanges.get() };
+	m_pContext->VSSetConstantBuffers(0, 2, pCBs);
+	// RasterizerState, SamplerState, BlendState
+	m_pContext->RSSetState(m_pRasterizerState.get());
+	ID3D11SamplerState *pSamplerState = m_pSamplerState.get();
+	m_pContext->PSSetSamplers(0, 1, &pSamplerState);
+	float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	m_pContext->OMSetBlendState(m_pBlendState.get(), blendFactor, 0xffffffff);
+
+	// Draw and clear list
+	for (auto &task : m_drawTaskList) {
+		// Set constant buffer
+		CBChanges cbChanges;
+		createCBFromTask(&cbChanges, task);
+		m_pContext->UpdateSubresource(m_pCBChanges.get(), 0, nullptr, &cbChanges, 0, 0);
+
+		ID3D11ShaderResourceView *rv = task.texture->pRV.get();
+		m_pContext->PSSetShaderResources(0, 1, &rv);
+
+		m_pContext->Draw(4, 0);
+	}
+	m_drawTaskList.clear();
+
+	// vsync and flip(blt)
 	m_pSwapChain->Present(1, 0);
 }
 
 int Application::run()
 {
+	// Call user code
+	init();
+
+	::ShowWindow(m_hWnd.get(), m_initParam.nCmdShow);
+	::UpdateWindow(m_hWnd.get());
+
 	MSG msg = { 0 };
 	while (msg.message != WM_QUIT) {
 		if (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -364,6 +624,69 @@ int Application::run()
 	}
 	return static_cast<int>(msg.wParam);
 }
+
+void Application::loadTexture(const char *id, const wchar_t *path)
+{
+	if (m_texMap.find(id) != m_texMap.end()) {
+		throw std::runtime_error("id already exists");
+	}
+
+	file::Bytes bin = file::loadFile(path);
+
+	HRESULT hr = S_OK;
+
+	D3DX11_IMAGE_INFO imageInfo = { 0 };
+	hr = ::D3DX11GetImageInfoFromMemory(bin.data(), bin.size(), nullptr,
+		&imageInfo, nullptr);
+	checkDXResult<D3DError>(hr, "D3DX11GetImageInfoFromMemory() failed");
+	if (imageInfo.ResourceDimension != D3D11_RESOURCE_DIMENSION_TEXTURE2D) {
+		throw std::runtime_error("Not 2D Texture");
+	}
+
+	ID3D11ShaderResourceView *ptmpRV = nullptr;
+	hr = ::D3DX11CreateShaderResourceViewFromMemory(m_pDevice.get(), bin.data(), bin.size(),
+		nullptr, nullptr, &ptmpRV, nullptr);
+	checkDXResult<D3DError>(hr, "D3DX11CreateShaderResourceViewFromMemory() failed");
+
+	// add (id, texture(...))
+	m_texMap.emplace(std::piecewise_construct,
+		std::forward_as_tuple(id),
+		std::forward_as_tuple(
+			ptmpRV, util::iunknownDeleter,
+			imageInfo.Width, imageInfo.Height
+		));
+}
+
+void Application::getTextureSize(const char *id, uint32_t *w, uint32_t *h) const
+{
+	auto res = m_texMap.find(id);
+	if (res == m_texMap.end()) {
+		throw std::runtime_error("id not found");
+	}
+	const Texture &tex = res->second;
+	*w = tex.w;
+	*h = tex.h;
+}
+
+void Application::drawTexture(const char *id,
+	int dx, int dy, bool lrInv, bool udInv,
+	int sx, int sy, int sw, int sh,
+	int cx, int cy, float angle, float scaleX, float scaleY,
+	float alpha)
+{
+	auto res = m_texMap.find(id);
+	if (res == m_texMap.end()) {
+		throw std::runtime_error("id not found");
+	}
+	const Texture &tex = res->second;
+	sw = (sw == SrcSizeDefault) ? tex.w : sw;
+	sh = (sh == SrcSizeDefault) ? tex.h : sh;
+	m_drawTaskList.emplace_back(&tex,
+		dx, dy, lrInv, udInv, sx, sy, sw, sh,
+		cx, cy, scaleX, scaleY, angle, alpha);
+}
+
+#pragma endregion
 
 }
 }
