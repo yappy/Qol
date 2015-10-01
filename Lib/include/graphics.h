@@ -58,7 +58,7 @@ struct Texture : private util::noncopyable {
 };
 
 struct DrawTask {
-	Texture *texture;
+	const Texture *texture;
 	int dx, dy;
 	bool lrInv, udInv;
 	int sx, sy, sw, sh;
@@ -67,7 +67,7 @@ struct DrawTask {
 	float angle;
 	float alpha;
 
-	explicit DrawTask(Texture *texture_,
+	explicit DrawTask(const Texture *texture_,
 		int dx_, int dy_, bool lrInv_, bool udInv_,
 		int sx_, int sy_, int sw_, int sh_,
 		int cx_, int cy_, float scaleX_, float scaleY_, float angle_,
@@ -102,6 +102,9 @@ public:
 	int run();
 
 	void loadTexture(const char *id, const wchar_t *path);
+	void getTextureSize(const char *id, uint32_t *w, uint32_t *h) const;
+
+	static const int SrcSizeDefault = -1;
 	/**
 	* @param id string id
 	* @param dx destination X (center pos)
@@ -110,19 +113,20 @@ public:
 	* @param udInv up-down invert
 	* @param sx source X
 	* @param sy source Y
-	* @param sw source width
-	* @param sh source height
+	* @param sw source width (texture size if SRC_SIZE_DEFAULT)
+	* @param sh source height (texture size if SRC_SIZE_DEFAULT)
 	* @param cx center X from (sx, sy)
 	* @param cy center Y from (sx, sy)
+	* @param angle rotation angle [rad] (using center pos)
 	* @param scaleX size scaling factor X
 	* @param scaleY size scaling factor Y
-	* @param angle rotation angle [rad] (using center pos)
+	* @param alpha alpha value
 	*/
 	void drawTexture(const char *id,
 		int dx, int dy, bool lrInv, bool udInv,
-		int sx, int sy, int sw, int sh,
-		int cx, int cy, float scaleX, float scaleY, float angle,
-		float alpha);
+		int sx = 0, int sy = 0, int sw = SrcSizeDefault, int sh = SrcSizeDefault,
+		int cx = 0, int cy = 0, float angle = 0.0f,
+		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f);
 
 protected:
 

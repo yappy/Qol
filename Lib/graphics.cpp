@@ -660,17 +660,31 @@ void Application::loadTexture(const char *id, const wchar_t *path)
 		));
 }
 
+void Application::getTextureSize(const char *id, uint32_t *w, uint32_t *h) const
+{
+	auto res = m_texMap.find(id);
+	if (res == m_texMap.end()) {
+		throw std::runtime_error("id not found");
+	}
+	const Texture &tex = res->second;
+	*w = tex.w;
+	*h = tex.h;
+}
+
 void Application::drawTexture(const char *id,
 	int dx, int dy, bool lrInv, bool udInv,
 	int sx, int sy, int sw, int sh,
-	int cx, int cy, float scaleX, float scaleY, float angle,
+	int cx, int cy, float angle, float scaleX, float scaleY,
 	float alpha)
 {
 	auto res = m_texMap.find(id);
 	if (res == m_texMap.end()) {
 		throw std::runtime_error("id not found");
 	}
-	m_drawTaskList.emplace_back(&res->second,
+	const Texture &tex = res->second;
+	sw = (sw == SrcSizeDefault) ? tex.w : sw;
+	sh = (sh == SrcSizeDefault) ? tex.h : sh;
+	m_drawTaskList.emplace_back(&tex,
 		dx, dy, lrInv, udInv, sx, sy, sw, sh,
 		cx, cy, scaleX, scaleY, angle, alpha);
 }
