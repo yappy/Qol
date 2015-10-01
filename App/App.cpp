@@ -56,6 +56,7 @@ void MyApp::update()
 	for (size_t i = 0U; i < keys.size(); i++) {
 		if (keys[i]) {
 			debug::writef(L"Key 0x%02x", i);
+			m_sound.playSoundEffect("testwav");
 		}
 	}
 	for (int i = 0; i < m_input.getPadCount(); i++) {
