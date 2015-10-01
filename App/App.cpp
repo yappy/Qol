@@ -9,203 +9,133 @@
 #include <input.h>
 #include <array>
 
-#define MAX_LOADSTRING 100
 
-// Global Variables:
-HINSTANCE hInst;                                // current instance
-WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
-WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+using yappy::graphics::Application;
+using yappy::input::DInput;
+using namespace yappy;
 
-yappy::input::DInput *g_di;
 
-LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
+class MyApp : public Application {
+public:
+	MyApp(const InitParam &param) :
+		Application(param),
+		m_di(param.hInstance, getHWnd())
+	{}
+protected:
+	void init() override;
+	void update() override;
+	void render() override;
+private:
+	DInput m_di;
+};
+
+
+void MyApp::init()
+{
+	loadTexture("notpow2", L"../sampledata/test_400_300.png");
+	loadTexture("testtex", L"../sampledata/circle.png");
+}
+
+void MyApp::render()
+{
+	static int test = 0;
+	test += 5;
+	test %= 768;
+	drawTexture("testtex", test, test);
+}
+
+void MyApp::update()
+{
+	m_di.processFrame();
+	std::array<bool, 256> keys = m_di.getKeys();
+	for (size_t i = 0U; i < keys.size(); i++) {
+		if (keys[i]) {
+			debug::writef(L"Key 0x%02x", i);
+		}
+	}
+	for (int i = 0; i < m_di.getPadCount(); i++) {
+		DIJOYSTATE state;
+		m_di.getPadState(&state, i);
+		for (int b = 0; b < 32; b++) {
+			if (state.rgbButtons[b] & 0x80) {
+				debug::writef(L"pad[%d].button%d", i, b);
+			}
+		}
+		{
+			// left stick
+			if (std::abs(state.lX) > DInput::AXIS_THRESHOLD) {
+				debug::writef(L"pad[%d].x=%ld", i, state.lX);
+			}
+			if (std::abs(state.lY) > DInput::AXIS_THRESHOLD) {
+				debug::writef(L"pad[%d].y=%ld", i, state.lY);
+			}
+			// right stick
+			if (std::abs(state.lZ) > DInput::AXIS_THRESHOLD) {
+				debug::writef(L"pad[%d].z=%ld", i, state.lZ);
+			}
+			if (std::abs(state.lRz) > DInput::AXIS_THRESHOLD) {
+				debug::writef(L"pad[%d].rz=%ld", i, state.lRz);
+			}
+		}
+		for (int b = 0; b < 4; b++) {
+			if (state.rgdwPOV[b] != -1) {
+				debug::writef(L"pad[%d].POV%d=%u", i, b, state.rgdwPOV[b]);
+			}
+		}
+	}
+}
+
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
-
-	hInst = hInstance;
-
-    // TODO: Place code here.
+	// debug test
 	{
-		using namespace yappy::debug;
-
-		enableDebugOutput();
+		debug::enableDebugOutput();
 #ifdef _DEBUG
-		enableConsoleOutput();
-		enableFileOutput(L"log.txt");
+		debug::enableConsoleOutput();
+		debug::enableFileOutput(L"log.txt");
 #endif
 
-		writeLine(L"Start application");
-		writeLine(L"‚É‚Ù‚ñ‚²");
-		writef(L"%d 0x%08x %f %.8f", 123, 0x1234abcd, 3.14, 3.14);
+		debug::writeLine(L"Start application");
+		debug::writeLine(L"‚É‚Ù‚ñ‚²");
+		debug::writef(L"%d 0x%08x %f %.8f", 123, 0x1234abcd, 3.14, 3.14);
 
 		const wchar_t *digit = L"0123456789abcdef";
 		wchar_t large[1024 + 32] = { 0 };
 		for (int i = 0; i < 1024; i++) {
 			large[i] = digit[i & 0xf];
 		}
-		writef(large);
+		debug::writef(large);
 
 		wchar_t dir[MAX_PATH];
 		::GetCurrentDirectory(MAX_PATH, dir);
-		writef(L"Current dir: %s", dir);
+		debug::writef(L"Current dir: %s", dir);
 	}
 
-	yappy::file::initWithFileSystem(L".");
-
 	int result = 0;
-	{
-		using namespace yappy::graphics;
+	try {
+		file::initWithFileSystem(L".");
 
-		InitParam param;
+		Application::InitParam param;
 		param.hInstance = hInstance;
 		param.w = 1024;
 		param.h = 768;
 		param.wndClsName = L"TestAppClass";
 		param.title = L"Test App";
+		param.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP));
+		param.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
 		param.nCmdShow = nCmdShow;
 
-		Application app(param);
+		MyApp app(param);
 		result = app.run();
 	}
-
-	{
-		using namespace yappy::debug;
-
-		shutdownDebugOutput();
+	catch (const std::exception &ex) {
+		debug::writef(L"Error: %s", ex.what());
 	}
 
+	debug::shutdownDebugOutput();
 	return result;
-}
-
-
-
-//
-//  FUNCTION: MyRegisterClass()
-//
-//  PURPOSE: Registers the window class.
-//
-ATOM MyRegisterClass(HINSTANCE hInstance)
-{
-    WNDCLASSEXW wcex;
-
-    wcex.cbSize = sizeof(WNDCLASSEX);
-
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_APP);
-    wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
-
-    return RegisterClassExW(&wcex);
-}
-
-//
-//   FUNCTION: InitInstance(HINSTANCE, int)
-//
-//   PURPOSE: Saves instance handle and creates main window
-//
-//   COMMENTS:
-//
-//        In this function, we save the instance handle in a global variable and
-//        create and display the main program window.
-//
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
-{
-   hInst = hInstance; // Store instance handle in our global variable
-
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
-
-   if (!hWnd)
-   {
-      return FALSE;
-   }
-
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
-
-   return TRUE;
-}
-
-//
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE:  Processes messages for the main window.
-//
-//  WM_COMMAND  - process the application menu
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-//
-//
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    switch (message)
-    {
-	case WM_CREATE:
-	{
-		g_di = new yappy::input::DInput(hInst, hWnd);
-		SetTimer(hWnd, 1, 16, nullptr);
-		break;
-	}
-	case WM_TIMER:
-	{
-		g_di->processFrame();
-		std::array<bool, 256> keys = g_di->getKeys();
-		for (auto i = 0U; i < keys.size(); i++) {
-			if (keys[i]) {
-				yappy::debug::writef(L"Key 0x%02x", i);
-			}
-		}
-		for (int i = 0; i < g_di->getPadCount(); i++) {
-			DIJOYSTATE state;
-			g_di->getPadState(&state, i);
-			for (int b = 0; b < 32; b++) {
-				if (state.rgbButtons[b] & 0x80) {
-					yappy::debug::writef(L"pad[%d].button%d", i, b);
-				}
-			}
-			{
-				// left stick
-				if (std::abs(state.lX) > yappy::input::DInput::AXIS_THRESHOLD) {
-					yappy::debug::writef(L"pad[%d].x=%ld", i, state.lX);
-				}
-				if (std::abs(state.lY) > yappy::input::DInput::AXIS_THRESHOLD) {
-					yappy::debug::writef(L"pad[%d].y=%ld", i, state.lY);
-				}
-				// right stick
-				if (std::abs(state.lZ) > yappy::input::DInput::AXIS_THRESHOLD) {
-					yappy::debug::writef(L"pad[%d].z=%ld", i, state.lZ);
-				}
-				if (std::abs(state.lRz) > yappy::input::DInput::AXIS_THRESHOLD) {
-					yappy::debug::writef(L"pad[%d].rz=%ld", i, state.lRz);
-				}
-			}
-			for (int b = 0; b < 4; b++) {
-				if (state.rgdwPOV[b] != -1) {
-					yappy::debug::writef(L"pad[%d].POV%d=%u", i, b, state.rgdwPOV[b]);
-				}
-			}
-		}
-		break;
-	}
-    case WM_DESTROY:
-		delete g_di;
-        PostQuitMessage(0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
-    return 0;
 }

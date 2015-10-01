@@ -194,12 +194,6 @@ Application::Application(const InitParam &param) :
 
 	initializeWindow(param);
 	initializeD3D(param);
-	::ShowWindow(m_hWnd.get(), param.nCmdShow);
-	::UpdateWindow(m_hWnd.get());
-
-	// TODO: test
-	loadTexture("notpow2", L"../sampledata/test_400_300.png");
-	loadTexture("testtex", L"../sampledata/circle.png");
 }
 
 void Application::initializeWindow(const InitParam &param)
@@ -212,12 +206,12 @@ void Application::initializeWindow(const InitParam &param)
 	cls.cbClsExtra = 0;
 	cls.cbWndExtra = 0;
 	cls.hInstance = param.hInstance;
-	cls.hIcon = nullptr;	//TODO
+	cls.hIcon = param.hIcon;
 	cls.hCursor = LoadCursor(NULL, IDC_ARROW);
 	cls.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
 	cls.lpszMenuName = nullptr;
 	cls.lpszClassName = param.wndClsName;
-	cls.hIconSm = nullptr;	//TODO
+	cls.hIconSm = param.hIconSm;
 	checkWin32Result(::RegisterClassEx(&cls) != 0, "RegisterClassEx() failed");
 
 	const DWORD wndStyle = WS_OVERLAPPEDWINDOW & ~WS_SIZEBOX & ~WS_MAXIMIZEBOX;
@@ -568,20 +562,16 @@ void Application::onIdle()
 
 void Application::updateInternal()
 {
-	// this->update();
+	// Call user code
+	update();
 }
 
 void Application::renderInternal()
 {
-	// this->render();
-	// TEST
-	drawTexture("notpow2", 1024 / 2, 768 / 2, true, false, 50, 50, 300, 200, 150, 100, 1.0f, 2.0f, 3.14f/3, 0.5f);
-	//drawTexture("testtex", 0, 0, false, false, 0, 0, 256, 256, 0, 0, 1.0f, 1.0f, 0.0f, 0.5f);
+	// Call user code
+	render();
 
-	// TEST
-	// 30fps by frame skip test
-	// render() > 16.67 ms
-	//::Sleep(17);
+	// Clear target
 	m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
 
 	// VS, PS, constant buffer
@@ -610,11 +600,18 @@ void Application::renderInternal()
 	}
 	m_drawTaskList.clear();
 
+	// vsync and flip(blt)
 	m_pSwapChain->Present(1, 0);
 }
 
 int Application::run()
 {
+	// Call user code
+	init();
+
+	::ShowWindow(m_hWnd.get(), m_initParam.nCmdShow);
+	::UpdateWindow(m_hWnd.get());
+
 	MSG msg = { 0 };
 	while (msg.message != WM_QUIT) {
 		if (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {

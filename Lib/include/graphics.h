@@ -83,52 +83,59 @@ struct DrawTask {
 	~DrawTask() = default;
 };
 
-struct InitParam {
-	HINSTANCE hInstance = nullptr;
-	int nCmdShow = SW_SHOW;
-	int w = 1024;
-	int h = 768;
-	const wchar_t *wndClsName = L"GameWndCls";
-	const wchar_t *title = L"GameApp";
-	uint32_t refreshRateNumer = 60;
-	uint32_t refreshRateDenom = 1;
-	bool fullScreen = false;
-};
-
 class Application : private util::noncopyable {
 public:
+	struct InitParam {
+		HINSTANCE hInstance = nullptr;
+		int nCmdShow = SW_SHOW;
+		int w = 1024;
+		int h = 768;
+		const wchar_t *wndClsName = L"GameWndCls";
+		const wchar_t *title = L"GameApp";
+		HICON hIcon = nullptr;
+		HICON hIconSm = nullptr;
+		uint32_t refreshRateNumer = 60;
+		uint32_t refreshRateDenom = 1;
+		bool fullScreen = false;
+	};
+
 	Application(const InitParam &param);
 	virtual ~Application();
 	int run();
+
+	HWND getHWnd() { return m_hWnd.get(); }
 
 	void loadTexture(const char *id, const wchar_t *path);
 	void getTextureSize(const char *id, uint32_t *w, uint32_t *h) const;
 
 	static const int SrcSizeDefault = -1;
 	/**
-	* @param id string id
-	* @param dx destination X (center pos)
-	* @param dy destination Y (center pos)
-	* @param lrInv left-right invert
-	* @param udInv up-down invert
-	* @param sx source X
-	* @param sy source Y
-	* @param sw source width (texture size if SRC_SIZE_DEFAULT)
-	* @param sh source height (texture size if SRC_SIZE_DEFAULT)
-	* @param cx center X from (sx, sy)
-	* @param cy center Y from (sx, sy)
-	* @param angle rotation angle [rad] (using center pos)
-	* @param scaleX size scaling factor X
-	* @param scaleY size scaling factor Y
-	* @param alpha alpha value
-	*/
+	 * @param id string id
+	 * @param dx destination X (center pos)
+	 * @param dy destination Y (center pos)
+	 * @param lrInv left-right invert
+	 * @param udInv up-down invert
+	 * @param sx source X
+	 * @param sy source Y
+	 * @param sw source width (texture size if SRC_SIZE_DEFAULT)
+	 * @param sh source height (texture size if SRC_SIZE_DEFAULT)
+	 * @param cx center X from (sx, sy)
+	 * @param cy center Y from (sx, sy)
+	 * @param angle rotation angle [rad] (using center pos)
+	 * @param scaleX size scaling factor X
+	 * @param scaleY size scaling factor Y
+	 * @param alpha alpha value
+	 */
 	void drawTexture(const char *id,
-		int dx, int dy, bool lrInv, bool udInv,
+		int dx, int dy, bool lrInv = false, bool udInv = false,
 		int sx = 0, int sy = 0, int sw = SrcSizeDefault, int sh = SrcSizeDefault,
 		int cx = 0, int cy = 0, float angle = 0.0f,
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f);
 
 protected:
+	virtual void init() = 0;
+	virtual void update() = 0;
+	virtual void render() = 0;
 
 private:
 	const UINT_PTR TimerEventId = 0xffff0001;
