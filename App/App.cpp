@@ -109,7 +109,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 #endif
 
 		debug::writeLine(L"Start application");
-		debug::writeLine(L"�ɂق�");
+		debug::writeLine(L"にほんご");
 		debug::writef(L"%d 0x%08x %f %.8f", 123, 0x1234abcd, 3.14, 3.14);
 
 		const wchar_t *digit = L"0123456789abcdef";
