@@ -17,7 +17,7 @@ public:
 	MyApp(const InitParam &param) :
 		Application(param),
 		m_input(param.hInstance, getHWnd()),
-		m_audio()
+		m_sound()
 	{}
 protected:
 	void init() override;
@@ -25,7 +25,7 @@ protected:
 	void render() override;
 private:
 	input::DInput m_input;
-	sound::XAudio2 m_audio;
+	sound::XAudio2 m_sound;
 };
 
 
@@ -33,6 +33,10 @@ void MyApp::init()
 {
 	loadTexture("notpow2", L"../sampledata/test_400_300.png");
 	loadTexture("testtex", L"../sampledata/circle.png");
+
+	m_sound.loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
+
+	m_sound.playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
 }
 
 void MyApp::render()
@@ -46,6 +50,8 @@ void MyApp::render()
 void MyApp::update()
 {
 	m_input.processFrame();
+	m_sound.processFrame();
+
 	std::array<bool, 256> keys = m_input.getKeys();
 	for (size_t i = 0U; i < keys.size(); i++) {
 		if (keys[i]) {
@@ -58,6 +64,7 @@ void MyApp::update()
 		for (int b = 0; b < 32; b++) {
 			if (state.rgbButtons[b] & 0x80) {
 				debug::writef(L"pad[%d].button%d", i, b);
+				m_sound.playSoundEffect("testwav");
 			}
 		}
 		{
