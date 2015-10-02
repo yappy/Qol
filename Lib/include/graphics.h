@@ -101,6 +101,7 @@ public:
 		uint32_t refreshRateDenom = 1;
 		bool fullScreen = false;
 		bool vsync = true;
+		bool showCursor = false;
 	};
 
 	Application(const InitParam &param);
