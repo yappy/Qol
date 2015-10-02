@@ -37,7 +37,8 @@ inline int64_t getTimeCounter()
 
 }	// namespace
 
-FrameControl::FrameControl(int64_t fpsNumer, int64_t fpsDenom) :
+FrameControl::FrameControl(int64_t fpsNumer, int64_t fpsDenom, uint32_t maxSkipCount) :
+	m_maxSkipCount(maxSkipCount),
 	m_base(0), m_skipCount(0),
 	m_fpsPeriod(static_cast<int>(fpsNumer / fpsDenom))
 {
@@ -72,13 +73,19 @@ void FrameControl::endFrame()
 	// cur < target					OK
 	// m_base == 0					the first frame, force OK
 	// m_skipCount > MaxSkipCount	force OK
-	if (cur < target || m_base == 0 || m_skipCount > MaxSkipCount) {
+	if (m_base == 0 || m_skipCount > m_maxSkipCount) {
+		// force OK
+		m_base = cur;
+		m_skipCount = 0;
+	}
+	else if (cur < target) {
 		// OK, wait for next frame
-		while (cur < target && m_base != 0 && m_skipCount <= MaxSkipCount) {
+		while (cur < target) {
 			cur = getTimeCounter();
 			::Sleep(1);
 		}
-		m_base = cur;
+		// may overrun a little bit, add it to next frame
+		m_base = target;
 		m_skipCount = 0;
 	}
 	else {
@@ -173,7 +180,7 @@ inline void createCBFromTask(CBChanges *out, const DrawTask &task)
 
 Application::Application(const InitParam &param) :
 	m_initParam(param),
-	m_frameCtrl(param.refreshRateNumer, param.refreshRateDenom),
+	m_frameCtrl(param.refreshRateNumer, param.refreshRateDenom, param.maxSkipCount),
 	m_pDevice(nullptr, util::iunknownDeleter),
 	m_pContext(nullptr, util::iunknownDeleter),
 	m_pSwapChain(nullptr, util::iunknownDeleter),
@@ -631,6 +638,14 @@ void Application::updateInternal()
 
 void Application::renderInternal()
 {
+	// TEST: frame skip
+	// if skip == 3, draw once per 4F
+	// So fps should be around 15.00
+	/*
+	uint32_t skip = 3;
+	::Sleep(17 * skip);
+	//*/
+
 	// Call user code
 	render();
 

@@ -20,7 +20,7 @@ struct hwndDeleter {
 
 class FrameControl : private util::noncopyable {
 public:
-	FrameControl(int64_t fpsNumer, int64_t fpsDenom);
+	FrameControl(int64_t fpsNumer, int64_t fpsDenomm, uint32_t m_maxSkipCount);
 	~FrameControl() = default;
 	bool shouldSkipFrame();
 	void endFrame();
@@ -28,8 +28,7 @@ public:
 	int getSkipPerSec();
 
 private:
-	const double Scale = 0.95;
-	const uint32_t MaxSkipCount = 5;
+	uint32_t m_maxSkipCount;
 
 	int64_t m_freq;
 	int64_t m_countPerFrame;
@@ -101,6 +100,7 @@ public:
 		uint32_t refreshRateDenom = 1;
 		bool fullScreen = false;
 		bool vsync = true;
+		uint32_t maxSkipCount = 5;
 		bool showCursor = false;
 	};
 
