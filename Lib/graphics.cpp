@@ -228,6 +228,14 @@ void Application::initializeWindow(const InitParam &param)
 
 	// for frame processing while window drugging etc.
 	::SetTimer(m_hWnd.get(), TimerEventId, 1, nullptr);
+
+	// Show cursor
+	if (param.showCursor) {
+		while (::ShowCursor(TRUE) < 0);
+	}
+	else {
+		while (::ShowCursor(FALSE) >= 0);
+	}
 }
 
 void Application::initializeD3D(const InitParam &param)

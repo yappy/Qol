@@ -100,6 +100,7 @@ public:
 		uint32_t refreshRateNumer = 60;
 		uint32_t refreshRateDenom = 1;
 		bool fullScreen = false;
+		bool showCursor = false;
 	};
 
 	Application(const InitParam &param);
