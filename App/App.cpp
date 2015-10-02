@@ -103,10 +103,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// debug test
 	{
 		debug::enableDebugOutput();
-#ifdef _DEBUG
 		debug::enableConsoleOutput();
 		debug::enableFileOutput(L"log.txt");
-#endif
 
 		debug::writeLine(L"Start application");
 		debug::writeLine(L"にほんご");

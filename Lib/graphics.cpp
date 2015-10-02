@@ -96,8 +96,6 @@ void FrameControl::endFrame()
 		m_fpsFrameAcc = 0;
 		m_fpsSkipAcc = 0;
 		m_fpsBase = cur;
-
-		debug::writef(L"fps=%.2f (%d)", getFramePerSec(), getSkipPerSec());
 	}
 }
 
@@ -198,6 +196,8 @@ Application::Application(const InitParam &param) :
 
 void Application::initializeWindow(const InitParam &param)
 {
+	debug::writeLine(L"Initializing window...");
+
 	// Register class
 	WNDCLASSEX cls = { 0 };
 	cls.cbSize = sizeof(WNDCLASSEX);
@@ -236,10 +236,14 @@ void Application::initializeWindow(const InitParam &param)
 	else {
 		while (::ShowCursor(FALSE) >= 0);
 	}
+
+	debug::writeLine(L"Initializing window OK");
 }
 
 void Application::initializeD3D(const InitParam &param)
 {
+	debug::writeLine(L"Initializing Direct3D 11...");
+
 	HRESULT hr = S_OK;
 
 	if (!::XMVerifyCPUSupport()) {
@@ -285,12 +289,20 @@ void Application::initializeD3D(const InitParam &param)
 		D3D_FEATURE_LEVEL featureLevel = static_cast<D3D_FEATURE_LEVEL>(0);
 
 		for (auto driverType : driverTypes) {
+			debug::writef(L"Creating device and swapchain... (driverType=%d)",
+				static_cast<int>(driverType));
 			hr = ::D3D11CreateDeviceAndSwapChain(nullptr, driverType, nullptr,
-				createDeviceFlags, &featureLevels[0], static_cast<UINT>(featureLevels.size()),
+				createDeviceFlags, featureLevels.data(), static_cast<UINT>(featureLevels.size()),
 				D3D11_SDK_VERSION, &sd,
 				&ptmpSwapChain, &ptmpDevice, &featureLevel, &ptmpContext);
-			if (SUCCEEDED(hr))
+			if (SUCCEEDED(hr)) {
+				debug::writef(L"Creating device and swapchain OK (Feature level=0x%04x)",
+					static_cast<uint32_t>(featureLevel));
 				break;
+			}
+			else {
+				debug::writeLine(L"Creating device and swapchain: Failed");
+			}
 		}
 		checkDXResult<D3DError>(hr, "D3D11CreateDeviceAndSwapChain() failed");
 		m_pDevice.reset(ptmpDevice);
@@ -300,17 +312,22 @@ void Application::initializeD3D(const InitParam &param)
 
 	// MaximumFrameLatency
 	{
+		debug::writeLine(L"SetMaximumFrameLatency...");
+
 		IDXGIDevice1 *ptmpDXGIDevice = nullptr;
 		hr = m_pDevice->QueryInterface(__uuidof(IDXGIDevice1), (void **)&ptmpDXGIDevice);
 		checkDXResult<D3DError>(hr, "QueryInterface(IDXGIDevice1) failed");
 		util::IUnknownPtr<IDXGIDevice1> pDXGIDevice(ptmpDXGIDevice, util::iunknownDeleter);
 		hr = pDXGIDevice->SetMaximumFrameLatency(1);
 		checkDXResult<D3DError>(hr, "IDXGIDevice1::SetMaximumFrameLatency() failed");
+
+		debug::writeLine(L"SetMaximumFrameLatency OK");
 	}
 
 	initBackBuffer();
 
 	// Vertex Shader
+	debug::writeLine(L"Creating vertex shader...");
 	{
 		file::Bytes bin = file::loadFile(VS_FileName);
 		ID3D11VertexShader *ptmpVS = nullptr;
@@ -319,6 +336,7 @@ void Application::initializeD3D(const InitParam &param)
 		m_pVertexShader.reset(ptmpVS);
 
 		// Create input layout
+		debug::writeLine(L"Creating input layout...");
 		D3D11_INPUT_ELEMENT_DESC layout[] = {
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -330,8 +348,11 @@ void Application::initializeD3D(const InitParam &param)
 		m_pInputLayout.reset(ptmpInputLayout);
 		// Set input layout
 		m_pContext->IASetInputLayout(m_pInputLayout.get());
+		debug::writeLine(L"Creating input layout OK");
 	}
+	debug::writeLine(L"Creating vertex shader OK");
 	// Pixel Shader
+	debug::writeLine(L"Creating pixel shader...");
 	{
 		file::Bytes bin = file::loadFile(PS_FileName);
 		ID3D11PixelShader *ptmpPS = nullptr;
@@ -339,9 +360,12 @@ void Application::initializeD3D(const InitParam &param)
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreatePixelShader() failed");
 		m_pPixelShader.reset(ptmpPS);
 	}
+	debug::writeLine(L"Creating pixel shader OK");
 
 	// Create vertex buffer
 	{
+		debug::writeLine(L"Creating vertex buffer...");
+
 		SpriteVertex vertices[] = {
 			{ XMFLOAT3(0.0f, 1.0f, 0.0f) , XMFLOAT2(0.0f, 1.0f) },
 			{ XMFLOAT3(1.0f, 1.0f, 0.0f) , XMFLOAT2(1.0f, 1.0f) },
@@ -360,6 +384,8 @@ void Application::initializeD3D(const InitParam &param)
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBuffer() failed");
 		m_pVertexBuffer.reset(ptmpVertexBuffer);
 
+		debug::writeLine(L"Creating vertex buffer OK");
+
 		// Set vertex buffer
 		ID3D11Buffer *pVertexBuffer = m_pVertexBuffer.get();
 		UINT stride = sizeof(SpriteVertex);
@@ -367,8 +393,11 @@ void Application::initializeD3D(const InitParam &param)
 		m_pContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &stride, &offset);
 		// Set primitive topology
 		m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+		debug::writeLine(L"Set vertex buffer OK");
 	}
 	// Create constant buffer
+	debug::writeLine(L"Creating constant buffer...");
 	{
 		CBNeverChanges buffer;
 		// Projection matrix: Window coord -> (-1, -1) .. (1, 1)
@@ -401,8 +430,10 @@ void Application::initializeD3D(const InitParam &param)
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBuffer() failed");
 		m_pCBChanges.reset(ptmpCBChanges);
 	}
+	debug::writeLine(L"Creating constant buffer OK");
 
 	// Create rasterizer state
+	debug::writeLine(L"Creating rasterizer state...");
 	{
 		D3D11_RASTERIZER_DESC rasterDesc;
 		::ZeroMemory(&rasterDesc, sizeof(rasterDesc));
@@ -413,7 +444,9 @@ void Application::initializeD3D(const InitParam &param)
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBuffer() failed");
 		m_pRasterizerState.reset(ptmpRasterizerState);
 	}
-	// Create sample state
+	debug::writeLine(L"Creating rasterizer state OK");
+	// Create sampler state
+	debug::writeLine(L"Creating sampler state...");
 	{
 		D3D11_SAMPLER_DESC sampDesc;
 		::ZeroMemory(&sampDesc, sizeof(sampDesc));
@@ -429,7 +462,9 @@ void Application::initializeD3D(const InitParam &param)
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreateSamplerState() failed");
 		m_pSamplerState.reset(ptmpSamplerState);
 	}
+	debug::writeLine(L"Creating sampler state OK");
 	// Create blend state
+	debug::writeLine(L"Creating blend state...");
 	{
 		D3D11_BLEND_DESC blendDesc;
 		::ZeroMemory(&blendDesc, sizeof(blendDesc));
@@ -448,6 +483,7 @@ void Application::initializeD3D(const InitParam &param)
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreateBlendState() failed");
 		m_pBlendState.reset(ptmpBlendState);
 	}
+	debug::writeLine(L"Creating blend state OK");
 
 	// fullscreen initially
 	/*
@@ -459,6 +495,8 @@ void Application::initializeD3D(const InitParam &param)
 	- Another application is already in full-screen mode.
 	*/
 	if(param.fullScreen) {
+		debug::writeLine(L"Set fullscreen...");
+
 		hr = m_pSwapChain->SetFullscreenState(TRUE, nullptr);
 		if (hr == DXGI_ERROR_NOT_CURRENTLY_AVAILABLE) {
 			debug::writeLine(L"Fullscreen mode is currently unavailable");
@@ -468,10 +506,14 @@ void Application::initializeD3D(const InitParam &param)
 			checkDXResult<D3DError>(hr, "IDXGISwapChain::SetFullscreenState() failed");
 		}
 	}
+
+	debug::writeLine(L"Initializing Direct3D 11 OK");
 }
 
 void Application::initBackBuffer()
 {
+	debug::writeLine(L"initalizing BackBuffer...");
+
 	HRESULT hr = S_OK;
 
 	// Create a render target view
@@ -488,6 +530,8 @@ void Application::initBackBuffer()
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreateRenderTargetView() failed");
 		m_pContext->OMSetRenderTargets(1, &ptmpRenderTargetView, nullptr);
 		m_pRenderTargetView.reset(ptmpRenderTargetView);
+
+		debug::writeLine(L"SetRenderTarget OK");
 	}
 
 	// Setup the viewport
@@ -500,7 +544,11 @@ void Application::initBackBuffer()
 		vp.MinDepth = 0.0f;
 		vp.MaxDepth = 1.0f;
 		m_pContext->RSSetViewports(1, &vp);
+
+		debug::writeLine(L"SetWiewPort OK");
 	}
+
+	debug::writeLine(L"initalizing BackBuffer OK");
 }
 
 Application::~Application()
@@ -511,6 +559,7 @@ Application::~Application()
 	if (m_pSwapChain != nullptr) {
 		m_pSwapChain->SetFullscreenState(FALSE, nullptr);
 	}
+	debug::writeLine(L"Finalize Application, Direct3D 11, window");
 }
 
 LRESULT CALLBACK Application::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -566,6 +615,12 @@ void Application::onIdle()
 		renderInternal();
 	}
 	m_frameCtrl.endFrame();
+
+	// TODO fps
+	wchar_t buf[256] = { 0 };
+	swprintf_s(buf, L"%s fps=%.2f (%d)", m_initParam.title,
+		m_frameCtrl.getFramePerSec(), m_frameCtrl.getSkipPerSec());
+	::SetWindowText(m_hWnd.get(), buf);
 }
 
 void Application::updateInternal()
