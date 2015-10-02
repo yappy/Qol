@@ -218,8 +218,6 @@ void XAudio2::playBgm(const wchar_t *path)
 	int ret = 0;
 	HRESULT hr = S_OK;
 
-	debug::writef(L"playBgm: %s", path);
-
 	stopBgm();
 
 	m_ovFileBin = file::loadFile(path);
