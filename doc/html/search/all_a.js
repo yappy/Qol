@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['texture',['Texture',['../structyappy_1_1graphics_1_1Texture.html',1,'yappy::graphics']]]
+  ['oggvorbiserror',['OggVorbisError',['../classyappy_1_1error_1_1OggVorbisError.html',1,'yappy::error']]]
 ];
