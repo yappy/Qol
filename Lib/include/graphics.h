@@ -83,6 +83,9 @@ struct DrawTask {
 	~DrawTask() = default;
 };
 
+/** @brief User application base, managing window and Direct3D.
+ * @details Please inherit this and override protected methods.
+ */
 class Application : private util::noncopyable {
 public:
 	struct InitParam {
@@ -105,26 +108,40 @@ public:
 
 	HWND getHWnd() { return m_hWnd.get(); }
 
+	/**@brief Use texture size.
+	  * @details You can use cw, ch in drawTexture().
+	  */
+	static const int SrcSizeDefault = -1;
+
+	/**@brief Load a texture.
+	  * @param[in] id string id
+	  * @param[in] path file path
+	  */
 	void loadTexture(const char *id, const wchar_t *path);
+
+	/**@brief Get texture size.
+	  * @param[in] id string id
+	  * @param[out] w texture width
+	  * @param[out] h texture height
+	  */
 	void getTextureSize(const char *id, uint32_t *w, uint32_t *h) const;
 
-	static const int SrcSizeDefault = -1;
-	/**
-	 * @param id string id
-	 * @param dx destination X (center pos)
-	 * @param dy destination Y (center pos)
-	 * @param lrInv left-right invert
-	 * @param udInv up-down invert
-	 * @param sx source X
-	 * @param sy source Y
-	 * @param sw source width (texture size if SRC_SIZE_DEFAULT)
-	 * @param sh source height (texture size if SRC_SIZE_DEFAULT)
-	 * @param cx center X from (sx, sy)
-	 * @param cy center Y from (sx, sy)
-	 * @param angle rotation angle [rad] (using center pos)
-	 * @param scaleX size scaling factor X
-	 * @param scaleY size scaling factor Y
-	 * @param alpha alpha value
+	/** @brief Draw texture.
+	 * @param[in] id string id
+	 * @param[in] dx destination X (center pos)
+	 * @param[in] dy destination Y (center pos)
+	 * @param[in] lrInv left-right invert
+	 * @param[in] udInv up-down invert
+	 * @param[in] sx source X
+	 * @param[in] sy source Y
+	 * @param[in] sw source width (texture size if SRC_SIZE_DEFAULT)
+	 * @param[in] sh source height (texture size if SRC_SIZE_DEFAULT)
+	 * @param[in] cx center X from (sx, sy)
+	 * @param[in] cy center Y from (sx, sy)
+	 * @param[in] angle rotation angle [rad] (using center pos)
+	 * @param[in] scaleX size scaling factor X
+	 * @param[in] scaleY size scaling factor Y
+	 * @param[in] alpha alpha value
 	 */
 	void drawTexture(const char *id,
 		int dx, int dy, bool lrInv = false, bool udInv = false,
