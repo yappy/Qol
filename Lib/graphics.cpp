@@ -72,13 +72,19 @@ void FrameControl::endFrame()
 	// cur < target					OK
 	// m_base == 0					the first frame, force OK
 	// m_skipCount > MaxSkipCount	force OK
-	if (cur < target || m_base == 0 || m_skipCount > MaxSkipCount) {
+	if (m_base == 0 || m_skipCount > MaxSkipCount) {
+		// force OK
+		m_base = cur;
+		m_skipCount = 0;
+	}
+	else if (cur < target) {
 		// OK, wait for next frame
-		while (cur < target && m_base != 0 && m_skipCount <= MaxSkipCount) {
+		while (cur < target) {
 			cur = getTimeCounter();
 			::Sleep(1);
 		}
-		m_base = cur;
+		// may overrun a little bit, add it to next frame
+		m_base = target;
 		m_skipCount = 0;
 	}
 	else {

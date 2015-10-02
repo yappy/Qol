@@ -28,7 +28,6 @@ public:
 	int getSkipPerSec();
 
 private:
-	const double Scale = 0.95;
 	const uint32_t MaxSkipCount = 5;
 
 	int64_t m_freq;
