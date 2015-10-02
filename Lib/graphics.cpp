@@ -601,7 +601,7 @@ void Application::renderInternal()
 	m_drawTaskList.clear();
 
 	// vsync and flip(blt)
-	m_pSwapChain->Present(1, 0);
+	m_pSwapChain->Present(m_initParam.vsync ? 1 : 0, 0);
 }
 
 int Application::run()
