@@ -26,6 +26,7 @@ protected:
 private:
 	input::DInput m_input;
 	sound::XAudio2 m_sound;
+	uint64_t m_frameCount = 0;
 };
 
 
@@ -41,9 +42,8 @@ void MyApp::init()
 
 void MyApp::render()
 {
-	static int test = 0;
-	test += 5;
-	test %= 768;
+	int test = static_cast<int>(m_frameCount * 5 % 768);
+
 	drawTexture("testtex", test, test);
 }
 
@@ -51,6 +51,7 @@ void MyApp::update()
 {
 	m_input.processFrame();
 	m_sound.processFrame();
+	m_frameCount++;
 
 	std::array<bool, 256> keys = m_input.getKeys();
 	for (size_t i = 0U; i < keys.size(); i++) {
