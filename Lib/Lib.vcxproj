@@ -168,6 +168,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\config.h" />
     <ClInclude Include="include\debug.h" />
     <ClInclude Include="include\exceptions.h" />
     <ClInclude Include="include\file.h" />
@@ -180,6 +181,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="config.cpp" />
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="exceptions.cpp" />
     <ClCompile Include="file.cpp" />
