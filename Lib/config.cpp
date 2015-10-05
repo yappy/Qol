@@ -1,28 +1,98 @@
 #include "stdafx.h"
 #include "include/config.h"
-#include <fstream>
+#include "include/debug.h"
+#include <cstdio>
 
 namespace yappy {
 namespace config {
 
-Config::Config(const wchar_t *fileName, InitList keyAndDefaults) :
+ConfigFile::ConfigFile(const wchar_t *fileName, InitList keyAndDefaults) :
 	m_fileName(fileName),
-	m_defaults(keyAndDefaults), m_map(keyAndDefaults)
+	m_defaults(keyAndDefaults), m_map()
 {
-	
+	load();
 }
 
-void Config::load()
+ConfigFile::~ConfigFile()
 {
-
+	try {
+		save();
+	}
+	catch (const std::exception &e) {
+		debug::writef(L"Config save error: %s", util::utf82wc(e.what()));
+	}
 }
 
-void Config::save() const
+void ConfigFile::load()
 {
+	debug::writeLine(L"Load config");
 
+	std::regex re(R"(\s*(\S+?)\s*=\s*(\S*)\s*)");
+	std::cmatch match;
+
+	FILE *tmpfp = nullptr;
+	if (::_wfopen_s(&tmpfp, m_fileName, L"r") != 0) {
+		save();
+		if (::_wfopen_s(&tmpfp, m_fileName, L"r") != 0) {
+			throw std::runtime_error("Load config file failed");
+		}
+	}
+	util::FilePtr fp(tmpfp, util::fileDeleter);
+
+	char line[LineCharMax];
+	while (::fgets(line, LineCharMax, fp.get()) != nullptr) {
+		size_t len = ::strlen(line);
+		if (line[len - 1] == '\n') {
+			// legal line
+			if (std::regex_match(line, match, re)) {
+				const std::string key = match.str(1);
+				const std::string value = match.str(2);
+				debug::writef(L"key: %s, value: %s",
+					util::utf82wc(key.c_str()).c_str(),
+					util::utf82wc(value.c_str()).c_str());
+				m_map[key] = value;
+			}
+		}
+		else {
+			// illegal line
+			while (::fgets(line, LineCharMax, fp.get()) != nullptr) {
+				// ignore to next LF
+				size_t len = ::strlen(line);
+				if (line[len - 1] == '\n') {
+					break;
+				}
+			}
+		}
+	}
+	fp.reset();
 }
 
-const std::string &Config::getString(const std::string &key)
+void ConfigFile::save()
+{
+	debug::writeLine(L"Save config");
+
+	FILE *tmpfp = nullptr;
+	if (::_wfopen_s(&tmpfp, m_fileName, L"w") != 0) {
+		throw std::runtime_error("Save config file failed");
+	}
+	util::FilePtr fp(tmpfp, util::fileDeleter);
+
+	for (const auto &pair : m_defaults) {
+		const std::string &key = pair.first;
+		const std::string &value = getString(key);
+		::fprintf_s(fp.get(), "%s=%s\n", key.c_str(), value.c_str());
+	}
+}
+
+void ConfigFile::setString(const std::string &key, const std::string &value)
+{
+	if (m_defaults.find(key) == m_defaults.end()) {
+		throw std::invalid_argument("Key not found: " + key);
+	}
+	m_map[key] = value;
+}
+
+const std::string &ConfigFile::getString(const std::string &key)
 {
 	auto res = m_map.find(key);
 	if (res == m_map.end()) {
@@ -34,7 +104,7 @@ const std::string &Config::getString(const std::string &key)
 	return res->second;
 }
 
-bool Config::getBool(const std::string &key)
+bool ConfigFile::getBool(const std::string &key)
 {
 	{
 		const std::string &value = getString(key);
@@ -61,7 +131,7 @@ bool Config::getBool(const std::string &key)
 	
 }
 
-int Config::getInt(const std::string &key)
+int ConfigFile::getInt(const std::string &key)
 {
 	{
 		const std::string &value = getString(key);

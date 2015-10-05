@@ -5,6 +5,7 @@
 #include "App.h"
 #include <debug.h>
 #include <file.h>
+#include <config.h>
 #include <graphics.h>
 #include <input.h>
 #include <sound.h>
@@ -125,6 +126,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	int result = 0;
 	try {
+		config::ConfigFile config(L"config.txt", {
+			{ "graphics.skip", "0" },
+			{ "graphics.cursor", "true" },
+			{ "graphics.fullscreen", "false" }
+		});
+
 		file::initWithFileSystem(L".");
 
 		graphics::Application::InitParam param;
@@ -136,12 +143,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		param.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP));
 		param.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
 		param.nCmdShow = nCmdShow;
+		param.showCursor = config.getBool("graphics.cursor");
+		param.fullScreen = config.getBool("graphics.fullscreen");
 
 		MyApp app(param);
 		result = app.run();
 	}
 	catch (const std::exception &ex) {
-		debug::writef(L"Error: %s", ex.what());
+		debug::writef(L"Error: %s", util::utf82wc(ex.what()));
 	}
 
 	debug::shutdownDebugOutput();
