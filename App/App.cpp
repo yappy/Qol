@@ -126,11 +126,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	int result = 0;
 	try {
-		config::ConfigFile config(L"config.txt", {
-			{ "graphics.skip", "0" },
-			{ "graphics.cursor", "true" },
-			{ "graphics.fullscreen", "false" }
-		});
+		struct {
+			int skip;
+			bool cursor;
+			bool fullscreen;
+		} config;
+		{
+			config::ConfigFile cf(L"config.txt", {
+				{ "graphics.skip", "0" },
+				{ "graphics.cursor", "true" },
+				{ "graphics.fullscreen", "false" }
+			});
+			config.skip       = cf.getInt("graphics.skip");
+			config.cursor     = cf.getBool("graphics.cursor");
+			config.fullscreen = cf.getBool("graphics.fullscreen");
+		}
 
 		file::initWithFileSystem(L".");
 
@@ -143,8 +153,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		param.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP));
 		param.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
 		param.nCmdShow = nCmdShow;
-		param.showCursor = config.getBool("graphics.cursor");
-		param.fullScreen = config.getBool("graphics.fullscreen");
+		param.frameSkip = config.skip;
+		param.showCursor = config.cursor;
+		param.fullScreen = config.fullscreen;
 
 		MyApp app(param);
 		result = app.run();
