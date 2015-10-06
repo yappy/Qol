@@ -37,10 +37,9 @@ inline int64_t getTimeCounter()
 
 }	// namespace
 
-FrameControl::FrameControl(int64_t fpsNumer, int64_t fpsDenom, uint32_t maxSkipCount) :
-	m_maxSkipCount(maxSkipCount),
-	m_base(0), m_skipCount(0),
-	m_fpsPeriod(static_cast<int>(fpsNumer / fpsDenom))
+FrameControl::FrameControl(uint32_t fps, uint32_t skipCount) :
+	m_skipCount(skipCount),
+	m_fpsPeriod(fps)
 {
 	// counter/sec
 	LARGE_INTEGER freq;
@@ -49,59 +48,54 @@ FrameControl::FrameControl(int64_t fpsNumer, int64_t fpsDenom, uint32_t maxSkipC
 	m_freq = freq.QuadPart;
 
 	// counter/frame = (counter/sec) / (frame/sec)
-	//               = m_freq / (fpsNumer / fpsDenom)
-	//               = m_freq * fpsDenom / fpsNumer
-	m_countPerFrame = m_freq * fpsDenom / fpsNumer;
+	//               = m_freq / fps
+	m_counterPerFrame = m_freq / fps;
 }
 
 bool FrameControl::shouldSkipFrame()
 {
-	return m_skipCount > 0;
+	return m_frameCount == 0;
 }
 
 void FrameControl::endFrame()
 {
-	if (shouldSkipFrame()) {
-		m_fpsSkipAcc++;
-	}
-	else {
+	// for fps calc
+	if (!shouldSkipFrame()) {
 		m_fpsFrameAcc++;
 	}
 
-	int64_t target = m_base + m_countPerFrame * (m_skipCount + 1);
+	int64_t target = m_base + m_counterPerFrame;
 	int64_t cur = getTimeCounter();
-	// cur < target					OK
-	// m_base == 0					the first frame, force OK
-	// m_skipCount > MaxSkipCount	force OK
-	if (m_base == 0 || m_skipCount > m_maxSkipCount) {
+	if (m_base == 0) {
 		// force OK
 		m_base = cur;
-		m_skipCount = 0;
 	}
 	else if (cur < target) {
 		// OK, wait for next frame
 		while (cur < target) {
-			cur = getTimeCounter();
 			::Sleep(1);
+			cur = getTimeCounter();
 		}
 		// may overrun a little bit, add it to next frame
 		m_base = target;
-		m_skipCount = 0;
 	}
 	else {
-		// too late, skip the next frame
-		m_skipCount++;
+		// too late, probably immediately right after vsync
+		m_base = cur;
 	}
 
+	// m_frameCount++;
+	// m_frameCount %= (#draw(=1) + #skip)
+	m_frameCount = (m_frameCount + 1) % (1 + m_skipCount);
+
+	// for fps calc
 	m_fpsCount++;
 	if (m_fpsCount >= m_fpsPeriod) {
 		double sec = static_cast<double>(cur - m_fpsBase) / m_freq;
 		m_fps = m_fpsFrameAcc / sec;
-		m_sps = m_fpsSkipAcc;
 
 		m_fpsCount = 0;
 		m_fpsFrameAcc = 0;
-		m_fpsSkipAcc = 0;
 		m_fpsBase = cur;
 	}
 }
@@ -109,11 +103,6 @@ void FrameControl::endFrame()
 double FrameControl::getFramePerSec()
 {
 	return m_fps;
-}
-
-int FrameControl::getSkipPerSec()
-{
-	return m_sps;
 }
 
 #pragma endregion
@@ -180,7 +169,7 @@ inline void createCBFromTask(CBChanges *out, const DrawTask &task)
 
 Application::Application(const InitParam &param) :
 	m_initParam(param),
-	m_frameCtrl(param.refreshRateNumer, param.refreshRateDenom, param.maxSkipCount),
+	m_frameCtrl(param.refreshRate, param.frameSkip),
 	m_pDevice(nullptr, util::iunknownDeleter),
 	m_pContext(nullptr, util::iunknownDeleter),
 	m_pSwapChain(nullptr, util::iunknownDeleter),
@@ -279,8 +268,8 @@ void Application::initializeD3D(const InitParam &param)
 		sd.BufferDesc.Width = param.w;
 		sd.BufferDesc.Height = param.h;
 		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		sd.BufferDesc.RefreshRate.Numerator = param.refreshRateNumer;
-		sd.BufferDesc.RefreshRate.Denominator = param.refreshRateDenom;
+		sd.BufferDesc.RefreshRate.Numerator = param.refreshRate;
+		sd.BufferDesc.RefreshRate.Denominator = 1;
 		sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 		sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -626,7 +615,7 @@ void Application::onIdle()
 	// TODO fps
 	wchar_t buf[256] = { 0 };
 	swprintf_s(buf, L"%s fps=%.2f (%d)", m_initParam.title,
-		m_frameCtrl.getFramePerSec(), m_frameCtrl.getSkipPerSec());
+		m_frameCtrl.getFramePerSec(), m_initParam.frameSkip);
 	::SetWindowText(m_hWnd.get(), buf);
 }
 
