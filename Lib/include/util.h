@@ -37,6 +37,12 @@ using IUnknownPtr = std::unique_ptr<T, IUnknownDeleterType>;
 template<class T>
 using IUnknownSharedPtr = std::shared_ptr<T>;
 
+inline void fileDeleter(FILE *fp)
+{
+	::fclose(fp);
+}
+using FilePtr = std::unique_ptr<FILE, decltype(&fileDeleter)>;
+
 
 inline std::string wc2utf8(const wchar_t *in)
 {

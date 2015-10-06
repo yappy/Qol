@@ -16,7 +16,9 @@
 
 #include <stdexcept>
 #include <memory>
+#include <regex>
 #include <string>
 #include <vector>
+#include <map>
 #include <unordered_map>
 #include <algorithm>
