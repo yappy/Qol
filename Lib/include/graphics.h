@@ -20,28 +20,24 @@ struct hwndDeleter {
 
 class FrameControl : private util::noncopyable {
 public:
-	FrameControl(int64_t fpsNumer, int64_t fpsDenomm, uint32_t m_maxSkipCount);
+	FrameControl(uint32_t fps, uint32_t skipCount);
 	~FrameControl() = default;
 	bool shouldSkipFrame();
 	void endFrame();
 	double getFramePerSec();
-	int getSkipPerSec();
 
 private:
-	uint32_t m_maxSkipCount;
-
 	int64_t m_freq;
-	int64_t m_countPerFrame;
-	int64_t m_base;
+	int64_t m_counterPerFrame;
+	int64_t m_base = 0;
 	uint32_t m_skipCount;
+	uint32_t m_frameCount = 0;
 
 	double m_fps = 0.0;
-	int m_sps = 0;
-	int m_fpsPeriod;
-	int m_fpsCount = 0;
+	uint32_t m_fpsPeriod;
+	uint32_t m_fpsCount = 0;
 	int64_t m_fpsBase = 0;
-	int m_fpsFrameAcc = 0;
-	int m_fpsSkipAcc = 0;
+	uint32_t m_fpsFrameAcc = 0;
 };
 
 struct Texture : private util::noncopyable {
@@ -96,11 +92,10 @@ public:
 		const wchar_t *title = L"GameApp";
 		HICON hIcon = nullptr;
 		HICON hIconSm = nullptr;
-		uint32_t refreshRateNumer = 60;
-		uint32_t refreshRateDenom = 1;
+		uint32_t refreshRate = 60;
 		bool fullScreen = false;
 		bool vsync = true;
-		uint32_t maxSkipCount = 5;
+		uint32_t frameSkip = 0;
 		bool showCursor = false;
 	};
 
