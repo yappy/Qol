@@ -54,7 +54,7 @@ FrameControl::FrameControl(uint32_t fps, uint32_t skipCount) :
 
 bool FrameControl::shouldSkipFrame()
 {
-	return m_frameCount == 0;
+	return m_frameCount != 0;
 }
 
 void FrameControl::endFrame()
