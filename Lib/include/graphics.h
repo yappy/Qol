@@ -43,13 +43,24 @@ private:
 struct Texture : private util::noncopyable {
 	using RvPtr = util::IUnknownPtr<ID3D11ShaderResourceView>;
 	RvPtr pRV;
-	uint32_t w;
-	uint32_t h;
+	uint32_t w, h;
 
 	Texture(RvPtr::pointer pRV_, RvPtr::deleter_type dRV_, uint32_t w_, uint32_t h_) :
 		pRV(pRV_, dRV_), w(w_), h(h_)
 	{}
 	~Texture() = default;
+};
+
+struct Font : private util::noncopyable {
+	using RvPtr = util::IUnknownPtr<ID3D11ShaderResourceView>;
+	std::vector<RvPtr> pRVList;
+	uint32_t w, h;
+	uint32_t startChar, endChar;
+
+	Font(uint32_t w_, uint32_t h_, uint32_t startChar_, uint32_t endChar_) :
+		w(w_), h(h_), startChar(startChar_), endChar(endChar_)
+	{}
+	~Font() = default;
 };
 
 struct DrawTask {
@@ -145,6 +156,9 @@ public:
 		int sx = 0, int sy = 0, int sw = SrcSizeDefault, int sh = SrcSizeDefault,
 		int cx = 0, int cy = 0, float angle = 0.0f,
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f);
+
+	void loadFont(const char *id, const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
+		uint32_t w, uint32_t h);
 
 protected:
 	virtual void init() = 0;

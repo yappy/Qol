@@ -753,6 +753,78 @@ void Application::drawTexture(const char *id,
 		cx, cy, scaleX, scaleY, angle, alpha);
 }
 
+// TODO error handling
+void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
+	uint32_t w, uint32_t h)
+{
+	HRESULT hr = S_OK;
+
+	HFONT hFont = CreateFont(
+		h, 0, 0, 0, 0, FALSE, FALSE, FALSE, SHIFTJIS_CHARSET,
+		OUT_TT_ONLY_PRECIS, CLIP_DEFAULT_PRECIS, PROOF_QUALITY,
+		FIXED_PITCH | FF_MODERN, fontName);
+	HDC hdc = GetDC(nullptr);
+	HFONT oldFont = (HFONT)SelectObject(hdc, hFont);
+
+	TEXTMETRIC tm = { 0 };
+	GetTextMetrics(hdc, &tm);
+
+	for (uint32_t c = startChar; c <= endChar; c++) {
+		// Get font bitmap
+		GLYPHMETRICS gm = { 0 };
+		const MAT2 mat = { { 0, 1 },{ 0, 0 },{ 0, 0 },{ 0, 1 } };
+		DWORD bufSize = GetGlyphOutline(hdc, c, GGO_GRAY8_BITMAP, &gm, 0, nullptr, &mat);
+		std::unique_ptr<uint8_t[]> buf(new uint8_t[bufSize]);
+		GetGlyphOutline(hdc, c, GGO_GRAY8_BITMAP, &gm, bufSize, buf.get(), &mat);
+		uint32_t pitch = (gm.gmBlackBoxX + 3) / 4 * 4;
+
+		uint32_t destX = gm.gmptGlyphOrigin.x;
+		uint32_t destY = tm.tmAscent - gm.gmptGlyphOrigin.y;
+
+		// Create texture
+		D3D11_TEXTURE2D_DESC desc = { 0 };
+		desc.Width = w;
+		desc.Height = h;
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		desc.SampleDesc.Count = 1;
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		ID3D11Texture2D *ptmpTex = nullptr;
+		m_pDevice->CreateTexture2D(&desc, nullptr, &ptmpTex);
+
+		// Write
+		D3D11_MAPPED_SUBRESOURCE mapped;
+		UINT subres = D3D11CalcSubresource(0, 0, 1);
+		hr = m_pContext->Map(ptmpTex, subres, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+		uint8_t *pTexels = static_cast<uint8_t *>(mapped.pData);
+		ZeroMemory(pTexels, w * h * 4);
+		for (uint32_t y = 0; y < gm.gmBlackBoxY; y++) {
+			for (uint32_t x = 0; x < gm.gmBlackBoxX; x++) {
+				uint32_t alpha = buf[y * pitch + x] * 255 / 64;
+				uint32_t destInd = ((destY + y) * w) + (destX + x);
+				pTexels[destInd + 0] = 0xff;
+				pTexels[destInd + 1] = 0xff;
+				pTexels[destInd + 2] = 0xff;
+				pTexels[destInd + 3] = alpha;
+			}
+		}
+		m_pContext->Unmap(ptmpTex, subres);
+
+		// Create resource view
+		ID3D11ShaderResourceView *ptmpRV = nullptr;
+		hr = m_pDevice->CreateShaderResourceView(ptmpTex, nullptr, &ptmpRV);
+		//ptmpRV->Release();
+		//ptmpTex->Release();
+	}
+
+	SelectObject(hdc, oldFont);
+	DeleteObject(hFont);
+	ReleaseDC(nullptr, hdc);
+}
+
 #pragma endregion
 
 }

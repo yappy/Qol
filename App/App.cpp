@@ -36,6 +36,8 @@ void MyApp::init()
 	loadTexture("notpow2", L"../sampledata/test_400_300.png");
 	loadTexture("testtex", L"../sampledata/circle.png");
 
+	loadFont("testfont", L"Consolas", 'A', 'Z', 16, 32);
+
 	m_sound.loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
 
 	m_sound.playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
