@@ -157,11 +157,11 @@ inline void createCBFromTask(CBChanges *out, const DrawTask &task)
 	out->Translate = XMMatrixTranspose(XMMatrixTranslation(
 		static_cast<float>(task.dx), static_cast<float>(task.dy), 1.0f));
 	out->uvOffset = XMFLOAT2(
-		static_cast<float>(task.sx) / task.texture->w,
-		static_cast<float>(task.sy) / task.texture->h);
+		static_cast<float>(task.sx) / task.texW,
+		static_cast<float>(task.sy) / task.texH);
 	out->uvSize = XMFLOAT2(
-		static_cast<float>(task.sw) / task.texture->w,
-		static_cast<float>(task.sh) / task.texture->h);
+		static_cast<float>(task.sw) / task.texW,
+		static_cast<float>(task.sh) / task.texH);
 	out->Alpha = task.alpha;
 }
 
@@ -660,8 +660,7 @@ void Application::renderInternal()
 		createCBFromTask(&cbChanges, task);
 		m_pContext->UpdateSubresource(m_pCBChanges.get(), 0, nullptr, &cbChanges, 0, 0);
 
-		ID3D11ShaderResourceView *rv = task.texture->pRV.get();
-		m_pContext->PSSetShaderResources(0, 1, &rv);
+		m_pContext->PSSetShaderResources(0, 1, &task.pRV);
 
 		m_pContext->Draw(4, 0);
 	}
@@ -748,7 +747,7 @@ void Application::drawTexture(const char *id,
 	const Texture &tex = res->second;
 	sw = (sw == SrcSizeDefault) ? tex.w : sw;
 	sh = (sh == SrcSizeDefault) ? tex.h : sh;
-	m_drawTaskList.emplace_back(&tex,
+	m_drawTaskList.emplace_back(tex.pRV.get(), tex.w, tex.h,
 		dx, dy, lrInv, udInv, sx, sy, sw, sh,
 		cx, cy, scaleX, scaleY, angle, alpha);
 }
@@ -757,6 +756,10 @@ void Application::drawTexture(const char *id,
 void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
 	uint32_t w, uint32_t h)
 {
+	if (m_fontMap.find(id) != m_fontMap.end()) {
+		throw std::runtime_error("id already exists");
+	}
+
 	HRESULT hr = S_OK;
 
 	HFONT hFont = CreateFont(
@@ -768,6 +771,9 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 
 	TEXTMETRIC tm = { 0 };
 	GetTextMetrics(hdc, &tm);
+
+	std::vector<FontTexture::RvPtr> rvList;
+	rvList.reserve(endChar - startChar + 1);
 
 	for (uint32_t c = startChar; c <= endChar; c++) {
 		// Get font bitmap
@@ -816,13 +822,35 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 		// Create resource view
 		ID3D11ShaderResourceView *ptmpRV = nullptr;
 		hr = m_pDevice->CreateShaderResourceView(ptmpTex, nullptr, &ptmpRV);
+
+		rvList.emplace_back(ptmpRV, util::iunknownDeleter);
 		//ptmpRV->Release();
 		//ptmpTex->Release();
 	}
 
+	// add (id, texture(...))
+	auto &val = m_fontMap.emplace(std::piecewise_construct,
+		std::forward_as_tuple(id),
+		std::forward_as_tuple(
+			w, h, startChar, endChar)).first->second;
+	val.pRVList.swap(rvList);
+
 	SelectObject(hdc, oldFont);
 	DeleteObject(hFont);
 	ReleaseDC(nullptr, hdc);
+}
+
+void Application::drawString(const char *id, char c, int dx, int dy, float scaleX, float scaleY, float alpha)
+{
+	auto res = m_fontMap.find(id);
+	if (res == m_fontMap.end()) {
+		throw std::runtime_error("id not found");
+	}
+	const FontTexture &fontTex = res->second;
+	auto *pRV = fontTex.pRVList.at(c - fontTex.startChar).get();
+	m_drawTaskList.emplace_back(pRV, fontTex.w, fontTex.h,
+		dx, dy, false, false, 0, 0, fontTex.w, fontTex.h,
+		0, 0, scaleX, scaleY, 0.0f, alpha);
 }
 
 #pragma endregion

@@ -48,6 +48,7 @@ void MyApp::render()
 	int test = static_cast<int>(m_frameCount * 5 % 768);
 
 	drawTexture("testtex", test, test);
+	drawString("testfont", 'A', 100, 100);
 }
 
 void MyApp::update()
