@@ -764,7 +764,7 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 
 	HFONT hFont = CreateFont(
 		h, 0, 0, 0, 0, FALSE, FALSE, FALSE, SHIFTJIS_CHARSET,
-		OUT_TT_ONLY_PRECIS, CLIP_DEFAULT_PRECIS, PROOF_QUALITY,
+		OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, PROOF_QUALITY,
 		FIXED_PITCH | FF_MODERN, fontName);
 	HDC hdc = GetDC(nullptr);
 	HFONT oldFont = (HFONT)SelectObject(hdc, hFont);
@@ -810,10 +810,10 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 		for (uint32_t y = 0; y < gm.gmBlackBoxY; y++) {
 			for (uint32_t x = 0; x < gm.gmBlackBoxX; x++) {
 				uint32_t alpha = buf[y * pitch + x] * 255 / 64;
-				uint32_t destInd = ((destY + y) * w) + (destX + x);
-				pTexels[destInd + 0] = 0xff;
-				pTexels[destInd + 1] = 0xff;
-				pTexels[destInd + 2] = 0xff;
+				uint32_t destInd = (((destY + y) * w) + (destX + x)) * 4;
+				pTexels[destInd + 0] = 0;
+				pTexels[destInd + 1] = 0;
+				pTexels[destInd + 2] = 0;
 				pTexels[destInd + 3] = alpha;
 			}
 		}

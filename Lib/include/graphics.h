@@ -74,13 +74,13 @@ struct DrawTask {
 	float angle;
 	float alpha;
 
-	explicit DrawTask(ID3D11ShaderResourceView *pRV_,
-		uint32_t texW, uint32_t texH,
+	DrawTask(ID3D11ShaderResourceView *pRV_,
+		uint32_t texW_, uint32_t texH_,
 		int dx_, int dy_, bool lrInv_, bool udInv_,
 		int sx_, int sy_, int sw_, int sh_,
 		int cx_, int cy_, float scaleX_, float scaleY_, float angle_,
 		float alpha_) :
-		pRV(pRV_),
+		pRV(pRV_), texW(texW_), texH(texH_),
 		dx(dx_), dy(dy_), lrInv(lrInv_), udInv(udInv_),
 		sx(sx_), sy(sy_), sw(sw_), sh(sh_),
 		cx(cx_), cy(cy_), scaleX(scaleX_), scaleY(scaleY_), angle(angle_),

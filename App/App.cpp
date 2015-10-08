@@ -1,4 +1,4 @@
-// App.cpp : Defines the entry point for the application.
+﻿// App.cpp : Defines the entry point for the application.
 //
 
 #include "stdafx.h"
@@ -36,7 +36,7 @@ void MyApp::init()
 	loadTexture("notpow2", L"../sampledata/test_400_300.png");
 	loadTexture("testtex", L"../sampledata/circle.png");
 
-	loadFont("testfont", L"Consolas", 'A', 'Z', 16, 32);
+	loadFont("testfont", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
 
 	m_sound.loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
 
@@ -48,7 +48,11 @@ void MyApp::render()
 	int test = static_cast<int>(m_frameCount * 5 % 768);
 
 	drawTexture("testtex", test, test);
-	drawString("testfont", 'A', 100, 100);
+	drawString("testfont", 'Y', 100, 100);
+	drawString("testfont", 'A', 116, 100);
+	drawString("testfont", 'P', 132, 100);
+	drawString("testfont", 'P', 148, 100);
+	drawString("testfont", 'Y', 164, 100);
 }
 
 void MyApp::update()
