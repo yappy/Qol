@@ -762,15 +762,27 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 
 	HRESULT hr = S_OK;
 
-	HFONT hFont = CreateFont(
+	// Create font
+	HFONT htmpFont = ::CreateFont(
 		h, 0, 0, 0, 0, FALSE, FALSE, FALSE, SHIFTJIS_CHARSET,
 		OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, PROOF_QUALITY,
 		FIXED_PITCH | FF_MODERN, fontName);
-	HDC hdc = GetDC(nullptr);
-	HFONT oldFont = (HFONT)SelectObject(hdc, hFont);
+	error::checkWin32Result(htmpFont != nullptr, "CreateFont() failed");
+	auto fontDel = [](HFONT hFont) { ::DeleteObject(hFont); };
+	std::unique_ptr<std::remove_pointer<HFONT>::type, decltype(fontDel)> hFont(htmpFont, fontDel);
+	// Get DC
+	HDC htmpDC = ::GetDC(nullptr);
+	error::checkWin32Result(htmpDC != nullptr, "GetDC() failed");
+	auto dcRel = [](HDC hDC) { ::ReleaseDC(nullptr, hDC); };
+	std::unique_ptr<std::remove_pointer<HDC>::type, decltype(dcRel)> hDC(htmpDC, dcRel);
+	// Select font
+	HFONT tmpOldFont = static_cast<HFONT>(::SelectObject(hDC.get(), hFont.get()));
+	error::checkWin32Result(tmpOldFont != nullptr, "SelectObject() failed");
+	auto restoreObj = [&hDC](HFONT oldFont) { ::SelectObject(hDC.get(), oldFont); };
+	std::unique_ptr<std::remove_pointer<HFONT>::type, decltype(restoreObj)> hOldFont(tmpOldFont, restoreObj);
 
 	TEXTMETRIC tm = { 0 };
-	GetTextMetrics(hdc, &tm);
+	GetTextMetrics(hDC.get(), &tm);
 
 	std::vector<FontTexture::RvPtr> rvList;
 	rvList.reserve(endChar - startChar + 1);
@@ -779,9 +791,9 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 		// Get font bitmap
 		GLYPHMETRICS gm = { 0 };
 		const MAT2 mat = { { 0, 1 },{ 0, 0 },{ 0, 0 },{ 0, 1 } };
-		DWORD bufSize = GetGlyphOutline(hdc, c, GGO_GRAY8_BITMAP, &gm, 0, nullptr, &mat);
-		std::unique_ptr<uint8_t[]> buf(new uint8_t[bufSize]);
-		GetGlyphOutline(hdc, c, GGO_GRAY8_BITMAP, &gm, bufSize, buf.get(), &mat);
+		DWORD bufSize = ::GetGlyphOutline(hDC.get(), c, GGO_GRAY8_BITMAP, &gm, 0, nullptr, &mat);
+		auto buf = std::make_unique<uint8_t[]>(bufSize);
+		::GetGlyphOutline(hDC.get(), c, GGO_GRAY8_BITMAP, &gm, bufSize, buf.get(), &mat);
 		uint32_t pitch = (gm.gmBlackBoxX + 3) / 4 * 4;
 
 		uint32_t destX = gm.gmptGlyphOrigin.x;
@@ -803,10 +815,10 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 
 		// Write
 		D3D11_MAPPED_SUBRESOURCE mapped;
-		UINT subres = D3D11CalcSubresource(0, 0, 1);
+		UINT subres = ::D3D11CalcSubresource(0, 0, 1);
 		hr = m_pContext->Map(ptmpTex, subres, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
 		uint8_t *pTexels = static_cast<uint8_t *>(mapped.pData);
-		ZeroMemory(pTexels, w * h * 4);
+		::ZeroMemory(pTexels, w * h * 4);
 		for (uint32_t y = 0; y < gm.gmBlackBoxY; y++) {
 			for (uint32_t x = 0; x < gm.gmBlackBoxX; x++) {
 				uint32_t alpha = buf[y * pitch + x] * 255 / 64;
@@ -828,16 +840,12 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 		//ptmpTex->Release();
 	}
 
-	// add (id, texture(...))
+	// add (id, FontTexture(...))
 	auto &val = m_fontMap.emplace(std::piecewise_construct,
 		std::forward_as_tuple(id),
 		std::forward_as_tuple(
 			w, h, startChar, endChar)).first->second;
 	val.pRVList.swap(rvList);
-
-	SelectObject(hdc, oldFont);
-	DeleteObject(hFont);
-	ReleaseDC(nullptr, hdc);
 }
 
 void Application::drawString(const char *id, char c, int dx, int dy, float scaleX, float scaleY, float alpha)
