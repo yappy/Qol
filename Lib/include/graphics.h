@@ -52,7 +52,9 @@ struct Texture : private util::noncopyable {
 };
 
 struct FontTexture : private util::noncopyable {
+	using TexPtr = util::IUnknownPtr<ID3D11Texture2D>;
 	using RvPtr = util::IUnknownPtr<ID3D11ShaderResourceView>;
+	std::vector<TexPtr> pTexList;
 	std::vector<RvPtr> pRVList;
 	uint32_t w, h;
 	uint32_t startChar, endChar;

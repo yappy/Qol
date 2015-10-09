@@ -31,7 +31,7 @@ inline int64_t getTimeCounter()
 {
 	LARGE_INTEGER cur;
 	BOOL b = ::QueryPerformanceCounter(&cur);
-	error::checkWin32Result(b != 0, "QueryPerformanceCounter() failed");
+	checkWin32Result(b != 0, "QueryPerformanceCounter() failed");
 	return cur.QuadPart;
 }
 
@@ -44,7 +44,7 @@ FrameControl::FrameControl(uint32_t fps, uint32_t skipCount) :
 	// counter/sec
 	LARGE_INTEGER freq;
 	BOOL b = ::QueryPerformanceFrequency(&freq);
-	error::checkWin32Result(b != FALSE, "QueryPerformanceFrequency() failed");
+	checkWin32Result(b != FALSE, "QueryPerformanceFrequency() failed");
 	m_freq = freq.QuadPart;
 
 	// counter/frame = (counter/sec) / (frame/sec)
@@ -752,7 +752,6 @@ void Application::drawTexture(const char *id,
 		cx, cy, scaleX, scaleY, angle, alpha);
 }
 
-// TODO error handling
 void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
 	uint32_t w, uint32_t h)
 {
@@ -767,24 +766,30 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 		h, 0, 0, 0, 0, FALSE, FALSE, FALSE, SHIFTJIS_CHARSET,
 		OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, PROOF_QUALITY,
 		FIXED_PITCH | FF_MODERN, fontName);
-	error::checkWin32Result(htmpFont != nullptr, "CreateFont() failed");
+	checkWin32Result(htmpFont != nullptr, "CreateFont() failed");
 	auto fontDel = [](HFONT hFont) { ::DeleteObject(hFont); };
-	std::unique_ptr<std::remove_pointer<HFONT>::type, decltype(fontDel)> hFont(htmpFont, fontDel);
+	std::unique_ptr<std::remove_pointer<HFONT>::type, decltype(fontDel)>
+		hFont(htmpFont, fontDel);
 	// Get DC
 	HDC htmpDC = ::GetDC(nullptr);
-	error::checkWin32Result(htmpDC != nullptr, "GetDC() failed");
+	checkWin32Result(htmpDC != nullptr, "GetDC() failed");
 	auto dcRel = [](HDC hDC) { ::ReleaseDC(nullptr, hDC); };
-	std::unique_ptr<std::remove_pointer<HDC>::type, decltype(dcRel)> hDC(htmpDC, dcRel);
+	std::unique_ptr<std::remove_pointer<HDC>::type, decltype(dcRel)>
+		hDC(htmpDC, dcRel);
 	// Select font
 	HFONT tmpOldFont = static_cast<HFONT>(::SelectObject(hDC.get(), hFont.get()));
-	error::checkWin32Result(tmpOldFont != nullptr, "SelectObject() failed");
+	checkWin32Result(tmpOldFont != nullptr, "SelectObject() failed");
 	auto restoreObj = [&hDC](HFONT oldFont) { ::SelectObject(hDC.get(), oldFont); };
-	std::unique_ptr<std::remove_pointer<HFONT>::type, decltype(restoreObj)> hOldFont(tmpOldFont, restoreObj);
+	std::unique_ptr<std::remove_pointer<HFONT>::type, decltype(restoreObj)>
+		hOldFont(tmpOldFont, restoreObj);
 
 	TEXTMETRIC tm = { 0 };
-	GetTextMetrics(hDC.get(), &tm);
+	checkWin32Result(::GetTextMetrics(hDC.get(), &tm) != FALSE,
+		"GetTextMetrics() failed");
 
+	std::vector<FontTexture::TexPtr> texList;
 	std::vector<FontTexture::RvPtr> rvList;
+	texList.reserve(endChar - startChar + 1);
 	rvList.reserve(endChar - startChar + 1);
 
 	for (uint32_t c = startChar; c <= endChar; c++) {
@@ -792,8 +797,10 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 		GLYPHMETRICS gm = { 0 };
 		const MAT2 mat = { { 0, 1 },{ 0, 0 },{ 0, 0 },{ 0, 1 } };
 		DWORD bufSize = ::GetGlyphOutline(hDC.get(), c, GGO_GRAY8_BITMAP, &gm, 0, nullptr, &mat);
+		checkWin32Result(bufSize != GDI_ERROR, "GetGlyphOutline() failed");
 		auto buf = std::make_unique<uint8_t[]>(bufSize);
-		::GetGlyphOutline(hDC.get(), c, GGO_GRAY8_BITMAP, &gm, bufSize, buf.get(), &mat);
+		DWORD ret = ::GetGlyphOutline(hDC.get(), c, GGO_GRAY8_BITMAP, &gm, bufSize, buf.get(), &mat);
+		checkWin32Result(ret != GDI_ERROR, "GetGlyphOutline() failed");
 		uint32_t pitch = (gm.gmBlackBoxX + 3) / 4 * 4;
 
 		uint32_t destX = gm.gmptGlyphOrigin.x;
@@ -811,12 +818,16 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		ID3D11Texture2D *ptmpTex = nullptr;
-		m_pDevice->CreateTexture2D(&desc, nullptr, &ptmpTex);
+		hr = m_pDevice->CreateTexture2D(&desc, nullptr, &ptmpTex);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateTexture2D() failed");
+		// make unique_ptr and push
+		texList.emplace_back(ptmpTex, util::iunknownDeleter);
 
 		// Write
 		D3D11_MAPPED_SUBRESOURCE mapped;
 		UINT subres = ::D3D11CalcSubresource(0, 0, 1);
 		hr = m_pContext->Map(ptmpTex, subres, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+		checkDXResult<D3DError>(hr, "ID3D11DeviceContext::Map() failed");
 		uint8_t *pTexels = static_cast<uint8_t *>(mapped.pData);
 		::ZeroMemory(pTexels, w * h * 4);
 		for (uint32_t y = 0; y < gm.gmBlackBoxY; y++) {
@@ -834,10 +845,9 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 		// Create resource view
 		ID3D11ShaderResourceView *ptmpRV = nullptr;
 		hr = m_pDevice->CreateShaderResourceView(ptmpTex, nullptr, &ptmpRV);
-
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateShaderResourceView() failed");
+		// make unique_ptr and push
 		rvList.emplace_back(ptmpRV, util::iunknownDeleter);
-		//ptmpRV->Release();
-		//ptmpTex->Release();
 	}
 
 	// add (id, FontTexture(...))
