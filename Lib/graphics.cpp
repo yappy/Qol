@@ -867,13 +867,15 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 	val.pRVList.swap(rvList);
 }
 
-void Application::drawString(const char *id, wchar_t c, int dx, int dy,
-	uint32_t color, float scaleX, float scaleY, float alpha)
+void Application::drawChar(const char *id, wchar_t c, int dx, int dy,
+	uint32_t color, float scaleX, float scaleY, float alpha,
+	int *nextx, int *nexty)
 {
 	auto res = m_fontMap.find(id);
 	if (res == m_fontMap.end()) {
 		throw std::runtime_error("id not found");
 	}
+
 	// Set alpha 0xff
 	color |= 0xff000000;
 	const FontTexture &fontTex = res->second;
@@ -881,6 +883,27 @@ void Application::drawString(const char *id, wchar_t c, int dx, int dy,
 	m_drawTaskList.emplace_back(pRV, fontTex.w, fontTex.h,
 		dx, dy, false, false, 0, 0, fontTex.w, fontTex.h,
 		0, 0, scaleX, scaleY, 0.0f, color, alpha);
+
+	if (nextx != nullptr) {
+		*nextx = dx + fontTex.w;
+	}
+	if (nexty != nullptr) {
+		*nexty = dy + fontTex.h;
+	}
+}
+
+void Application::drawString(const char *id, const wchar_t *str, int dx, int dy,
+	uint32_t color, int ajustX, float scaleX, float scaleY, float alpha,
+	int *nextx, int *nexty)
+{
+	while (*str != L'\0') {
+		drawChar(id, *str, dx, dy, color, scaleX, scaleY, alpha, &dx, nexty);
+		dx += ajustX;
+		str++;
+	}
+	if (nextx != nullptr) {
+		*nextx = dx;
+	}
 }
 
 #pragma endregion

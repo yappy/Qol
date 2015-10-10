@@ -165,9 +165,15 @@ public:
 	void loadFont(const char *id, const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
 		uint32_t w, uint32_t h);
 
-	void drawString(const char *id, wchar_t c, int dx, int dy,
+	void drawChar(const char *id, wchar_t c, int dx, int dy,
 		uint32_t color = 0x000000,
-		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f);
+		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f,
+		int *nextx = nullptr, int *nexty = nullptr);
+
+	void drawString(const char *id, const wchar_t *str, int dx, int dy,
+		uint32_t color = 0x000000, int ajustX = 0,
+		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f,
+		int *nextx = nullptr, int *nexty = nullptr);
 
 protected:
 	virtual void init() = 0;

@@ -49,14 +49,16 @@ void MyApp::render()
 	int test = static_cast<int>(m_frameCount * 5 % 768);
 
 	drawTexture("testtex", test, test);
+	drawTexture("notpow2", 1024 / 2, 768 / 2, false, false, 0, 0, -1, -1, 200, 150, m_frameCount / 3.14f / 10);
 
-	drawString("testfont", 'Y', 100, 100);
-	drawString("testfont", 'A', 116, 100);
-	drawString("testfont", 'P', 132, 100);
-	drawString("testfont", 'P', 148, 100);
-	drawString("testfont", 'Y', 164, 100, 0xff0000, 2, 2, 1.0f);
+	drawChar("testfont", 'Y', 100, 100);
+	drawChar("testfont", 'A', 116, 100);
+	drawChar("testfont", 'P', 132, 100);
+	drawChar("testfont", 'P', 148, 100);
+	drawChar("testfont", 'Y', 164, 100, 0x00ff00, 2, 2, 1.0f);
 
-	drawString("testj", L'ほ', 100, 200);
+	drawChar("testj", L'ほ', 100, 200);
+	drawString("testj", L"ほわいと", 100, 600, 0x000000, -32);
 }
 
 void MyApp::update()
