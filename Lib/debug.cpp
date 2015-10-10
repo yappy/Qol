@@ -91,7 +91,6 @@ void write(const wchar_t *str, bool newline) noexcept
 		}
 		DWORD written = 0;
 		::WriteFile(s_hFile, mbstr.c_str(), static_cast<DWORD>(mbstr.size()), &written, NULL);
-		::FlushFileBuffers(s_hFile);
 	}
 }
 
