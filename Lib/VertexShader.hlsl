@@ -15,6 +15,7 @@ cbuffer cbChanges : register( b1 ) {
 	/* float4x4	Projection; */
 	float2		uvOffset;
 	float2		uvSize;
+	float4		FontColor;
 	float		Alpha;
 };
 
@@ -59,6 +60,11 @@ VS_OUTPUT main( VS_INPUT input )
 
 	// (0.0f, 1.0f) => (offset, offset+size)
 	output.Tex = uvOffset + uvSize * input.Tex;
+
+	///////////////////////////////////////
+	// Font Color
+	///////////////////////////////////////
+	output.FontColor = FontColor;
 
 	///////////////////////////////////////
 	// Alpha

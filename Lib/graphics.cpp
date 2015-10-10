@@ -133,6 +133,7 @@ struct CBChanges {
 	XMMATRIX	Translate;
 	XMFLOAT2	uvOffset;
 	XMFLOAT2	uvSize;
+	XMFLOAT4	FontColor;
 	float		Alpha;
 };
 
@@ -162,6 +163,11 @@ inline void createCBFromTask(CBChanges *out, const DrawTask &task)
 	out->uvSize = XMFLOAT2(
 		static_cast<float>(task.sw) / task.texW,
 		static_cast<float>(task.sh) / task.texH);
+	out->FontColor = XMFLOAT4(
+		((task.fontColor & 0xff000000) >> 24) / 255.0f,
+		((task.fontColor & 0x00ff0000) >> 16) / 255.0f, 
+		((task.fontColor & 0x0000ff00) >>  8) / 255.0f, 
+		((task.fontColor & 0x000000ff) >>  0) / 255.0f);
 	out->Alpha = task.alpha;
 }
 
@@ -749,7 +755,7 @@ void Application::drawTexture(const char *id,
 	sh = (sh == SrcSizeDefault) ? tex.h : sh;
 	m_drawTaskList.emplace_back(tex.pRV.get(), tex.w, tex.h,
 		dx, dy, lrInv, udInv, sx, sy, sw, sh,
-		cx, cy, scaleX, scaleY, angle, alpha);
+		cx, cy, scaleX, scaleY, angle, 0x00000000, alpha);
 }
 
 void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
@@ -871,7 +877,7 @@ void Application::drawString(const char *id, char c, int dx, int dy, float scale
 	auto *pRV = fontTex.pRVList.at(c - fontTex.startChar).get();
 	m_drawTaskList.emplace_back(pRV, fontTex.w, fontTex.h,
 		dx, dy, false, false, 0, 0, fontTex.w, fontTex.h,
-		0, 0, scaleX, scaleY, 0.0f, alpha);
+		0, 0, scaleX, scaleY, 0.0f, 0xff0000ff, alpha);
 }
 
 #pragma endregion

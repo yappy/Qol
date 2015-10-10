@@ -74,6 +74,7 @@ struct DrawTask {
 	int cx, cy;
 	float scaleX, scaleY;
 	float angle;
+	uint32_t fontColor;
 	float alpha;
 
 	DrawTask(ID3D11ShaderResourceView *pRV_,
@@ -81,12 +82,12 @@ struct DrawTask {
 		int dx_, int dy_, bool lrInv_, bool udInv_,
 		int sx_, int sy_, int sw_, int sh_,
 		int cx_, int cy_, float scaleX_, float scaleY_, float angle_,
-		float alpha_) :
+		uint32_t fontColor_, float alpha_) :
 		pRV(pRV_), texW(texW_), texH(texH_),
 		dx(dx_), dy(dy_), lrInv(lrInv_), udInv(udInv_),
 		sx(sx_), sy(sy_), sw(sw_), sh(sh_),
 		cx(cx_), cy(cy_), scaleX(scaleX_), scaleY(scaleY_), angle(angle_),
-		alpha(alpha_)
+		fontColor(fontColor_), alpha(alpha_)
 	{}
 	DrawTask(const DrawTask &) = default;
 	DrawTask &operator=(const DrawTask &) = default;
