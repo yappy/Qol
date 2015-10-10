@@ -52,7 +52,7 @@ void MyApp::render()
 	drawString("testfont", 'A', 116, 100);
 	drawString("testfont", 'P', 132, 100);
 	drawString("testfont", 'P', 148, 100);
-	drawString("testfont", 'Y', 164, 100);
+	drawString("testfont", 'Y', 164, 100, 2, 2, 0.5);
 }
 
 void MyApp::update()

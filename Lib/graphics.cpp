@@ -802,7 +802,7 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 		DWORD ret = ::GetGlyphOutline(hDC.get(), c, GGO_GRAY8_BITMAP, &gm, bufSize, buf.get(), &mat);
 		checkWin32Result(ret != GDI_ERROR, "GetGlyphOutline() failed");
 		uint32_t pitch = (gm.gmBlackBoxX + 3) / 4 * 4;
-
+		// Black box pos in while box
 		uint32_t destX = gm.gmptGlyphOrigin.x;
 		uint32_t destY = tm.tmAscent - gm.gmptGlyphOrigin.y;
 
@@ -832,6 +832,9 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 		::ZeroMemory(pTexels, w * h * 4);
 		for (uint32_t y = 0; y < gm.gmBlackBoxY; y++) {
 			for (uint32_t x = 0; x < gm.gmBlackBoxX; x++) {
+				if (destX + x >= w || destY + y >= h) {
+					continue;
+				}
 				uint32_t alpha = buf[y * pitch + x] * 255 / 64;
 				uint32_t destInd = (((destY + y) * w) + (destX + x)) * 4;
 				pTexels[destInd + 0] = 0;
