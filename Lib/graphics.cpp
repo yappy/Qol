@@ -867,7 +867,7 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 	val.pRVList.swap(rvList);
 }
 
-void Application::drawString(const char *id, char c, int dx, int dy,
+void Application::drawString(const char *id, wchar_t c, int dx, int dy,
 	uint32_t color, float scaleX, float scaleY, float alpha)
 {
 	auto res = m_fontMap.find(id);

@@ -37,6 +37,7 @@ void MyApp::init()
 	loadTexture("testtex", L"../sampledata/circle.png");
 
 	loadFont("testfont", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
+	loadFont("testj", L"メイリオ", L'あ', L'ん', 128, 128);
 
 	m_sound.loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
 
@@ -48,11 +49,14 @@ void MyApp::render()
 	int test = static_cast<int>(m_frameCount * 5 % 768);
 
 	drawTexture("testtex", test, test);
+
 	drawString("testfont", 'Y', 100, 100);
 	drawString("testfont", 'A', 116, 100);
 	drawString("testfont", 'P', 132, 100);
 	drawString("testfont", 'P', 148, 100);
-	drawString("testfont", 'Y', 164, 100, 0x00ff00ff, 2, 2, 1.0f);
+	drawString("testfont", 'Y', 164, 100, 0xff0000, 2, 2, 1.0f);
+
+	drawString("testj", L'ほ', 100, 200);
 }
 
 void MyApp::update()
@@ -168,7 +172,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		result = app.run();
 	}
 	catch (const std::exception &ex) {
-		debug::writef(L"Error: %s", util::utf82wc(ex.what()));
+		debug::writef(L"Error: %s", util::utf82wc(ex.what()).c_str());
 	}
 
 	debug::shutdownDebugOutput();
