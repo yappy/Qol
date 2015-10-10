@@ -133,7 +133,7 @@ struct CBChanges {
 	XMMATRIX	Translate;
 	XMFLOAT2	uvOffset;
 	XMFLOAT2	uvSize;
-	XMFLOAT4	FontColor;
+	XMFLOAT4	FontColor;	// rgba
 	float		Alpha;
 };
 
@@ -164,10 +164,10 @@ inline void createCBFromTask(CBChanges *out, const DrawTask &task)
 		static_cast<float>(task.sw) / task.texW,
 		static_cast<float>(task.sh) / task.texH);
 	out->FontColor = XMFLOAT4(
-		((task.fontColor & 0xff000000) >> 24) / 255.0f,
 		((task.fontColor & 0x00ff0000) >> 16) / 255.0f, 
 		((task.fontColor & 0x0000ff00) >>  8) / 255.0f, 
-		((task.fontColor & 0x000000ff) >>  0) / 255.0f);
+		((task.fontColor & 0x000000ff) >>  0) / 255.0f,
+		((task.fontColor & 0xff000000) >> 24) / 255.0f);
 	out->Alpha = task.alpha;
 }
 
@@ -867,17 +867,20 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 	val.pRVList.swap(rvList);
 }
 
-void Application::drawString(const char *id, char c, int dx, int dy, float scaleX, float scaleY, float alpha)
+void Application::drawString(const char *id, char c, int dx, int dy,
+	uint32_t color, float scaleX, float scaleY, float alpha)
 {
 	auto res = m_fontMap.find(id);
 	if (res == m_fontMap.end()) {
 		throw std::runtime_error("id not found");
 	}
+	// Set alpha 0xff
+	color |= 0xff000000;
 	const FontTexture &fontTex = res->second;
 	auto *pRV = fontTex.pRVList.at(c - fontTex.startChar).get();
 	m_drawTaskList.emplace_back(pRV, fontTex.w, fontTex.h,
 		dx, dy, false, false, 0, 0, fontTex.w, fontTex.h,
-		0, 0, scaleX, scaleY, 0.0f, 0xff0000ff, alpha);
+		0, 0, scaleX, scaleY, 0.0f, color, alpha);
 }
 
 #pragma endregion
