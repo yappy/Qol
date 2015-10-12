@@ -320,7 +320,7 @@ size_t XAudio2::read(void *ptr, size_t size, size_t nmemb, void *datasource)
 	ASSERT(totalSize >= obj->m_readPos);
 	uint32_t remainSize = totalSize - obj->m_readPos;
 	size_t count = std::min(remainSize / size, nmemb);
-	::memcpy(ptr, &obj->m_ovFileBin[obj->m_readPos], size * count);
+	::memcpy(ptr, &obj->m_ovFileBin.data()[obj->m_readPos], size * count);
 	obj->m_readPos += static_cast<uint32_t>(size * count);
 	return count;
 }
