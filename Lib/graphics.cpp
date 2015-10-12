@@ -31,7 +31,7 @@ inline int64_t getTimeCounter()
 {
 	LARGE_INTEGER cur;
 	BOOL b = ::QueryPerformanceCounter(&cur);
-	error::checkWin32Result(b != 0, "QueryPerformanceCounter() failed");
+	checkWin32Result(b != 0, "QueryPerformanceCounter() failed");
 	return cur.QuadPart;
 }
 
@@ -44,7 +44,7 @@ FrameControl::FrameControl(uint32_t fps, uint32_t skipCount) :
 	// counter/sec
 	LARGE_INTEGER freq;
 	BOOL b = ::QueryPerformanceFrequency(&freq);
-	error::checkWin32Result(b != FALSE, "QueryPerformanceFrequency() failed");
+	checkWin32Result(b != FALSE, "QueryPerformanceFrequency() failed");
 	m_freq = freq.QuadPart;
 
 	// counter/frame = (counter/sec) / (frame/sec)
@@ -133,6 +133,7 @@ struct CBChanges {
 	XMMATRIX	Translate;
 	XMFLOAT2	uvOffset;
 	XMFLOAT2	uvSize;
+	XMFLOAT4	FontColor;	// rgba
 	float		Alpha;
 };
 
@@ -157,11 +158,16 @@ inline void createCBFromTask(CBChanges *out, const DrawTask &task)
 	out->Translate = XMMatrixTranspose(XMMatrixTranslation(
 		static_cast<float>(task.dx), static_cast<float>(task.dy), 1.0f));
 	out->uvOffset = XMFLOAT2(
-		static_cast<float>(task.sx) / task.texture->w,
-		static_cast<float>(task.sy) / task.texture->h);
+		static_cast<float>(task.sx) / task.texW,
+		static_cast<float>(task.sy) / task.texH);
 	out->uvSize = XMFLOAT2(
-		static_cast<float>(task.sw) / task.texture->w,
-		static_cast<float>(task.sh) / task.texture->h);
+		static_cast<float>(task.sw) / task.texW,
+		static_cast<float>(task.sh) / task.texH);
+	out->FontColor = XMFLOAT4(
+		((task.fontColor & 0x00ff0000) >> 16) / 255.0f, 
+		((task.fontColor & 0x0000ff00) >>  8) / 255.0f, 
+		((task.fontColor & 0x000000ff) >>  0) / 255.0f,
+		((task.fontColor & 0xff000000) >> 24) / 255.0f);
 	out->Alpha = task.alpha;
 }
 
@@ -660,8 +666,7 @@ void Application::renderInternal()
 		createCBFromTask(&cbChanges, task);
 		m_pContext->UpdateSubresource(m_pCBChanges.get(), 0, nullptr, &cbChanges, 0, 0);
 
-		ID3D11ShaderResourceView *rv = task.texture->pRV.get();
-		m_pContext->PSSetShaderResources(0, 1, &rv);
+		m_pContext->PSSetShaderResources(0, 1, &task.pRV);
 
 		m_pContext->Draw(4, 0);
 	}
@@ -748,9 +753,157 @@ void Application::drawTexture(const char *id,
 	const Texture &tex = res->second;
 	sw = (sw == SrcSizeDefault) ? tex.w : sw;
 	sh = (sh == SrcSizeDefault) ? tex.h : sh;
-	m_drawTaskList.emplace_back(&tex,
+	m_drawTaskList.emplace_back(tex.pRV.get(), tex.w, tex.h,
 		dx, dy, lrInv, udInv, sx, sy, sw, sh,
-		cx, cy, scaleX, scaleY, angle, alpha);
+		cx, cy, scaleX, scaleY, angle, 0x00000000, alpha);
+}
+
+void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
+	uint32_t w, uint32_t h)
+{
+	if (m_fontMap.find(id) != m_fontMap.end()) {
+		throw std::runtime_error("id already exists");
+	}
+
+	HRESULT hr = S_OK;
+
+	// Create font
+	HFONT htmpFont = ::CreateFont(
+		h, 0, 0, 0, 0, FALSE, FALSE, FALSE, SHIFTJIS_CHARSET,
+		OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, PROOF_QUALITY,
+		FIXED_PITCH | FF_MODERN, fontName);
+	checkWin32Result(htmpFont != nullptr, "CreateFont() failed");
+	auto fontDel = [](HFONT hFont) { ::DeleteObject(hFont); };
+	std::unique_ptr<std::remove_pointer<HFONT>::type, decltype(fontDel)>
+		hFont(htmpFont, fontDel);
+	// Get DC
+	HDC htmpDC = ::GetDC(nullptr);
+	checkWin32Result(htmpDC != nullptr, "GetDC() failed");
+	auto dcRel = [](HDC hDC) { ::ReleaseDC(nullptr, hDC); };
+	std::unique_ptr<std::remove_pointer<HDC>::type, decltype(dcRel)>
+		hDC(htmpDC, dcRel);
+	// Select font
+	HFONT tmpOldFont = static_cast<HFONT>(::SelectObject(hDC.get(), hFont.get()));
+	checkWin32Result(tmpOldFont != nullptr, "SelectObject() failed");
+	auto restoreObj = [&hDC](HFONT oldFont) { ::SelectObject(hDC.get(), oldFont); };
+	std::unique_ptr<std::remove_pointer<HFONT>::type, decltype(restoreObj)>
+		hOldFont(tmpOldFont, restoreObj);
+
+	TEXTMETRIC tm = { 0 };
+	checkWin32Result(::GetTextMetrics(hDC.get(), &tm) != FALSE,
+		"GetTextMetrics() failed");
+
+	std::vector<FontTexture::TexPtr> texList;
+	std::vector<FontTexture::RvPtr> rvList;
+	texList.reserve(endChar - startChar + 1);
+	rvList.reserve(endChar - startChar + 1);
+
+	for (uint32_t c = startChar; c <= endChar; c++) {
+		// Get font bitmap
+		GLYPHMETRICS gm = { 0 };
+		const MAT2 mat = { { 0, 1 },{ 0, 0 },{ 0, 0 },{ 0, 1 } };
+		DWORD bufSize = ::GetGlyphOutline(hDC.get(), c, GGO_GRAY8_BITMAP, &gm, 0, nullptr, &mat);
+		checkWin32Result(bufSize != GDI_ERROR, "GetGlyphOutline() failed");
+		auto buf = std::make_unique<uint8_t[]>(bufSize);
+		DWORD ret = ::GetGlyphOutline(hDC.get(), c, GGO_GRAY8_BITMAP, &gm, bufSize, buf.get(), &mat);
+		checkWin32Result(ret != GDI_ERROR, "GetGlyphOutline() failed");
+		uint32_t pitch = (gm.gmBlackBoxX + 3) / 4 * 4;
+		// Black box pos in while box
+		uint32_t destX = gm.gmptGlyphOrigin.x;
+		uint32_t destY = tm.tmAscent - gm.gmptGlyphOrigin.y;
+
+		// Create texture
+		D3D11_TEXTURE2D_DESC desc = { 0 };
+		desc.Width = w;
+		desc.Height = h;
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		desc.SampleDesc.Count = 1;
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		ID3D11Texture2D *ptmpTex = nullptr;
+		hr = m_pDevice->CreateTexture2D(&desc, nullptr, &ptmpTex);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateTexture2D() failed");
+		// make unique_ptr and push
+		texList.emplace_back(ptmpTex, util::iunknownDeleter);
+
+		// Write
+		D3D11_MAPPED_SUBRESOURCE mapped;
+		UINT subres = ::D3D11CalcSubresource(0, 0, 1);
+		hr = m_pContext->Map(ptmpTex, subres, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+		checkDXResult<D3DError>(hr, "ID3D11DeviceContext::Map() failed");
+		uint8_t *pTexels = static_cast<uint8_t *>(mapped.pData);
+		::ZeroMemory(pTexels, w * h * 4);
+		for (uint32_t y = 0; y < gm.gmBlackBoxY; y++) {
+			for (uint32_t x = 0; x < gm.gmBlackBoxX; x++) {
+				if (destX + x >= w || destY + y >= h) {
+					continue;
+				}
+				uint32_t alpha = buf[y * pitch + x] * 255 / 64;
+				uint32_t destInd = (((destY + y) * w) + (destX + x)) * 4;
+				pTexels[destInd + 0] = 0;
+				pTexels[destInd + 1] = 0;
+				pTexels[destInd + 2] = 0;
+				pTexels[destInd + 3] = alpha;
+			}
+		}
+		m_pContext->Unmap(ptmpTex, subres);
+
+		// Create resource view
+		ID3D11ShaderResourceView *ptmpRV = nullptr;
+		hr = m_pDevice->CreateShaderResourceView(ptmpTex, nullptr, &ptmpRV);
+		checkDXResult<D3DError>(hr, "ID3D11Device::CreateShaderResourceView() failed");
+		// make unique_ptr and push
+		rvList.emplace_back(ptmpRV, util::iunknownDeleter);
+	}
+
+	// add (id, FontTexture(...))
+	auto &val = m_fontMap.emplace(std::piecewise_construct,
+		std::forward_as_tuple(id),
+		std::forward_as_tuple(
+			w, h, startChar, endChar)).first->second;
+	val.pRVList.swap(rvList);
+}
+
+void Application::drawChar(const char *id, wchar_t c, int dx, int dy,
+	uint32_t color, float scaleX, float scaleY, float alpha,
+	int *nextx, int *nexty)
+{
+	auto res = m_fontMap.find(id);
+	if (res == m_fontMap.end()) {
+		throw std::runtime_error("id not found");
+	}
+
+	// Set alpha 0xff
+	color |= 0xff000000;
+	const FontTexture &fontTex = res->second;
+	auto *pRV = fontTex.pRVList.at(c - fontTex.startChar).get();
+	m_drawTaskList.emplace_back(pRV, fontTex.w, fontTex.h,
+		dx, dy, false, false, 0, 0, fontTex.w, fontTex.h,
+		0, 0, scaleX, scaleY, 0.0f, color, alpha);
+
+	if (nextx != nullptr) {
+		*nextx = dx + fontTex.w;
+	}
+	if (nexty != nullptr) {
+		*nexty = dy + fontTex.h;
+	}
+}
+
+void Application::drawString(const char *id, const wchar_t *str, int dx, int dy,
+	uint32_t color, int ajustX, float scaleX, float scaleY, float alpha,
+	int *nextx, int *nexty)
+{
+	while (*str != L'\0') {
+		drawChar(id, *str, dx, dy, color, scaleX, scaleY, alpha, &dx, nexty);
+		dx += ajustX;
+		str++;
+	}
+	if (nextx != nullptr) {
+		*nextx = dx;
+	}
 }
 
 #pragma endregion

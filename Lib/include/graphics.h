@@ -43,8 +43,7 @@ private:
 struct Texture : private util::noncopyable {
 	using RvPtr = util::IUnknownPtr<ID3D11ShaderResourceView>;
 	RvPtr pRV;
-	uint32_t w;
-	uint32_t h;
+	uint32_t w, h;
 
 	Texture(RvPtr::pointer pRV_, RvPtr::deleter_type dRV_, uint32_t w_, uint32_t h_) :
 		pRV(pRV_, dRV_), w(w_), h(h_)
@@ -52,26 +51,43 @@ struct Texture : private util::noncopyable {
 	~Texture() = default;
 };
 
+struct FontTexture : private util::noncopyable {
+	using TexPtr = util::IUnknownPtr<ID3D11Texture2D>;
+	using RvPtr = util::IUnknownPtr<ID3D11ShaderResourceView>;
+	std::vector<TexPtr> pTexList;
+	std::vector<RvPtr> pRVList;
+	uint32_t w, h;
+	uint32_t startChar, endChar;
+
+	FontTexture(uint32_t w_, uint32_t h_, uint32_t startChar_, uint32_t endChar_) :
+		w(w_), h(h_), startChar(startChar_), endChar(endChar_)
+	{}
+	~FontTexture() = default;
+};
+
 struct DrawTask {
-	const Texture *texture;
+	ID3D11ShaderResourceView *pRV;
+	uint32_t texW, texH;
 	int dx, dy;
 	bool lrInv, udInv;
 	int sx, sy, sw, sh;
 	int cx, cy;
 	float scaleX, scaleY;
 	float angle;
+	uint32_t fontColor;		// ARGB
 	float alpha;
 
-	explicit DrawTask(const Texture *texture_,
+	DrawTask(ID3D11ShaderResourceView *pRV_,
+		uint32_t texW_, uint32_t texH_,
 		int dx_, int dy_, bool lrInv_, bool udInv_,
 		int sx_, int sy_, int sw_, int sh_,
 		int cx_, int cy_, float scaleX_, float scaleY_, float angle_,
-		float alpha_) :
-		texture(texture_),
+		uint32_t fontColor_, float alpha_) :
+		pRV(pRV_), texW(texW_), texH(texH_),
 		dx(dx_), dy(dy_), lrInv(lrInv_), udInv(udInv_),
 		sx(sx_), sy(sy_), sw(sw_), sh(sh_),
 		cx(cx_), cy(cy_), scaleX(scaleX_), scaleY(scaleY_), angle(angle_),
-		alpha(alpha_)
+		fontColor(fontColor_), alpha(alpha_)
 	{}
 	DrawTask(const DrawTask &) = default;
 	DrawTask &operator=(const DrawTask &) = default;
@@ -146,6 +162,19 @@ public:
 		int cx = 0, int cy = 0, float angle = 0.0f,
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f);
 
+	void loadFont(const char *id, const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
+		uint32_t w, uint32_t h);
+
+	void drawChar(const char *id, wchar_t c, int dx, int dy,
+		uint32_t color = 0x000000,
+		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f,
+		int *nextx = nullptr, int *nexty = nullptr);
+
+	void drawString(const char *id, const wchar_t *str, int dx, int dy,
+		uint32_t color = 0x000000, int ajustX = 0,
+		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f,
+		int *nextx = nullptr, int *nexty = nullptr);
+
 protected:
 	virtual void init() = 0;
 	virtual void update() = 0;
@@ -179,6 +208,7 @@ private:
 	util::IUnknownPtr<ID3D11BlendState>			m_pBlendState;
 
 	std::unordered_map<std::string, Texture> m_texMap;
+	std::unordered_map<std::string, FontTexture> m_fontMap;
 	std::vector<DrawTask> m_drawTaskList;
 
 	void initializeWindow(const InitParam &param);
