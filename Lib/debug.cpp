@@ -85,12 +85,12 @@ void write(const wchar_t *str, bool newline) noexcept
 	}
 	// File Out
 	if (s_fileOut) {
-		std::string mbstr = util::wc2utf8(str);
-		if (newline) {
-			mbstr += "\n";
-		}
+		auto mbstr = util::wc2utf8(str);
 		DWORD written = 0;
-		::WriteFile(s_hFile, mbstr.c_str(), static_cast<DWORD>(mbstr.size()), &written, NULL);
+		::WriteFile(s_hFile, mbstr.get(), static_cast<DWORD>(strlen(mbstr.get())), &written, nullptr);
+		if (newline) {
+			::WriteFile(s_hFile, "\n", 1, &written, nullptr);
+		}
 	}
 }
 
@@ -100,6 +100,17 @@ void writef(const wchar_t *fmt, ...) noexcept
 	va_start(args, fmt);
 	wchar_t buf[1024];
 	_vsnwprintf_s(buf, _TRUNCATE, fmt, args);
+	va_end(args);
+
+	write(buf, true);
+}
+
+void writef(const char *fmt, ...) noexcept
+{
+	va_list args;
+	va_start(args, fmt);
+	char buf[1024];
+	vsnprintf_s(buf, _TRUNCATE, fmt, args);
 	va_end(args);
 
 	write(buf, true);

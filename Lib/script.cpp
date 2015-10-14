@@ -1,9 +1,23 @@
 #include "stdafx.h"
 #include "include/script.h"
+#include "include/debug.h"
 #include "include/file.h"
+#include <lua.hpp>
 
 namespace yappy {
 namespace lua {
+
+LuaError::LuaError(const std::string &msg, lua_State *L) noexcept :
+	runtime_error("")
+{
+	const char *str = lua_tostring(L, -1);
+	if (str == nullptr) {
+		m_what = msg;
+	}
+	else {
+		m_what = msg + ": " + str;
+	}
+}
 
 namespace {
 
@@ -46,6 +60,11 @@ LUALIB_API void my_luaL_openlibs(lua_State *L) {
 
 }	// namespace
 
+void Lua::luaDeleter(lua_State *lua)
+{
+	::lua_close(lua);
+}
+
 Lua::Lua() : m_lua(nullptr, luaDeleter)
 {
 	lua_State *tmpLua = ::luaL_newstate();
@@ -60,8 +79,70 @@ Lua::Lua() : m_lua(nullptr, luaDeleter)
 
 void Lua::load(const wchar_t *fileName, const char *name)
 {
-	// TODO
-	//::luaL_loadbufferx(m_lua.get());
+	lua_State *L = m_lua.get();
+
+	file::Bytes buf = file::loadFile(fileName);
+
+	// Use fileName if name is nullptr
+	auto cvtName = util::wc2utf8(fileName);
+	name = (name == nullptr) ? cvtName.get() : name;
+	int ret = ::luaL_loadbufferx(L,
+		reinterpret_cast<const char *>(buf.data()), buf.size(),
+		name, "t");
+	if (ret != LUA_OK) {
+		throw LuaError("Load script failed", L);
+	}
+
+	ret = ::lua_pcall(L, 0, LUA_MULTRET, 0);
+	if (ret != LUA_OK) {
+		throw LuaError("Execute chunk failed", L);
+	}
+}
+
+void Lua::dumpStack()
+{
+	lua_State *L = m_lua.get();
+
+	debug::writeLine("[Stack]----------------------");
+	const int num = lua_gettop(L);
+	if (num == 0) {
+		debug::writeLine("No stack.");
+		return;
+	}
+	for (int i = num; i >= 1; i--) {
+		debug::writef(L"%03d(%04d): ", i, -num + i - 1);
+		int type = lua_type(L, i);
+		switch (type) {
+		case LUA_TNIL:
+			debug::writeLine(L"NIL");
+			break;
+		case LUA_TBOOLEAN:
+			debug::writef(L"BOOLEAN %s", lua_toboolean(L, i) ? L"true" : L"false");
+			break;
+		case LUA_TLIGHTUSERDATA:
+			debug::writeLine(L"LIGHTUSERDATA");
+			break;
+		case LUA_TNUMBER:
+			debug::writef(L"NUMBER %f", lua_tonumber(L, i));
+			break;
+		case LUA_TSTRING:
+			debug::writef("STRING %s", lua_tostring(L, i));
+			break;
+		case LUA_TTABLE:
+			debug::writeLine(L"TABLE");
+			break;
+		case LUA_TFUNCTION:
+			debug::writeLine(L"FUNCTION");
+			break;
+		case LUA_TUSERDATA:
+			debug::writeLine(L"USERDATA");
+			break;
+		case LUA_TTHREAD:
+			debug::writeLine(L"THREAD");
+			break;
+		}
+	}
+	debug::writeLine(L"-----------------------------");
 }
 
 }

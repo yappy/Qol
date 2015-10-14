@@ -27,9 +27,11 @@ bool enableFileOutput(const wchar_t *fileName) noexcept;
 void shutdownDebugOutput() noexcept;
 
 void write(const wchar_t *str, bool newline = false) noexcept;
+inline void write(const char *str, bool newline = false) noexcept { write(util::utf82wc(str).c_str(), newline); }
 inline void writeLine(const wchar_t *str) noexcept { write(str, true); }
 inline void writeLine(const char *str) noexcept { write(util::utf82wc(str).c_str(), true); }
 void writef(const wchar_t *fmt, ...) noexcept;
+void writef(const char *fmt, ...) noexcept;
 
 
 class StopWatch : private util::noncopyable {

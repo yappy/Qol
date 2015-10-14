@@ -6,6 +6,7 @@
 #include <debug.h>
 #include <file.h>
 #include <config.h>
+#include <script.h>
 #include <graphics.h>
 #include <input.h>
 #include <sound.h>
@@ -136,6 +137,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		::GetCurrentDirectory(MAX_PATH, dir);
 		debug::writef(L"Current dir: %s", dir);
 	}
+	try {
+		file::initWithFileSystem(L".");
+		lua::Lua lua;
+		lua.load(L"../sampledata/test.lua", "testfile");
+		lua.dumpStack();
+	}
+	catch (std::exception &ex) {
+		debug::writef(L"Error: %s", util::utf82wc(ex.what()).c_str());
+	}
+	while (1);
 
 	int result = 0;
 	try {
