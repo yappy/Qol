@@ -147,7 +147,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	catch (std::exception &ex) {
 		debug::writef(L"Error: %s", util::utf82wc(ex.what()).c_str());
 	}
-	while (1);
+	while (1) {
+		Sleep(0);
+	}
 
 	int result = 0;
 	try {
