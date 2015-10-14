@@ -140,6 +140,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	try {
 		file::initWithFileSystem(L".");
 		lua::Lua lua;
+		lua.loadTraceLib();
 		lua.load(L"../sampledata/test.lua", "testfile");
 		lua.dumpStack();
 	}

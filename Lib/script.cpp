@@ -60,6 +60,30 @@ LUALIB_API void my_luaL_openlibs(lua_State *L) {
 
 }	// namespace
 
+///////////////////////////////////////////////////////////////////////////////
+// "trace" interface
+///////////////////////////////////////////////////////////////////////////////
+namespace {
+
+int trace_write(lua_State *L)
+{
+	int argc = lua_gettop(L);
+	for (int i = 1; i <= argc; i++) {
+		const char *str = ::lua_tostring(L, i);
+		str = (str == nullptr) ? "<?>" : str;
+		debug::writeLine(str);
+	}
+	return 0;
+}
+
+const luaL_Reg TraceLib[] =
+{
+	{ "write", trace_write },
+	{ nullptr, nullptr }
+};
+
+}	// namespace
+
 void Lua::luaDeleter(lua_State *lua)
 {
 	::lua_close(lua);
@@ -75,6 +99,13 @@ Lua::Lua() : m_lua(nullptr, luaDeleter)
 
 	::lua_atpanic(m_lua.get(), atpanic);
 	my_luaL_openlibs(m_lua.get());
+}
+
+void Lua::loadTraceLib()
+{
+	lua_State *L = m_lua.get();
+	luaL_newlib(L, TraceLib);
+	lua_setglobal(L, "trace");
 }
 
 void Lua::load(const wchar_t *fileName, const char *name)

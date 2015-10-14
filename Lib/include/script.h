@@ -20,6 +20,8 @@ class Lua {
 public:
 	Lua();
 	~Lua() = default;
+
+	void loadTraceLib();
 	void load(const wchar_t *fileName, const char *name = nullptr);
 	void dumpStack(void);
 

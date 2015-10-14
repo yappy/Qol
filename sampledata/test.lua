@@ -4,4 +4,6 @@ d = function()
 	local t = 3.14;
 end
 
+trace.write("sinki", "sinki", "return", "sinki", "sinki", "gg")
+
 return a, b, c, d
