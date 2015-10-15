@@ -2,7 +2,6 @@
 #include "include/script.h"
 #include "include/debug.h"
 #include "include/file.h"
-#include <lua.hpp>
 
 namespace yappy {
 namespace lua {
@@ -42,7 +41,7 @@ const luaL_Reg loadedlibs[] = {
 	{ LUA_STRLIBNAME, luaopen_string },
 	{ LUA_MATHLIBNAME, luaopen_math },
 	{ LUA_UTF8LIBNAME, luaopen_utf8 },
-	{ LUA_DBLIBNAME, luaopen_debug },
+//	{ LUA_DBLIBNAME, luaopen_debug },
 	{ NULL, NULL }
 };
 
@@ -56,33 +55,6 @@ LUALIB_API void my_luaL_openlibs(lua_State *L) {
 }
 ///////////////////////////////////////////////////////////////////////////////
 // Copied from linit.c END
-///////////////////////////////////////////////////////////////////////////////
-
-}	// namespace
-
-namespace {
-
-///////////////////////////////////////////////////////////////////////////////
-// "trace" interface
-///////////////////////////////////////////////////////////////////////////////
-int trace_write(lua_State *L)
-{
-	int argc = lua_gettop(L);
-	for (int i = 1; i <= argc; i++) {
-		const char *str = ::lua_tostring(L, i);
-		str = (str == nullptr) ? "<?>" : str;
-		debug::writeLine(str);
-	}
-	return 0;
-}
-
-const luaL_Reg TraceLib[] =
-{
-	{ "write", trace_write },
-	{ nullptr, nullptr }
-};
-///////////////////////////////////////////////////////////////////////////////
-// "trace" interface END
 ///////////////////////////////////////////////////////////////////////////////
 
 }	// namespace
@@ -107,8 +79,18 @@ Lua::Lua() : m_lua(nullptr, luaDeleter)
 void Lua::loadTraceLib()
 {
 	lua_State *L = m_lua.get();
-	luaL_newlib(L, TraceLib);
+	luaL_newlib(L, trace::TraceLib);
 	lua_setglobal(L, "trace");
+}
+
+void Lua::loadGraphLib(graphics::Application *app)
+{
+	lua_State *L = m_lua.get();
+	luaL_newlib(L, graph::GraphLib);
+	lua_pushstring(L, "ptr");
+	lua_pushlightuserdata(L, app);
+	lua_settable(L, -3);
+	lua_setglobal(L, "graph");
 }
 
 void Lua::load(const wchar_t *fileName, const char *name)

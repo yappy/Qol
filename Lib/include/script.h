@@ -1,8 +1,8 @@
 #pragma once
 
 #include "util.h"
-
-struct lua_State;
+#include "graphics.h"
+#include <lua.hpp>
 
 namespace yappy {
 namespace lua {
@@ -22,6 +22,7 @@ public:
 	~Lua() = default;
 
 	void loadTraceLib();
+	void loadGraphLib(graphics::Application *app);
 	void load(const wchar_t *fileName, const char *name = nullptr);
 	void dumpStack(void);
 
@@ -31,6 +32,32 @@ private:
 
 	std::unique_ptr<lua_State, LuaDeleterType> m_lua;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+// Export Functions
+///////////////////////////////////////////////////////////////////////////////
+
+namespace trace {
+
+int write(lua_State *L);
+const luaL_Reg TraceLib[] =
+{
+	{ "write", write },
+	{ nullptr, nullptr }
+};
+
+}	// namespace trace
+
+namespace graph {
+
+int draw(lua_State *L);
+const luaL_Reg GraphLib[] =
+{
+	{ "draw", draw },
+	{ nullptr, nullptr }
+};
+
+}	// namespace graph
 
 }
 }

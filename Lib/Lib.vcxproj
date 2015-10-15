@@ -190,6 +190,7 @@
     <ClCompile Include="input.cpp" />
     <ClCompile Include="network.cpp" />
     <ClCompile Include="script.cpp" />
+    <ClCompile Include="script_export.cpp" />
     <ClCompile Include="sound.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

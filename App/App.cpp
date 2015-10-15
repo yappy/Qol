@@ -26,6 +26,7 @@ protected:
 	void update() override;
 	void render() override;
 private:
+	lua::Lua m_lua;
 	input::DInput m_input;
 	sound::XAudio2 m_sound;
 	uint64_t m_frameCount = 0;
@@ -43,6 +44,12 @@ void MyApp::init()
 	m_sound.loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
 
 	m_sound.playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
+
+
+	m_lua.loadTraceLib();
+	m_lua.loadGraphLib(this);
+	m_lua.load(L"../sampledata/test.lua", "testfile.lua");
+	m_lua.dumpStack();
 }
 
 void MyApp::render()
@@ -136,19 +143,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		wchar_t dir[MAX_PATH];
 		::GetCurrentDirectory(MAX_PATH, dir);
 		debug::writef(L"Current dir: %s", dir);
-	}
-	try {
-		file::initWithFileSystem(L".");
-		lua::Lua lua;
-		lua.loadTraceLib();
-		lua.load(L"../sampledata/test.lua", "testfile");
-		lua.dumpStack();
-	}
-	catch (std::exception &ex) {
-		debug::writef(L"Error: %s", util::utf82wc(ex.what()).c_str());
-	}
-	while (1) {
-		Sleep(0);
 	}
 
 	int result = 0;
