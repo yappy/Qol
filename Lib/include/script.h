@@ -21,9 +21,35 @@ public:
 	Lua();
 	~Lua() = default;
 
+	lua_State *getLuaState() { return m_lua.get(); }
+
 	void loadTraceLib();
 	void loadGraphLib(graphics::Application *app);
-	void load(const wchar_t *fileName, const char *name = nullptr);
+
+	void loadFile(const wchar_t *fileName, const char *name = nullptr);
+
+	template <class ParamFunc, class RetFunc>
+	void callGlobal(const char *funcName,
+		ParamFunc pushParamFunc, int narg, RetFunc getRetFunc, int nret)
+	{
+		lua_State *L = m_lua.get();
+		// push global function
+		lua_getglobal(L, funcName);
+		// push parameters
+		pushParamFunc(L);
+		// call
+		int ret = lua_pcall(L, narg, nret, 0);
+		if (ret != LUA_OK) {
+			throw LuaError("Call global function failed", L);
+		}
+		// get results
+		getRetFunc(L);
+	}
+	void callGlobal(const char *funcName)
+	{
+		callGlobal(funcName, [](lua_State *L) {}, 0, [](lua_State *L) {}, 0);
+	}
+
 	void dumpStack(void);
 
 private:
@@ -36,28 +62,31 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // Export Functions
 ///////////////////////////////////////////////////////////////////////////////
+namespace lua_export {
 
-namespace trace {
+struct trace {
 
-int write(lua_State *L);
-const luaL_Reg TraceLib[] =
-{
-	{ "write", write },
+	static int write(lua_State *L);
+
+	trace() = delete;
+};
+const luaL_Reg trace_RegList[] = {
+	{ "write", trace::write },
 	{ nullptr, nullptr }
 };
 
-}	// namespace trace
+struct graph {
+	static int drawTexture(lua_State *L);
 
-namespace graph {
-
-int draw(lua_State *L);
-const luaL_Reg GraphLib[] =
-{
-	{ "draw", draw },
+	graph() = delete;
+};
+const luaL_Reg graph_RegList[] = {
+	{ "drawTexture", graph::drawTexture },
 	{ nullptr, nullptr }
 };
+const char *const graph_RawFieldName = "_rawdata";
 
-}	// namespace graph
+}	// lua_export
 
 }
 }

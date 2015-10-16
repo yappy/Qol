@@ -79,21 +79,21 @@ Lua::Lua() : m_lua(nullptr, luaDeleter)
 void Lua::loadTraceLib()
 {
 	lua_State *L = m_lua.get();
-	luaL_newlib(L, trace::TraceLib);
+	luaL_newlib(L, lua_export::trace_RegList);
 	lua_setglobal(L, "trace");
 }
 
 void Lua::loadGraphLib(graphics::Application *app)
 {
 	lua_State *L = m_lua.get();
-	luaL_newlib(L, graph::GraphLib);
-	lua_pushstring(L, "ptr");
+	luaL_newlib(L, lua_export::graph_RegList);
+	lua_pushstring(L, lua_export::graph_RawFieldName);
 	lua_pushlightuserdata(L, app);
 	lua_settable(L, -3);
 	lua_setglobal(L, "graph");
 }
 
-void Lua::load(const wchar_t *fileName, const char *name)
+void Lua::loadFile(const wchar_t *fileName, const char *name)
 {
 	lua_State *L = m_lua.get();
 

@@ -6,6 +6,8 @@ end
 
 trace.write("sinki", "sinki", "return", "sinki", "sinki", "gg");
 
-graph:draw();
+function draw()
+	graph:drawTexture("testtex", 100, 100);
+end
 
 return a, b, c, d;

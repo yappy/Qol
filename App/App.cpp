@@ -48,12 +48,13 @@ void MyApp::init()
 
 	m_lua.loadTraceLib();
 	m_lua.loadGraphLib(this);
-	m_lua.load(L"../sampledata/test.lua", "testfile.lua");
+	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
 	m_lua.dumpStack();
 }
 
 void MyApp::render()
 {
+	/*
 	int test = static_cast<int>(m_frameCount * 5 % 768);
 
 	drawTexture("testtex", test, test);
@@ -67,6 +68,8 @@ void MyApp::render()
 
 	drawChar("testj", L'ほ', 100, 200);
 	drawString("testj", L"ほわいと", 100, 600, 0x000000, -32);
+	*/
+	m_lua.callGlobal("draw");
 }
 
 void MyApp::update()
@@ -173,7 +176,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		param.title = L"Test App";
 		param.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP));
 		param.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
-		param.nCmdShow = nCmdShow;
+		param.nCmdShow = SW_MINIMIZE;//nCmdShow;
 		param.frameSkip = config.skip;
 		param.showCursor = config.cursor;
 		param.fullScreen = config.fullscreen;
