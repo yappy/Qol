@@ -7,6 +7,22 @@ namespace yappy {
 namespace lua {
 namespace lua_export {
 
+namespace {
+
+template <class T>
+inline T *getPtrFromSelf(lua_State *L, const char *fieldName)
+{
+	luaL_checktype(L, 1, LUA_TTABLE);
+	lua_getfield(L, 1, fieldName);
+	luaL_checktype(L, -1, LUA_TLIGHTUSERDATA);
+	void *p = lua_touserdata(L, -1);
+	T *result = reinterpret_cast<T *>(p);
+	lua_pop(L, 1);
+	return result;
+}
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // "trace" table
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,6 +42,21 @@ int trace::write(lua_State *L)
 // "graph" table
 ///////////////////////////////////////////////////////////////////////////////
 
+int graph::getTextureSize(lua_State *L)
+{
+	auto *app = getPtrFromSelf<graphics::Application>(L, graph_RawFieldName);
+	const char *id = luaL_checkstring(L, 2);
+
+	uint32_t w = 0;
+	uint32_t h = 0;
+	app->getTextureSize(id, &w, &h);
+
+	lua_pushinteger(L, w);
+	lua_pushinteger(L, h);
+
+	return 2;
+}
+
 /**
  * (string id, int dx, int dy, bool lrInv = false, bool udInv = false,
  * int sx = 0, int sy = 0, int sw = -1, int sh = -1,
@@ -34,14 +65,7 @@ int trace::write(lua_State *L)
  */
 int graph::drawTexture(lua_State *L)
 {
-	luaL_checktype(L, 1, LUA_TTABLE);
-	lua_getfield(L, 1, graph_RawFieldName);
-
-	luaL_checktype(L, -1, LUA_TLIGHTUSERDATA);
-	void *p = lua_touserdata(L, -1);
-	auto *app = reinterpret_cast<graphics::Application *>(p);
-	lua_pop(L, 1);
-
+	auto *app = getPtrFromSelf<graphics::Application>(L, graph_RawFieldName);
 	const char *id = luaL_checkstring(L, 2);
 	int dx = static_cast<int>(luaL_checkinteger(L, 3));
 	int dy = static_cast<int>(luaL_checkinteger(L, 4));

@@ -5,6 +5,8 @@ d = function()
 end
 
 trace.write("sinki", "sinki", "return", "sinki", "sinki", "gg");
+local w, h = graph:getTextureSize("notpow2");
+trace.write("w=" .. w, "h=" .. h);
 
 function draw()
 	graph:drawTexture("testtex", 100, 100);

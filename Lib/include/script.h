@@ -60,12 +60,11 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// Export Functions
+// Export Functions (implemented in script_export.cpp)
 ///////////////////////////////////////////////////////////////////////////////
 namespace lua_export {
 
 struct trace {
-
 	static int write(lua_State *L);
 
 	trace() = delete;
@@ -76,11 +75,13 @@ const luaL_Reg trace_RegList[] = {
 };
 
 struct graph {
+	static int getTextureSize(lua_State *L);
 	static int drawTexture(lua_State *L);
 
 	graph() = delete;
 };
 const luaL_Reg graph_RegList[] = {
+	{ "getTextureSize", graph::getTextureSize },
 	{ "drawTexture", graph::drawTexture },
 	{ nullptr, nullptr }
 };
