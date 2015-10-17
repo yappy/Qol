@@ -26,9 +26,10 @@ end
 
 function draw()
 	local t = frame * 3 % 512;
-	graph:drawTexture("unyo", t, t, false, false, 0, 0, -1, -1, w / 2, h / 2,
-		t / 3.14 / 20
-		, t / 512.0, t / 512.0, t / 512.0);
+	graph:drawTexture("unyo", 500, 350, false, false, 0, 0, -1, -1, w / 2, h / 2,
+		frame / 3.14 / 10);
+	graph:drawTexture("ball", t, t, false, false, 0, 0, -1, -1, 0, 0,
+		0.0, t / 512.0, t / 512.0, t / 512.0);
 
 	graph:drawString("testj", "ほ", 100, 200, 0x0000ff);
 	graph:drawString("testj", "ほわいと", 100, 600, 0x000000, -32);
