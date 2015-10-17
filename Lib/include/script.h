@@ -78,12 +78,16 @@ struct graph {
 	static int loadTexture(lua_State *L);
 	static int getTextureSize(lua_State *L);
 	static int drawTexture(lua_State *L);
+	static int loadFont(lua_State *L);
+	static int drawString(lua_State *L);
 	graph() = delete;
 };
 const luaL_Reg graph_RegList[] = {
 	{ "loadTexture", graph::loadTexture },
 	{ "getTextureSize", graph::getTextureSize },
 	{ "drawTexture", graph::drawTexture },
+	{ "loadFont", graph::loadFont },
+	{ "drawString", graph::drawString },
 	{ nullptr, nullptr }
 };
 const char *const graph_RawFieldName = "_rawdata";

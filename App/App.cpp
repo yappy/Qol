@@ -38,10 +38,10 @@ void MyApp::init()
 	/*
 	loadTexture("notpow2", L"../sampledata/test_400_300.png");
 	loadTexture("testtex", L"../sampledata/circle.png");
-	*/
 
 	loadFont("testfont", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
 	loadFont("testj", L"メイリオ", L'あ', L'ん', 128, 128);
+	*/
 
 	m_sound.loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
 
@@ -51,6 +51,7 @@ void MyApp::init()
 	m_lua.loadTraceLib();
 	m_lua.loadGraphLib(this);
 	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
+	m_lua.callGlobal("init");
 }
 
 void MyApp::render()
