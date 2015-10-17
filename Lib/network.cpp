@@ -29,8 +29,8 @@ void initialize()
 	debug::writef(L"WinSock2 initialized");
 	debug::writef(L"wVersion = %d.%d", LOBYTE(wsaData.wVersion), HIBYTE(wsaData.wVersion));
 	debug::writef(L"wHighVersion = %d.%d", LOBYTE(wsaData.wHighVersion), HIBYTE(wsaData.wHighVersion));
-	debug::writef(L"szDescription = %s", util::utf82wc(wsaData.szDescription).c_str());
-	debug::writef(L"szSystemStatus = %s", util::utf82wc(wsaData.szSystemStatus).c_str());
+	debug::writef(L"szDescription = %s", util::utf82wc(wsaData.szDescription).get());
+	debug::writef(L"szSystemStatus = %s", util::utf82wc(wsaData.szSystemStatus).get());
 }
 
 void finalize() noexcept

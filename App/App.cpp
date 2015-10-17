@@ -35,8 +35,10 @@ private:
 
 void MyApp::init()
 {
+	/*
 	loadTexture("notpow2", L"../sampledata/test_400_300.png");
 	loadTexture("testtex", L"../sampledata/circle.png");
+	*/
 
 	loadFont("testfont", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
 	loadFont("testj", L"メイリオ", L'あ', L'ん', 128, 128);
@@ -49,7 +51,6 @@ void MyApp::init()
 	m_lua.loadTraceLib();
 	m_lua.loadGraphLib(this);
 	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
-	m_lua.dumpStack();
 }
 
 void MyApp::render()
@@ -76,7 +77,8 @@ void MyApp::update()
 {
 	m_input.processFrame();
 	m_sound.processFrame();
-	m_frameCount++;
+
+	m_lua.callGlobal("update");
 
 	std::array<bool, 256> keys = m_input.getKeys();
 	for (size_t i = 0U; i < keys.size(); i++) {
@@ -176,7 +178,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		param.title = L"Test App";
 		param.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP));
 		param.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
-		param.nCmdShow = SW_MINIMIZE;//nCmdShow;
+		param.nCmdShow = nCmdShow;
 		param.frameSkip = config.skip;
 		param.showCursor = config.cursor;
 		param.fullScreen = config.fullscreen;
@@ -185,7 +187,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		result = app.run();
 	}
 	catch (const std::exception &ex) {
-		debug::writef(L"Error: %s", util::utf82wc(ex.what()).c_str());
+		debug::writef(L"Error: %s", util::utf82wc(ex.what()).get());
 	}
 
 	debug::shutdownDebugOutput();

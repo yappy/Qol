@@ -48,8 +48,8 @@ void ConfigFile::load()
 				const std::string key = match.str(1);
 				const std::string value = match.str(2);
 				debug::writef(L"key: %s, value: %s",
-					util::utf82wc(key.c_str()).c_str(),
-					util::utf82wc(value.c_str()).c_str());
+					util::utf82wc(key.c_str()).get(),
+					util::utf82wc(value.c_str()).get());
 				m_map[key] = value;
 			}
 		}

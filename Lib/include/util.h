@@ -52,12 +52,12 @@ inline std::unique_ptr<char[]> wc2utf8(const wchar_t *in)
 	return pBuf;
 }
 
-inline std::wstring utf82wc(const char *in)
+inline std::unique_ptr<wchar_t[]> utf82wc(const char *in)
 {
 	int len = ::MultiByteToWideChar(CP_UTF8, 0, in, -1, nullptr, 0);
 	std::unique_ptr<wchar_t[]> pBuf(new wchar_t[len]);
 	::MultiByteToWideChar(CP_UTF8, 0, in, -1, pBuf.get(), len);
-	return std::wstring(pBuf.get());
+	return pBuf;
 }
 
 

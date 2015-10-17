@@ -42,6 +42,17 @@ int trace::write(lua_State *L)
 // "graph" table
 ///////////////////////////////////////////////////////////////////////////////
 
+int graph::loadTexture(lua_State *L)
+{
+	auto *app = getPtrFromSelf<graphics::Application>(L, graph_RawFieldName);
+	const char *id = luaL_checkstring(L, 2);
+	const char *path = luaL_checkstring(L, 3);
+
+	app->loadTexture(id, util::utf82wc(path).get());
+
+	return 0;
+}
+
 int graph::getTextureSize(lua_State *L)
 {
 	auto *app = getPtrFromSelf<graphics::Application>(L, graph_RawFieldName);
