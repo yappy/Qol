@@ -6,6 +6,7 @@
 #include <debug.h>
 #include <file.h>
 #include <config.h>
+#include <script.h>
 #include <graphics.h>
 #include <input.h>
 #include <sound.h>
@@ -25,6 +26,7 @@ protected:
 	void update() override;
 	void render() override;
 private:
+	lua::Lua m_lua;
 	input::DInput m_input;
 	sound::XAudio2 m_sound;
 	uint64_t m_frameCount = 0;
@@ -33,19 +35,29 @@ private:
 
 void MyApp::init()
 {
+	/*
 	loadTexture("notpow2", L"../sampledata/test_400_300.png");
 	loadTexture("testtex", L"../sampledata/circle.png");
 
 	loadFont("testfont", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
 	loadFont("testj", L"メイリオ", L'あ', L'ん', 128, 128);
+	*/
 
 	m_sound.loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
 
-	m_sound.playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
+	//m_sound.playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
+
+
+	m_lua.loadTraceLib();
+	m_lua.loadGraphLib(this);
+	m_lua.loadSoundLib(&m_sound);
+	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
+	m_lua.callGlobal("init");
 }
 
 void MyApp::render()
 {
+	/*
 	int test = static_cast<int>(m_frameCount * 5 % 768);
 
 	drawTexture("testtex", test, test);
@@ -59,13 +71,16 @@ void MyApp::render()
 
 	drawChar("testj", L'ほ', 100, 200);
 	drawString("testj", L"ほわいと", 100, 600, 0x000000, -32);
+	*/
+	m_lua.callGlobal("draw");
 }
 
 void MyApp::update()
 {
 	m_input.processFrame();
 	m_sound.processFrame();
-	m_frameCount++;
+
+	m_lua.callGlobal("update");
 
 	std::array<bool, 256> keys = m_input.getKeys();
 	for (size_t i = 0U; i < keys.size(); i++) {
@@ -174,7 +189,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		result = app.run();
 	}
 	catch (const std::exception &ex) {
-		debug::writef(L"Error: %s", util::utf82wc(ex.what()).c_str());
+		debug::writef(L"Error: %s", util::utf82wc(ex.what()).get());
 	}
 
 	debug::shutdownDebugOutput();

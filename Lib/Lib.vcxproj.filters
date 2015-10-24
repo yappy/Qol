@@ -59,6 +59,9 @@
     <ClInclude Include="include\config.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
+    <ClInclude Include="include\script.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -86,6 +89,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="script.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="script_export.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

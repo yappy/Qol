@@ -92,13 +92,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;$(SolutionDir)\Lib\include;$(SolutionDir)libvorbis-1.3.5\include;$(SolutionDir)libogg-1.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;$(SolutionDir)\Lib\include;$(SolutionDir)libvorbis-1.3.5\include;$(SolutionDir)libogg-1.3.2\include;$(SolutionDir)lua-5.3.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(TargetDir)Lib.lib;$(TargetDir)libogg_static.lib;$(TargetDir)libvorbis_static.lib;$(TargetDir)libvorbisfile_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(TargetDir)Lib.lib;$(TargetDir)lua.lib;$(TargetDir)libogg_static.lib;$(TargetDir)libvorbis_static.lib;$(TargetDir)libvorbisfile_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -109,13 +109,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;$(SolutionDir)\Lib\include;$(SolutionDir)libvorbis-1.3.5\include;$(SolutionDir)libogg-1.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;$(SolutionDir)\Lib\include;$(SolutionDir)libvorbis-1.3.5\include;$(SolutionDir)libogg-1.3.2\include;$(SolutionDir)lua-5.3.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(TargetDir)Lib.lib;$(TargetDir)libogg_static.lib;$(TargetDir)libvorbis_static.lib;$(TargetDir)libvorbisfile_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(TargetDir)Lib.lib;$(TargetDir)lua.lib;$(TargetDir)libogg_static.lib;$(TargetDir)libvorbis_static.lib;$(TargetDir)libvorbisfile_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -128,7 +128,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;$(SolutionDir)\Lib\include;$(SolutionDir)libvorbis-1.3.5\include;$(SolutionDir)libogg-1.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;$(SolutionDir)\Lib\include;$(SolutionDir)libvorbis-1.3.5\include;$(SolutionDir)libogg-1.3.2\include;$(SolutionDir)lua-5.3.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -136,7 +136,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(TargetDir)Lib.lib;$(TargetDir)libogg_static.lib;$(TargetDir)libvorbis_static.lib;$(TargetDir)libvorbisfile_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(TargetDir)Lib.lib;$(TargetDir)lua.lib;$(TargetDir)libogg_static.lib;$(TargetDir)libvorbis_static.lib;$(TargetDir)libvorbisfile_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -149,7 +149,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;$(SolutionDir)\Lib\include;$(SolutionDir)libvorbis-1.3.5\include;$(SolutionDir)libogg-1.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;$(SolutionDir)\Lib\include;$(SolutionDir)libvorbis-1.3.5\include;$(SolutionDir)libogg-1.3.2\include;$(SolutionDir)lua-5.3.1\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -157,7 +157,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(TargetDir)Lib.lib;$(TargetDir)libogg_static.lib;$(TargetDir)libvorbis_static.lib;$(TargetDir)libvorbisfile_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(TargetDir)Lib.lib;$(TargetDir)lua.lib;$(TargetDir)libogg_static.lib;$(TargetDir)libvorbis_static.lib;$(TargetDir)libvorbisfile_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -185,6 +185,9 @@
   <ItemGroup>
     <Image Include="App.ico" />
     <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\sampledata\test.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
