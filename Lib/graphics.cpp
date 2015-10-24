@@ -547,7 +547,7 @@ void Application::initBackBuffer()
 		vp.MaxDepth = 1.0f;
 		m_pContext->RSSetViewports(1, &vp);
 
-		debug::writeLine(L"SetWiewPort OK");
+		debug::writeLine(L"SetViewPort OK");
 	}
 
 	debug::writeLine(L"initalizing BackBuffer OK");
