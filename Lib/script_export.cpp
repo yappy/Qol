@@ -171,6 +171,29 @@ int graph::drawString(lua_State *L)
 	return 0;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// "sound" table
+///////////////////////////////////////////////////////////////////////////////
+
+int sound::playBgm(lua_State *L)
+{
+	auto *sound = getPtrFromSelf<yappy::sound::XAudio2>(L, sound_RawFieldName);
+	const char *path = luaL_checkstring(L, 2);
+
+	sound->playBgm(util::utf82wc(path).get());
+
+	return 0;
+}
+
+int sound::stopBgm(lua_State *L)
+{
+	auto *sound = getPtrFromSelf<yappy::sound::XAudio2>(L, sound_RawFieldName);
+
+	sound->stopBgm();
+
+	return 0;
+}
+
 }
 }
 }

@@ -2,6 +2,7 @@
 
 #include "util.h"
 #include "graphics.h"
+#include "sound.h"
 #include <lua.hpp>
 
 namespace yappy {
@@ -25,6 +26,7 @@ public:
 
 	void loadTraceLib();
 	void loadGraphLib(graphics::Application *app);
+	void loadSoundLib(sound::XAudio2 *sound);
 
 	void loadFile(const wchar_t *fileName, const char *name = nullptr);
 
@@ -90,7 +92,19 @@ const luaL_Reg graph_RegList[] = {
 	{ "drawString", graph::drawString },
 	{ nullptr, nullptr }
 };
-const char *const graph_RawFieldName = "_rawdata";
+const char *const graph_RawFieldName = "_rawptr";
+
+struct sound {
+	static int playBgm(lua_State *L);
+	static int stopBgm(lua_State *L);
+	sound() = delete;
+};
+const luaL_Reg sound_RegList[] = {
+	{ "playBgm", sound::playBgm },
+	{ "stopBgm", sound::stopBgm },
+	{ nullptr, nullptr }
+};
+const char *const sound_RawFieldName = "_rawptr";
 
 }	// lua_export
 

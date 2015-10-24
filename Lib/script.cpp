@@ -93,6 +93,16 @@ void Lua::loadGraphLib(graphics::Application *app)
 	lua_setglobal(L, "graph");
 }
 
+void Lua::loadSoundLib(sound::XAudio2 *sound)
+{
+	lua_State *L = m_lua.get();
+	luaL_newlib(L, lua_export::sound_RegList);
+	lua_pushstring(L, lua_export::sound_RawFieldName);
+	lua_pushlightuserdata(L, sound);
+	lua_settable(L, -3);
+	lua_setglobal(L, "sound");
+}
+
 void Lua::loadFile(const wchar_t *fileName, const char *name)
 {
 	lua_State *L = m_lua.get();

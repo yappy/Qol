@@ -45,11 +45,12 @@ void MyApp::init()
 
 	m_sound.loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
 
-	m_sound.playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
+	//m_sound.playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
 
 
 	m_lua.loadTraceLib();
 	m_lua.loadGraphLib(this);
+	m_lua.loadSoundLib(&m_sound);
 	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
 	m_lua.callGlobal("init");
 }

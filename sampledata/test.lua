@@ -18,6 +18,8 @@ function init()
 	graph:loadTexture("ball", "../sampledata/circle.png");
 	w, h = graph:getTextureSize("unyo");
 	trace.write("w=" .. w, "h=" .. h);
+
+	sound:playBgm("../sampledata/Epoq-Lepidoptera.ogg");
 end
 
 function update()
