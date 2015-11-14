@@ -151,6 +151,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		::GetCurrentDirectory(MAX_PATH, dir);
 		debug::writef(L"Current dir: %s", dir);
 	}
+	// fixed length string key test
+	{
+		using util::IdString;
+		IdString key1, key2, key3;
+		util::createFixedString(&key1, "alice");
+		util::createFixedString(&key2, "sinki");
+		util::createFixedString(&key3, "takenoko");
+		std::unordered_map<IdString, int> hash;
+		hash.emplace(key1, 1);
+		hash.emplace(key2, 2);
+		hash.emplace(key3, 3);
+		hash.insert({key1, 4});
+		for (auto entry : hash) {
+			debug::writef("%s=%d", entry.first.data(), entry.second);
+		}
+	}
 
 	int result = 0;
 	try {

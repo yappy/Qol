@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <array>
 #include <string>
 #include <windows.h>
 #include <Unknwn.h>
@@ -14,6 +15,18 @@ public:
 	noncopyable(const noncopyable &) = delete;
 	noncopyable &operator=(const noncopyable &) = delete;
 };
+
+
+using IdString = std::array<char, 16>;
+
+template <size_t N>
+inline void createFixedString(std::array<char, N> *out, const char *src) {
+	if (std::strlen(src) >= N) {
+		throw std::invalid_argument(std::string("String size too long: ") + src);
+	}
+	// strncpy fills the remainder with '\0'
+	::strncpy_s(out->data(), N, src, N);
+}
 
 
 struct handleDeleter {
@@ -60,7 +73,6 @@ inline std::unique_ptr<wchar_t[]> utf82wc(const char *in)
 	return pBuf;
 }
 
-
 class Com : private noncopyable {
 public:
 	Com() { ::CoInitializeEx(nullptr, COINIT_MULTITHREADED); }
@@ -69,3 +81,22 @@ public:
 
 }
 }
+
+
+namespace std {
+
+template <>
+struct hash<yappy::util::IdString> {
+	size_t operator()(const yappy::util::IdString &key) const
+	{
+		size_t hashCode = 0;
+		const char *p = key.data();
+		for (size_t i = 0; i < key.size(); i++) {
+			hashCode = hashCode * 31 + p[i];
+		}
+		return hashCode;
+	}
+};
+
+}
+
