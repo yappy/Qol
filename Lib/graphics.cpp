@@ -3,7 +3,6 @@
 #include "include/debug.h"
 #include "include/exceptions.h"
 #include "include/file.h"
-#include <array>
 #include <d3dx11.h>
 #pragma warning(push)
 #pragma warning(disable: 4838)
@@ -19,98 +18,6 @@ namespace graphics {
 using error::checkWin32Result;
 using error::D3DError;
 using error::checkDXResult;
-
-///////////////////////////////////////////////////////////////////////////////
-// class FrameControl impl
-///////////////////////////////////////////////////////////////////////////////
-#pragma region FrameControl
-
-namespace {
-
-inline int64_t getTimeCounter()
-{
-	LARGE_INTEGER cur;
-	BOOL b = ::QueryPerformanceCounter(&cur);
-	checkWin32Result(b != 0, "QueryPerformanceCounter() failed");
-	return cur.QuadPart;
-}
-
-}	// namespace
-
-FrameControl::FrameControl(uint32_t fps, uint32_t skipCount) :
-	m_skipCount(skipCount),
-	m_fpsPeriod(fps)
-{
-	// counter/sec
-	LARGE_INTEGER freq;
-	BOOL b = ::QueryPerformanceFrequency(&freq);
-	checkWin32Result(b != FALSE, "QueryPerformanceFrequency() failed");
-	m_freq = freq.QuadPart;
-
-	// counter/frame = (counter/sec) / (frame/sec)
-	//               = m_freq / fps
-	m_counterPerFrame = m_freq / fps;
-}
-
-bool FrameControl::shouldSkipFrame()
-{
-	return m_frameCount != 0;
-}
-
-void FrameControl::endFrame()
-{
-	// for fps calc
-	if (!shouldSkipFrame()) {
-		m_fpsFrameAcc++;
-	}
-
-	int64_t target = m_base + m_counterPerFrame;
-	int64_t cur = getTimeCounter();
-	if (m_base == 0) {
-		// force OK
-		m_base = cur;
-	}
-	else if (cur < target) {
-		// OK, wait for next frame
-		while (cur < target) {
-			::Sleep(1);
-			cur = getTimeCounter();
-		}
-		// may overrun a little bit, add it to next frame
-		m_base = target;
-	}
-	else {
-		// too late, probably immediately right after vsync
-		m_base = cur;
-	}
-
-	// m_frameCount++;
-	// m_frameCount %= (#draw(=1) + #skip)
-	m_frameCount = (m_frameCount + 1) % (1 + m_skipCount);
-
-	// for fps calc
-	m_fpsCount++;
-	if (m_fpsCount >= m_fpsPeriod) {
-		double sec = static_cast<double>(cur - m_fpsBase) / m_freq;
-		m_fps = m_fpsFrameAcc / sec;
-
-		m_fpsCount = 0;
-		m_fpsFrameAcc = 0;
-		m_fpsBase = cur;
-	}
-}
-
-double FrameControl::getFramePerSec()
-{
-	return m_fps;
-}
-
-#pragma endregion
-
-///////////////////////////////////////////////////////////////////////////////
-// class Application impl
-///////////////////////////////////////////////////////////////////////////////
-#pragma region Application
 
 namespace {
 
@@ -173,9 +80,8 @@ inline void createCBFromTask(CBChanges *out, const DrawTask &task)
 
 }
 
-Application::Application(const InitParam &param) :
-	m_initParam(param),
-	m_frameCtrl(param.refreshRate, param.frameSkip),
+DGraphics::DGraphics(const GraphicsParam &param) :
+	m_param(param),
 	m_pDevice(nullptr, util::iunknownDeleter),
 	m_pContext(nullptr, util::iunknownDeleter),
 	m_pSwapChain(nullptr, util::iunknownDeleter),
@@ -192,57 +98,10 @@ Application::Application(const InitParam &param) :
 {
 	m_drawTaskList.reserve(DrawListMax);
 
-	initializeWindow(param);
-	initializeD3D(param);
+	initializeD3D();
 }
 
-void Application::initializeWindow(const InitParam &param)
-{
-	debug::writeLine(L"Initializing window...");
-
-	// Register class
-	WNDCLASSEX cls = { 0 };
-	cls.cbSize = sizeof(WNDCLASSEX);
-	cls.style = 0;
-	cls.lpfnWndProc = wndProc;
-	cls.cbClsExtra = 0;
-	cls.cbWndExtra = 0;
-	cls.hInstance = param.hInstance;
-	cls.hIcon = param.hIcon;
-	cls.hCursor = LoadCursor(NULL, IDC_ARROW);
-	cls.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
-	cls.lpszMenuName = nullptr;
-	cls.lpszClassName = param.wndClsName;
-	cls.hIconSm = param.hIconSm;
-	checkWin32Result(::RegisterClassEx(&cls) != 0, "RegisterClassEx() failed");
-
-	const DWORD wndStyle = WS_OVERLAPPEDWINDOW & ~WS_SIZEBOX & ~WS_MAXIMIZEBOX;
-
-	RECT rc = { 0, 0, param.w, param.h };
-	checkWin32Result(::AdjustWindowRect(&rc, wndStyle, FALSE) != FALSE,
-		"AdjustWindowRect() failed");
-
-	HWND hWnd = ::CreateWindow(param.wndClsName, param.title, wndStyle,
-		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
-		nullptr, nullptr, param.hInstance, this);
-	checkWin32Result(hWnd != nullptr, "CreateWindow() failed");
-	m_hWnd.reset(hWnd);
-
-	// for frame processing while window drugging etc.
-	::SetTimer(m_hWnd.get(), TimerEventId, 1, nullptr);
-
-	// Show cursor
-	if (param.showCursor) {
-		while (::ShowCursor(TRUE) < 0);
-	}
-	else {
-		while (::ShowCursor(FALSE) >= 0);
-	}
-
-	debug::writeLine(L"Initializing window OK");
-}
-
-void Application::initializeD3D(const InitParam &param)
+void DGraphics::initializeD3D()
 {
 	debug::writeLine(L"Initializing Direct3D 11...");
 
@@ -271,15 +130,15 @@ void Application::initializeD3D(const InitParam &param)
 		DXGI_SWAP_CHAIN_DESC sd;
 		ZeroMemory(&sd, sizeof(sd));
 		sd.BufferCount = 1;
-		sd.BufferDesc.Width = param.w;
-		sd.BufferDesc.Height = param.h;
+		sd.BufferDesc.Width = m_param.w;
+		sd.BufferDesc.Height = m_param.h;
 		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		sd.BufferDesc.RefreshRate.Numerator = param.refreshRate;
+		sd.BufferDesc.RefreshRate.Numerator = m_param.refreshRate;
 		sd.BufferDesc.RefreshRate.Denominator = 1;
 		sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 		sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		sd.OutputWindow = m_hWnd.get();
+		sd.OutputWindow = m_param.hWnd;
 		sd.SampleDesc.Count = 1;
 		sd.SampleDesc.Quality = 0;
 		sd.Windowed = TRUE;
@@ -406,8 +265,8 @@ void Application::initializeD3D(const InitParam &param)
 		buffer.Projection = XMMatrixIdentity();
 		buffer.Projection._41 = -1.0f;
 		buffer.Projection._42 = 1.0f;
-		buffer.Projection._11 = 2.0f / m_initParam.w;
-		buffer.Projection._22 = -2.0f / m_initParam.h;
+		buffer.Projection._11 = 2.0f / m_param.w;
+		buffer.Projection._22 = -2.0f / m_param.h;
 		buffer.Projection = XMMatrixTranspose(buffer.Projection);
 		D3D11_BUFFER_DESC bd = { 0 };
 		bd.Usage = D3D11_USAGE_DEFAULT;
@@ -496,7 +355,7 @@ void Application::initializeD3D(const InitParam &param)
 	- The output window does not have keyboard focus.
 	- Another application is already in full-screen mode.
 	*/
-	if(param.fullScreen) {
+	if(m_param.fullScreen) {
 		debug::writeLine(L"Set fullscreen...");
 
 		hr = m_pSwapChain->SetFullscreenState(TRUE, nullptr);
@@ -512,7 +371,7 @@ void Application::initializeD3D(const InitParam &param)
 	debug::writeLine(L"Initializing Direct3D 11 OK");
 }
 
-void Application::initBackBuffer()
+void DGraphics::initBackBuffer()
 {
 	debug::writeLine(L"initalizing BackBuffer...");
 
@@ -541,8 +400,8 @@ void Application::initBackBuffer()
 		D3D11_VIEWPORT vp;
 		vp.TopLeftX = 0;
 		vp.TopLeftY = 0;
-		vp.Width = static_cast<float>(m_initParam.w);
-		vp.Height = static_cast<float>(m_initParam.h);
+		vp.Width = static_cast<float>(m_param.w);
+		vp.Height = static_cast<float>(m_param.h);
 		vp.MinDepth = 0.0f;
 		vp.MaxDepth = 1.0f;
 		m_pContext->RSSetViewports(1, &vp);
@@ -553,7 +412,7 @@ void Application::initBackBuffer()
 	debug::writeLine(L"initalizing BackBuffer OK");
 }
 
-Application::~Application()
+DGraphics::~DGraphics()
 {
 	if (m_pContext != nullptr) {
 		m_pContext->ClearState();
@@ -564,34 +423,7 @@ Application::~Application()
 	debug::writeLine(L"Finalize Application, Direct3D 11, window");
 }
 
-LRESULT CALLBACK Application::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	if (msg == WM_CREATE) {
-		// Associate this ptr with hWnd
-		void *userData = reinterpret_cast<LPCREATESTRUCT>(lParam)->lpCreateParams;
-		::SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(userData));
-	}
-
-	LONG_PTR user = ::GetWindowLongPtr(hWnd, GWLP_USERDATA);
-	Application *self = reinterpret_cast<Application *>(user);
-
-	switch (msg) {
-	case WM_TIMER:
-		self->onIdle();
-		return 0;
-	case WM_SIZE:
-		return self->onSize(hWnd, msg, wParam, lParam);
-	case WM_CLOSE:
-		self->m_hWnd.reset();
-		return 0;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return ::DefWindowProc(hWnd, msg, wParam, lParam);
-}
-
-LRESULT Application::onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT DGraphics::onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pSwapChain == nullptr || wParam == SIZE_MINIMIZED) {
 		debug::writeLine(L"!!!");
@@ -610,40 +442,8 @@ LRESULT Application::onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-void Application::onIdle()
+void DGraphics::render()
 {
-	updateInternal();
-	if (!m_frameCtrl.shouldSkipFrame()) {
-		renderInternal();
-	}
-	m_frameCtrl.endFrame();
-
-	// TODO fps
-	wchar_t buf[256] = { 0 };
-	swprintf_s(buf, L"%s fps=%.2f (%d)", m_initParam.title,
-		m_frameCtrl.getFramePerSec(), m_initParam.frameSkip);
-	::SetWindowText(m_hWnd.get(), buf);
-}
-
-void Application::updateInternal()
-{
-	// Call user code
-	update();
-}
-
-void Application::renderInternal()
-{
-	// TEST: frame skip
-	// if skip == 3, draw once per 4F
-	// So fps should be around 15.00
-	/*
-	uint32_t skip = 3;
-	::Sleep(17 * skip);
-	//*/
-
-	// Call user code
-	render();
-
 	// Clear target
 	m_pContext->ClearRenderTargetView(m_pRenderTargetView.get(), ClearColor);
 
@@ -673,31 +473,10 @@ void Application::renderInternal()
 	m_drawTaskList.clear();
 
 	// vsync and flip(blt)
-	m_pSwapChain->Present(m_initParam.vsync ? 1 : 0, 0);
+	m_pSwapChain->Present(m_param.vsync ? 1 : 0, 0);
 }
 
-int Application::run()
-{
-	// Call user code
-	init();
-
-	::ShowWindow(m_hWnd.get(), m_initParam.nCmdShow);
-	::UpdateWindow(m_hWnd.get());
-
-	MSG msg = { 0 };
-	while (msg.message != WM_QUIT) {
-		if (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-			::TranslateMessage(&msg);
-			::DispatchMessage(&msg);
-		}
-		else {
-			onIdle();
-		}
-	}
-	return static_cast<int>(msg.wParam);
-}
-
-void Application::loadTexture(const char *id, const wchar_t *path)
+void DGraphics::loadTexture(const char *id, const wchar_t *path)
 {
 	if (m_texMap.find(id) != m_texMap.end()) {
 		throw std::runtime_error("id already exists");
@@ -729,7 +508,7 @@ void Application::loadTexture(const char *id, const wchar_t *path)
 		));
 }
 
-void Application::getTextureSize(const char *id, uint32_t *w, uint32_t *h) const
+void DGraphics::getTextureSize(const char *id, uint32_t *w, uint32_t *h) const
 {
 	auto res = m_texMap.find(id);
 	if (res == m_texMap.end()) {
@@ -740,7 +519,7 @@ void Application::getTextureSize(const char *id, uint32_t *w, uint32_t *h) const
 	*h = tex.h;
 }
 
-void Application::drawTexture(const char *id,
+void DGraphics::drawTexture(const char *id,
 	int dx, int dy, bool lrInv, bool udInv,
 	int sx, int sy, int sw, int sh,
 	int cx, int cy, float angle, float scaleX, float scaleY,
@@ -758,7 +537,7 @@ void Application::drawTexture(const char *id,
 		cx, cy, scaleX, scaleY, angle, 0x00000000, alpha);
 }
 
-void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
+void DGraphics::loadFont(const char *id, const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
 	uint32_t w, uint32_t h)
 {
 	if (m_fontMap.find(id) != m_fontMap.end()) {
@@ -867,7 +646,7 @@ void Application::loadFont(const char *id, const wchar_t *fontName, uint32_t sta
 	val.pRVList.swap(rvList);
 }
 
-void Application::drawChar(const char *id, wchar_t c, int dx, int dy,
+void DGraphics::drawChar(const char *id, wchar_t c, int dx, int dy,
 	uint32_t color, float scaleX, float scaleY, float alpha,
 	int *nextx, int *nexty)
 {
@@ -892,7 +671,7 @@ void Application::drawChar(const char *id, wchar_t c, int dx, int dy,
 	}
 }
 
-void Application::drawString(const char *id, const wchar_t *str, int dx, int dy,
+void DGraphics::drawString(const char *id, const wchar_t *str, int dx, int dy,
 	uint32_t color, int ajustX, float scaleX, float scaleY, float alpha,
 	int *nextx, int *nexty)
 {

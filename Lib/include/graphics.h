@@ -10,36 +10,6 @@
 namespace yappy {
 namespace graphics {
 
-struct hwndDeleter {
-	using pointer = HWND;
-	void operator()(HWND hwnd)
-	{
-		::DestroyWindow(hwnd);
-	}
-};
-
-class FrameControl : private util::noncopyable {
-public:
-	FrameControl(uint32_t fps, uint32_t skipCount);
-	~FrameControl() = default;
-	bool shouldSkipFrame();
-	void endFrame();
-	double getFramePerSec();
-
-private:
-	int64_t m_freq;
-	int64_t m_counterPerFrame;
-	int64_t m_base = 0;
-	uint32_t m_skipCount;
-	uint32_t m_frameCount = 0;
-
-	double m_fps = 0.0;
-	uint32_t m_fpsPeriod;
-	uint32_t m_fpsCount = 0;
-	int64_t m_fpsBase = 0;
-	uint32_t m_fpsFrameAcc = 0;
-};
-
 struct Texture : private util::noncopyable {
 	using RvPtr = util::IUnknownPtr<ID3D11ShaderResourceView>;
 	RvPtr pRV;
@@ -94,32 +64,24 @@ struct DrawTask {
 	~DrawTask() = default;
 };
 
-/** @brief User application base, managing window and Direct3D.
- * @details Please inherit this and override protected methods.
+struct GraphicsParam {
+	HWND hWnd = nullptr;
+	int w = 1024;
+	int h = 768;
+	uint32_t refreshRate = 60;
+	bool fullScreen = false;
+	bool vsync = true;
+};
+
+/** @brief DirectGraphics manager.
  */
-class Application : private util::noncopyable {
+class DGraphics : private util::noncopyable {
 public:
-	struct InitParam {
-		HINSTANCE hInstance = nullptr;
-		int nCmdShow = SW_SHOW;
-		int w = 1024;
-		int h = 768;
-		const wchar_t *wndClsName = L"GameWndCls";
-		const wchar_t *title = L"GameApp";
-		HICON hIcon = nullptr;
-		HICON hIconSm = nullptr;
-		uint32_t refreshRate = 60;
-		bool fullScreen = false;
-		bool vsync = true;
-		uint32_t frameSkip = 0;
-		bool showCursor = false;
-	};
+	DGraphics(const GraphicsParam &param);
+	~DGraphics();
 
-	Application(const InitParam &param);
-	virtual ~Application();
-	int run();
-
-	HWND getHWnd() { return m_hWnd.get(); }
+	void render();
+	LRESULT onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 	/**@brief Use texture size.
 	  * @details You can use cw, ch in drawTexture().
@@ -175,13 +137,7 @@ public:
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f,
 		int *nextx = nullptr, int *nexty = nullptr);
 
-protected:
-	virtual void init() = 0;
-	virtual void update() = 0;
-	virtual void render() = 0;
-
 private:
-	const UINT_PTR TimerEventId = 0xffff0001;
 	const DXGI_FORMAT BufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	const DXGI_SWAP_CHAIN_FLAG SwapChainFlag = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	const float ClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -189,11 +145,7 @@ private:
 	const wchar_t * const VS_FileName = L"@VertexShader.cso";
 	const wchar_t * const PS_FileName = L"@PixelShader.cso";
 
-	using HWndPtr = std::unique_ptr<HWND, hwndDeleter>;
-	HWndPtr m_hWnd;
-
-	InitParam m_initParam;
-	FrameControl m_frameCtrl;
+	GraphicsParam m_param;
 	util::IUnknownPtr<ID3D11Device>				m_pDevice;
 	util::IUnknownPtr<ID3D11DeviceContext>		m_pContext;
 	util::IUnknownPtr<IDXGISwapChain>			m_pSwapChain;
@@ -211,15 +163,8 @@ private:
 	std::unordered_map<std::string, FontTexture> m_fontMap;
 	std::vector<DrawTask> m_drawTaskList;
 
-	void initializeWindow(const InitParam &param);
-	static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	LRESULT onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	void initializeD3D(const InitParam &param);
+	void initializeD3D();
 	void initBackBuffer();
-
-	void onIdle();
-	void updateInternal();
-	void renderInternal();
 };
 
 }

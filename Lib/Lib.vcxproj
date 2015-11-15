@@ -172,6 +172,7 @@
     <ClInclude Include="include\debug.h" />
     <ClInclude Include="include\exceptions.h" />
     <ClInclude Include="include\file.h" />
+    <ClInclude Include="include\framework.h" />
     <ClInclude Include="include\graphics.h" />
     <ClInclude Include="include\input.h" />
     <ClInclude Include="include\network.h" />
@@ -186,11 +187,22 @@
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="exceptions.cpp" />
     <ClCompile Include="file.cpp" />
+    <ClCompile Include="framework.cpp" />
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="network.cpp" />
-    <ClCompile Include="script.cpp" />
-    <ClCompile Include="script_export.cpp" />
+    <ClCompile Include="script.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="script_export.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="sound.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
