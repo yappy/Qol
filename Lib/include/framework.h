@@ -2,6 +2,8 @@
 
 #include "util.h"
 #include "graphics.h"
+#include "sound.h"
+#include "input.h"
 
 namespace yappy {
 namespace framework {
@@ -58,7 +60,7 @@ public:
 	int run();
 
 	HWND getHWnd() { return m_hWnd.get(); }
-	graphics::DGraphics &graph();
+	graphics::DGraphics &graph() { return *m_dg.get(); }
 
 protected:
 	virtual void init() = 0;
@@ -71,6 +73,8 @@ private:
 	using HWndPtr = std::unique_ptr<HWND, hwndDeleter>;
 	HWndPtr m_hWnd;
 	std::unique_ptr<graphics::DGraphics> m_dg;
+	std::unique_ptr<sound::XAudio2> m_ds;
+	std::unique_ptr<input::DInput> m_di;
 
 	AppParam m_param;
 	graphics::GraphicsParam m_graphParam;

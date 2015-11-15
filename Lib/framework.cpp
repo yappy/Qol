@@ -107,10 +107,17 @@ Application::Application(const AppParam &appParam, const graphics::GraphicsParam
 {
 	// window
 	initializeWindow();
+	m_graphParam.hWnd = m_hWnd.get();
+
 	// DirectGraphics
-	graphics::DGraphics *tmpDg = new graphics::DGraphics(graphParam);
+	auto *tmpDg = new graphics::DGraphics(m_graphParam);
 	m_dg.reset(tmpDg);
-	// TODO: sound, input
+	// XAudio2
+	auto *tmpXa2 = new sound::XAudio2();
+	m_ds.reset(tmpXa2);
+	// DirectInput
+	auto *tmpDi = new input::DInput(m_param.hInstance, m_hWnd.get());
+	m_di.reset(tmpDi);
 }
 
 void Application::initializeWindow()
