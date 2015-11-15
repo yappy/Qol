@@ -111,35 +111,15 @@ XAudio2::XAudio2() :
 
 XAudio2::~XAudio2() {}
 
-void XAudio2::loadSoundEffect(const char *id, const wchar_t *path)
+XAudio2::SeResource XAudio2::loadSoundEffect(const wchar_t *path)
 {
-	// TODO: on error for scripting
-	// m_selib[id] <- SoundEffect()
-	auto res = m_seMap.emplace(std::piecewise_construct,
-		std::forward_as_tuple(id), std::forward_as_tuple());
-	if (!res.second) {
-		throw std::runtime_error("id already exists");
-	}
-	// ((key, val), success?).first.second
-	SoundEffect &value = res.first->second;
-	try {
-		loadWaveFile(&value, path);
-	}
-	catch (...) {
-		m_seMap.erase(res.first);
-		throw;
-	}
+	auto res = std::make_shared<SoundEffect>();
+	loadWaveFile(res.get(), path);
+	return res;
 }
 
-void XAudio2::playSoundEffect(const char *id)
+void XAudio2::playSoundEffect(const SeResource &se)
 {
-	// find (WAVEFORMATEX, SampleBytes) entry
-	auto res = m_seMap.find(id);
-	if (res == m_seMap.end()) {
-		throw std::runtime_error("id not found");
-	}
-	SoundEffect &se = res->second;
-
 	// find playing src voice list entry
 	SourceVoicePtr *ppEntry = findFreeSeEntry();
 	if (ppEntry == nullptr) {
@@ -149,15 +129,15 @@ void XAudio2::playSoundEffect(const char *id)
 	ASSERT(*ppEntry == nullptr);
 
 	XAUDIO2_BUFFER buffer = { 0 };
-	ASSERT(se.samples.size() <= file::FileSizeMax);
-	buffer.AudioBytes = static_cast<UINT32>(se.samples.size());
-	buffer.pAudioData = se.samples.data();
+	ASSERT(se->samples.size() <= file::FileSizeMax);
+	buffer.AudioBytes = static_cast<UINT32>(se->samples.size());
+	buffer.pAudioData = se->samples.data();
 	buffer.Flags = XAUDIO2_END_OF_STREAM;
 
 	// create source voice
 	HRESULT hr = S_OK;
 	IXAudio2SourceVoice *ptmpSrcVoice = nullptr;
-	hr = m_pIXAudio->CreateSourceVoice(&ptmpSrcVoice, &se.format);
+	hr = m_pIXAudio->CreateSourceVoice(&ptmpSrcVoice, &se->format);
 	checkDXResult<XAudioError>(hr, "IXAudio2::CreateSourceVoice() failed");
 	SourceVoicePtr pSrcVoice(ptmpSrcVoice, voiceDeleter);
 

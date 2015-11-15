@@ -28,6 +28,7 @@ private:
 
 	graphics::DGraphics::TextureResource notpow2, circle;
 	graphics::DGraphics::FontResource testfont, testjfont;
+	sound::XAudio2::SeResource testse;
 };
 
 
@@ -41,7 +42,7 @@ void MyApp::init()
 	testjfont = graph().loadFont(L"メイリオ", L'あ', L'ん', 128, 128);
 	//*/
 
-	sound().loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
+	testse = sound().loadSoundEffect(L"/C:/Windows/Media/chimes.wav");
 
 	sound().playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
 
@@ -83,7 +84,7 @@ void MyApp::update()
 	for (size_t i = 0U; i < keys.size(); i++) {
 		if (keys[i]) {
 			debug::writef(L"Key 0x%02x", i);
-			sound().playSoundEffect("testwav");
+			sound().playSoundEffect(testse);
 		}
 	}
 	for (int i = 0; i < input().getPadCount(); i++) {
@@ -92,7 +93,7 @@ void MyApp::update()
 		for (int b = 0; b < 32; b++) {
 			if (state.rgbButtons[b] & 0x80) {
 				debug::writef(L"pad[%d].button%d", i, b);
-				sound().playSoundEffect("testwav");
+				sound().playSoundEffect(testse);
 			}
 		}
 		{
