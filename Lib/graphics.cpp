@@ -476,12 +476,8 @@ void DGraphics::render()
 	m_pSwapChain->Present(m_param.vsync ? 1 : 0, 0);
 }
 
-void DGraphics::loadTexture(const char *id, const wchar_t *path)
+DGraphics::TextureResource DGraphics::loadTexture(const wchar_t *path)
 {
-	if (m_texMap.find(id) != m_texMap.end()) {
-		throw std::runtime_error("id already exists");
-	}
-
 	file::Bytes bin = file::loadFile(path);
 
 	HRESULT hr = S_OK;
@@ -499,51 +495,26 @@ void DGraphics::loadTexture(const char *id, const wchar_t *path)
 		nullptr, nullptr, &ptmpRV, nullptr);
 	checkDXResult<D3DError>(hr, "D3DX11CreateShaderResourceViewFromMemory() failed");
 
-	// add (id, texture(...))
-	m_texMap.emplace(std::piecewise_construct,
-		std::forward_as_tuple(id),
-		std::forward_as_tuple(
-			ptmpRV, util::iunknownDeleter,
-			imageInfo.Width, imageInfo.Height
-		));
+	return std::make_shared<Texture>(
+		ptmpRV, util::iunknownDeleter, imageInfo.Width, imageInfo.Height);
 }
 
-void DGraphics::getTextureSize(const char *id, uint32_t *w, uint32_t *h) const
-{
-	auto res = m_texMap.find(id);
-	if (res == m_texMap.end()) {
-		throw std::runtime_error("id not found");
-	}
-	const Texture &tex = res->second;
-	*w = tex.w;
-	*h = tex.h;
-}
-
-void DGraphics::drawTexture(const char *id,
+void DGraphics::drawTexture(const TextureResource &texture,
 	int dx, int dy, bool lrInv, bool udInv,
 	int sx, int sy, int sw, int sh,
 	int cx, int cy, float angle, float scaleX, float scaleY,
 	float alpha)
 {
-	auto res = m_texMap.find(id);
-	if (res == m_texMap.end()) {
-		throw std::runtime_error("id not found");
-	}
-	const Texture &tex = res->second;
-	sw = (sw == SrcSizeDefault) ? tex.w : sw;
-	sh = (sh == SrcSizeDefault) ? tex.h : sh;
-	m_drawTaskList.emplace_back(tex.pRV.get(), tex.w, tex.h,
+	sw = (sw == SrcSizeDefault) ? texture->w : sw;
+	sh = (sh == SrcSizeDefault) ? texture->h : sh;
+	m_drawTaskList.emplace_back(texture->pRV.get(), texture->w, texture->h,
 		dx, dy, lrInv, udInv, sx, sy, sw, sh,
 		cx, cy, scaleX, scaleY, angle, 0x00000000, alpha);
 }
 
-void DGraphics::loadFont(const char *id, const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
-	uint32_t w, uint32_t h)
+DGraphics::FontResource DGraphics::loadFont(const wchar_t *fontName,
+	uint32_t startChar, uint32_t endChar, uint32_t w, uint32_t h)
 {
-	if (m_fontMap.find(id) != m_fontMap.end()) {
-		throw std::runtime_error("id already exists");
-	}
-
 	HRESULT hr = S_OK;
 
 	// Create font
@@ -639,44 +610,38 @@ void DGraphics::loadFont(const char *id, const wchar_t *fontName, uint32_t start
 	}
 
 	// add (id, FontTexture(...))
-	auto &val = m_fontMap.emplace(std::piecewise_construct,
-		std::forward_as_tuple(id),
-		std::forward_as_tuple(
-			w, h, startChar, endChar)).first->second;
-	val.pRVList.swap(rvList);
+	auto res = std::make_shared<FontTexture>(
+		w, h, startChar, endChar);
+	res->pTexList.swap(texList);
+	res->pRVList.swap(rvList);
+	return res;
 }
 
-void DGraphics::drawChar(const char *id, wchar_t c, int dx, int dy,
+void DGraphics::drawChar(const FontResource &font, wchar_t c, int dx, int dy,
 	uint32_t color, float scaleX, float scaleY, float alpha,
 	int *nextx, int *nexty)
 {
-	auto res = m_fontMap.find(id);
-	if (res == m_fontMap.end()) {
-		throw std::runtime_error("id not found");
-	}
-
 	// Set alpha 0xff
 	color |= 0xff000000;
-	const FontTexture &fontTex = res->second;
-	auto *pRV = fontTex.pRVList.at(c - fontTex.startChar).get();
-	m_drawTaskList.emplace_back(pRV, fontTex.w, fontTex.h,
-		dx, dy, false, false, 0, 0, fontTex.w, fontTex.h,
+	auto *pRV = font->pRVList.at(c - font->startChar).get();
+	m_drawTaskList.emplace_back(pRV, font->w, font->h,
+		dx, dy, false, false, 0, 0, font->w, font->h,
 		0, 0, scaleX, scaleY, 0.0f, color, alpha);
 
 	if (nextx != nullptr) {
-		*nextx = dx + fontTex.w;
+		*nextx = dx + font->w;
 	}
 	if (nexty != nullptr) {
-		*nexty = dy + fontTex.h;
+		*nexty = dy + font->h;
 	}
 }
 
-void DGraphics::drawString(const char *id, const wchar_t *str, int dx, int dy,
+void DGraphics::drawString(const FontResource &font, const wchar_t *str, int dx, int dy,
 	uint32_t color, int ajustX, float scaleX, float scaleY, float alpha,
 	int *nextx, int *nexty)
 {
 	while (*str != L'\0') {
-		drawChar(id, *str, dx, dy, color, scaleX, scaleY, alpha, &dx, nexty);
+		drawChar(font, *str, dx, dy, color, scaleX, scaleY, alpha, &dx, nexty);
 		dx += ajustX;
 		str++;
 	}

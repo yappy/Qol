@@ -25,17 +25,20 @@ protected:
 private:
 	//lua::Lua m_lua;
 	uint64_t m_frameCount = 0;
+
+	graphics::DGraphics::TextureResource notpow2, circle;
+	graphics::DGraphics::FontResource testfont, testjfont;
 };
 
 
 void MyApp::init()
 {
 	//*
-	graph().loadTexture("notpow2", L"../sampledata/test_400_300.png");
-	graph().loadTexture("testtex", L"../sampledata/circle.png");
+	notpow2 = graph().loadTexture(L"../sampledata/test_400_300.png");
+	circle = graph().loadTexture(L"../sampledata/circle.png");
 
-	graph().loadFont("testfont", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
-	graph().loadFont("testj", L"メイリオ", L'あ', L'ん', 128, 128);
+	testfont = graph().loadFont(L"ＭＳ 明朝", 'A', 'Z', 16, 32);
+	testjfont = graph().loadFont(L"メイリオ", L'あ', L'ん', 128, 128);
 	//*/
 
 	sound().loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
@@ -56,17 +59,17 @@ void MyApp::render()
 	//*
 	int test = static_cast<int>(m_frameCount * 5 % 768);
 
-	graph().drawTexture("testtex", test, test);
-	graph().drawTexture("notpow2", 1024 / 2, 768 / 2, false, false, 0, 0, -1, -1, 200, 150, m_frameCount / 3.14f / 10);
+	graph().drawTexture(circle, test, test);
+	graph().drawTexture(notpow2, 1024 / 2, 768 / 2, false, false, 0, 0, -1, -1, 200, 150, m_frameCount / 3.14f / 10);
 
-	graph().drawChar("testfont", 'Y', 100, 100);
-	graph().drawChar("testfont", 'A', 116, 100);
-	graph().drawChar("testfont", 'P', 132, 100);
-	graph().drawChar("testfont", 'P', 148, 100);
-	graph().drawChar("testfont", 'Y', 164, 100, 0x00ff00, 2, 2, 1.0f);
+	graph().drawChar(testfont, 'Y', 100, 100);
+	graph().drawChar(testfont, 'A', 116, 100);
+	graph().drawChar(testfont, 'P', 132, 100);
+	graph().drawChar(testfont, 'P', 148, 100);
+	graph().drawChar(testfont, 'Y', 164, 100, 0x00ff00, 2, 2, 1.0f);
 
-	graph().drawChar("testj", L'ほ', 100, 200);
-	graph().drawString("testj", L"ほわいと", 100, 600, 0x000000, -32);
+	graph().drawChar(testjfont, L'ほ', 100, 200);
+	graph().drawString(testjfont, L"ほわいと", 100, 600, 0x000000, -32);
 	//*/
 	//m_lua.callGlobal("draw");
 }
