@@ -54,13 +54,14 @@ struct AppParam {
 */
 class Application : private util::noncopyable {
 public:
-
 	Application(const AppParam &appParam, const graphics::GraphicsParam &graphParam);
 	virtual ~Application();
 	int run();
 
 	HWND getHWnd() { return m_hWnd.get(); }
 	graphics::DGraphics &graph() { return *m_dg.get(); }
+	sound::XAudio2 &sound() { return *m_ds.get(); }
+	input::DInput &input() { return *m_di.get(); }
 
 protected:
 	virtual void init() = 0;

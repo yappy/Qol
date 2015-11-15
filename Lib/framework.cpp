@@ -222,6 +222,8 @@ void Application::onIdle()
 
 void Application::updateInternal()
 {
+	m_ds->processFrame();
+	m_di->processFrame();
 	// Call user code
 	update();
 }

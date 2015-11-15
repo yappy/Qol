@@ -6,96 +6,90 @@
 #include <debug.h>
 #include <file.h>
 #include <config.h>
-#include <script.h>
-#include <graphics.h>
-#include <input.h>
-#include <sound.h>
+//#include <script.h>
+#include <framework.h>
 #include <array>
 
 using namespace yappy;
 
-class MyApp : public graphics::Application {
+class MyApp : public framework::Application {
 public:
-	MyApp(const InitParam &param) :
-		Application(param),
-		m_input(param.hInstance, getHWnd()),
-		m_sound()
+	MyApp(const framework::AppParam &appParam,
+		const graphics::GraphicsParam &graphParam) :
+		Application(appParam, graphParam)
 	{}
 protected:
 	void init() override;
 	void update() override;
 	void render() override;
 private:
-	lua::Lua m_lua;
-	input::DInput m_input;
-	sound::XAudio2 m_sound;
+	//lua::Lua m_lua;
 	uint64_t m_frameCount = 0;
 };
 
 
 void MyApp::init()
 {
+	//*
+	graph().loadTexture("notpow2", L"../sampledata/test_400_300.png");
+	graph().loadTexture("testtex", L"../sampledata/circle.png");
+
+	graph().loadFont("testfont", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
+	graph().loadFont("testj", L"メイリオ", L'あ', L'ん', 128, 128);
+	//*/
+
+	sound().loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
+
+	sound().playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
+
 	/*
-	loadTexture("notpow2", L"../sampledata/test_400_300.png");
-	loadTexture("testtex", L"../sampledata/circle.png");
-
-	loadFont("testfont", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
-	loadFont("testj", L"メイリオ", L'あ', L'ん', 128, 128);
-	*/
-
-	m_sound.loadSoundEffect("testwav", L"/C:/Windows/Media/chimes.wav");
-
-	//m_sound.playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
-
-
 	m_lua.loadTraceLib();
 	m_lua.loadGraphLib(this);
 	m_lua.loadSoundLib(&m_sound);
 	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
 	m_lua.callGlobal("init");
+	*/
 }
 
 void MyApp::render()
 {
-	/*
+	//*
 	int test = static_cast<int>(m_frameCount * 5 % 768);
 
-	drawTexture("testtex", test, test);
-	drawTexture("notpow2", 1024 / 2, 768 / 2, false, false, 0, 0, -1, -1, 200, 150, m_frameCount / 3.14f / 10);
+	graph().drawTexture("testtex", test, test);
+	graph().drawTexture("notpow2", 1024 / 2, 768 / 2, false, false, 0, 0, -1, -1, 200, 150, m_frameCount / 3.14f / 10);
 
-	drawChar("testfont", 'Y', 100, 100);
-	drawChar("testfont", 'A', 116, 100);
-	drawChar("testfont", 'P', 132, 100);
-	drawChar("testfont", 'P', 148, 100);
-	drawChar("testfont", 'Y', 164, 100, 0x00ff00, 2, 2, 1.0f);
+	graph().drawChar("testfont", 'Y', 100, 100);
+	graph().drawChar("testfont", 'A', 116, 100);
+	graph().drawChar("testfont", 'P', 132, 100);
+	graph().drawChar("testfont", 'P', 148, 100);
+	graph().drawChar("testfont", 'Y', 164, 100, 0x00ff00, 2, 2, 1.0f);
 
-	drawChar("testj", L'ほ', 100, 200);
-	drawString("testj", L"ほわいと", 100, 600, 0x000000, -32);
-	*/
-	m_lua.callGlobal("draw");
+	graph().drawChar("testj", L'ほ', 100, 200);
+	graph().drawString("testj", L"ほわいと", 100, 600, 0x000000, -32);
+	//*/
+	//m_lua.callGlobal("draw");
 }
 
 void MyApp::update()
 {
-	m_input.processFrame();
-	m_sound.processFrame();
+	//m_lua.callGlobal("update");
+	m_frameCount++;
 
-	m_lua.callGlobal("update");
-
-	std::array<bool, 256> keys = m_input.getKeys();
+	std::array<bool, 256> keys = input().getKeys();
 	for (size_t i = 0U; i < keys.size(); i++) {
 		if (keys[i]) {
 			debug::writef(L"Key 0x%02x", i);
-			m_sound.playSoundEffect("testwav");
+			sound().playSoundEffect("testwav");
 		}
 	}
-	for (int i = 0; i < m_input.getPadCount(); i++) {
+	for (int i = 0; i < input().getPadCount(); i++) {
 		DIJOYSTATE state;
-		m_input.getPadState(&state, i);
+		input().getPadState(&state, i);
 		for (int b = 0; b < 32; b++) {
 			if (state.rgbButtons[b] & 0x80) {
 				debug::writef(L"pad[%d].button%d", i, b);
-				m_sound.playSoundEffect("testwav");
+				sound().playSoundEffect("testwav");
 			}
 		}
 		{
@@ -188,20 +182,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		file::initWithFileSystem(L".");
 
-		graphics::Application::InitParam param;
-		param.hInstance = hInstance;
-		param.w = 1024;
-		param.h = 768;
-		param.wndClsName = L"TestAppClass";
-		param.title = L"Test App";
-		param.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP));
-		param.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
-		param.nCmdShow = nCmdShow;
-		param.frameSkip = config.skip;
-		param.showCursor = config.cursor;
-		param.fullScreen = config.fullscreen;
+		framework::AppParam appParam;
+		graphics::GraphicsParam graphParam;
+		appParam.hInstance = hInstance;
+		appParam.wndClsName = L"TestAppClass";
+		appParam.title = L"Test App";
+		appParam.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP));
+		appParam.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
+		appParam.nCmdShow = nCmdShow;
+		appParam.frameSkip = config.skip;
+		appParam.showCursor = config.cursor;
+		graphParam.w = 1024;
+		graphParam.h = 768;
+		graphParam.fullScreen = config.fullscreen;
 
-		MyApp app(param);
+		MyApp app(appParam, graphParam);
 		result = app.run();
 	}
 	catch (const std::exception &ex) {
