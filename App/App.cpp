@@ -31,7 +31,6 @@ private:
 	sound::XAudio2::SeResourcePtr testse;
 };
 
-
 void MyApp::init()
 {
 	//*
@@ -45,6 +44,10 @@ void MyApp::init()
 	testse = sound().loadSoundEffect(L"/C:/Windows/Media/chimes.wav");
 
 	sound().playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
+
+	addResource(0, "testres1", L"../sampledata/test_400_300.png");
+	addResource(0, "testres2", L"../sampledata/circle.png");
+	loadResourceSet(0);
 
 	/*
 	m_lua.loadTraceLib();

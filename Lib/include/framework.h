@@ -1,6 +1,7 @@
 #pragma once
 
 #include "util.h"
+#include "debug.h"
 #include "graphics.h"
 #include "sound.h"
 #include "input.h"
@@ -23,7 +24,7 @@ struct Resource : private util::noncopyable {
 	void load()
 	{
 		if (ptr == nullptr) {
-			ptr = LoadFunc();
+			ptr = loadFunc();
 		}
 	}
 	void unload()
@@ -60,14 +61,12 @@ public:
 	void addSoundEffect(size_t setId, const char *resId,
 		std::function<sound::XAudio2::SeResource> loadFunc);
 
-	// auto static_cast(enum->size_t) sample
-	template <class T>
-	void addTexture(T setId, const char *resId,
-		std::function<std::shared_ptr<graphics::Texture>()> loadFunc)
+	void loadResourceSet(size_t setId)
 	{
-		static_assert(std::is_enum<T>::value || std::is_integral<T>::value,
-			"T must be enum or integral");
-		addTexture(static_cast<size_t>(setId), resId, loadFunc);
+		auto &map = m_texMap.at(setId);
+		for (auto &elem : map) {
+			elem.second.load();
+		}
 	}
 
 private:
@@ -138,10 +137,23 @@ public:
 
 	void addResource(size_t setId, const char *resId, const wchar_t *fileName)
 	{
-		std::wstring fileNameForCopy(fileName);
-		m_resMgr.addTexture(setId, resId, [this, fileNameForCopy]() {
-			return m_dg->loadTexture(fileNameForCopy.c_str());
+		std::wstring fileNameCopy(fileName);
+		m_resMgr.addTexture(setId, resId, [this, fileNameCopy]() {
+			yappy::debug::writef(L"LoadTexture: %s", fileNameCopy.c_str());
+			return m_dg->loadTexture(fileNameCopy.c_str());
 		});
+	}
+	// auto static_cast(enum->size_t) sample
+	template <class T>
+	void addResource(T setId, const char *resId, const wchar_t *fileName)
+	{
+		static_assert(std::is_enum<T>::value || std::is_integral<T>::value,
+			"T must be enum or integral");
+		addResource(static_cast<size_t>(setId), resId, fileName);
+	}
+	void loadResourceSet(size_t setId)
+	{
+		m_resMgr.loadResourceSet(setId);
 	}
 
 protected:
