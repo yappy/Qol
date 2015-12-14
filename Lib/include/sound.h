@@ -48,14 +48,15 @@ struct SoundEffect : private util::noncopyable {
 
 class XAudio2 : private util::noncopyable {
 public:
+	using SeResource = const SoundEffect;
+	using SeResourcePtr = std::shared_ptr<SeResource>;
+
 	XAudio2();
 	~XAudio2();
 
-	using SeResource = std::shared_ptr<const SoundEffect>;
-
 	// Sound Effect
-	SeResource loadSoundEffect(const wchar_t *path);
-	void playSoundEffect(const SeResource &se);
+	SeResourcePtr loadSoundEffect(const wchar_t *path);
+	void playSoundEffect(const SeResourcePtr &se);
 	bool isPlayingAnySoundEffect() const noexcept;
 	void stopAllSoundEffect();
 

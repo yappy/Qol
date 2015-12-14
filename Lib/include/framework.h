@@ -41,7 +41,7 @@ public:
 	~ResourceManager() = default;
 
 	void addTexture(size_t setId, const char *resId,
-		std::function<graphics::DGraphics::TextureResource()> loadFunc)
+		std::function<graphics::DGraphics::TextureResourcePtr()> loadFunc)
 	{
 		IdString fixedResId;
 		util::createFixedString(&fixedResId, resId);
@@ -75,9 +75,9 @@ private:
 	template <class T>
 	using ResMap = std::vector<std::unordered_map<IdString, Resource<T>>>;
 
-	ResMap<graphics::DGraphics::TextureResource::element_type> m_texMap;
-	ResMap<graphics::DGraphics::FontResource::element_type>    m_fontMap;
-	ResMap<sound::XAudio2::SeResource::element_type>           m_seMap;
+	ResMap<graphics::DGraphics::TextureResource> m_texMap;
+	ResMap<graphics::DGraphics::FontResource>    m_fontMap;
+	ResMap<sound::XAudio2::SeResource>           m_seMap;
 };
 
 

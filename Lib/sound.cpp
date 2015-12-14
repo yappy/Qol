@@ -111,14 +111,14 @@ XAudio2::XAudio2() :
 
 XAudio2::~XAudio2() {}
 
-XAudio2::SeResource XAudio2::loadSoundEffect(const wchar_t *path)
+XAudio2::SeResourcePtr XAudio2::loadSoundEffect(const wchar_t *path)
 {
 	auto res = std::make_shared<SoundEffect>();
 	loadWaveFile(res.get(), path);
 	return res;
 }
 
-void XAudio2::playSoundEffect(const SeResource &se)
+void XAudio2::playSoundEffect(const SeResourcePtr &se)
 {
 	// find playing src voice list entry
 	SourceVoicePtr *ppEntry = findFreeSeEntry();

@@ -77,23 +77,26 @@ struct GraphicsParam {
  */
 class DGraphics : private util::noncopyable {
 public:
+	using TextureResource = const Texture;
+	using TextureResourcePtr = std::shared_ptr<TextureResource>;
+	using FontResource = const FontTexture;
+	using FontResourcePtr = std::shared_ptr<FontResource>;
+
+	/**@brief Use texture size.
+	* @details You can use cw, ch in drawTexture().
+	*/
+	static const int SrcSizeDefault = -1;
+
 	explicit DGraphics(const GraphicsParam &param);
 	~DGraphics();
 
 	void render();
 	LRESULT onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-	using TextureResource = std::shared_ptr<const Texture>;
-
-	/**@brief Use texture size.
-	  * @details You can use cw, ch in drawTexture().
-	  */
-	static const int SrcSizeDefault = -1;
-
 	/**@brief Load a texture.
 	  * @param[in] path file path
 	  */
-	TextureResource loadTexture(const wchar_t *path);
+	TextureResourcePtr loadTexture(const wchar_t *path);
 
 	/** @brief Draw texture.
 	 * @param[in] texture texture resource
@@ -112,23 +115,21 @@ public:
 	 * @param[in] scaleY size scaling factor Y
 	 * @param[in] alpha alpha value
 	 */
-	void drawTexture(const TextureResource &texture,
+	void drawTexture(const TextureResourcePtr &texture,
 		int dx, int dy, bool lrInv = false, bool udInv = false,
 		int sx = 0, int sy = 0, int sw = SrcSizeDefault, int sh = SrcSizeDefault,
 		int cx = 0, int cy = 0, float angle = 0.0f,
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f);
 
-	using FontResource = std::shared_ptr<const FontTexture>;
-
-	FontResource loadFont(const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
+	FontResourcePtr loadFont(const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
 		uint32_t w, uint32_t h);
 
-	void drawChar(const FontResource &font, wchar_t c, int dx, int dy,
+	void drawChar(const FontResourcePtr &font, wchar_t c, int dx, int dy,
 		uint32_t color = 0x000000,
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f,
 		int *nextx = nullptr, int *nexty = nullptr);
 
-	void drawString(const FontResource &font, const wchar_t *str, int dx, int dy,
+	void drawString(const FontResourcePtr &font, const wchar_t *str, int dx, int dy,
 		uint32_t color = 0x000000, int ajustX = 0,
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f,
 		int *nextx = nullptr, int *nexty = nullptr);

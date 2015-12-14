@@ -26,9 +26,9 @@ private:
 	//lua::Lua m_lua;
 	uint64_t m_frameCount = 0;
 
-	graphics::DGraphics::TextureResource notpow2, circle;
-	graphics::DGraphics::FontResource testfont, testjfont;
-	sound::XAudio2::SeResource testse;
+	graphics::DGraphics::TextureResourcePtr notpow2, circle;
+	graphics::DGraphics::FontResourcePtr testfont, testjfont;
+	sound::XAudio2::SeResourcePtr testse;
 };
 
 

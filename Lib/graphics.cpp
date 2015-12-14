@@ -476,7 +476,7 @@ void DGraphics::render()
 	m_pSwapChain->Present(m_param.vsync ? 1 : 0, 0);
 }
 
-DGraphics::TextureResource DGraphics::loadTexture(const wchar_t *path)
+DGraphics::TextureResourcePtr DGraphics::loadTexture(const wchar_t *path)
 {
 	file::Bytes bin = file::loadFile(path);
 
@@ -499,7 +499,7 @@ DGraphics::TextureResource DGraphics::loadTexture(const wchar_t *path)
 		ptmpRV, util::iunknownDeleter, imageInfo.Width, imageInfo.Height);
 }
 
-void DGraphics::drawTexture(const TextureResource &texture,
+void DGraphics::drawTexture(const TextureResourcePtr &texture,
 	int dx, int dy, bool lrInv, bool udInv,
 	int sx, int sy, int sw, int sh,
 	int cx, int cy, float angle, float scaleX, float scaleY,
@@ -512,7 +512,7 @@ void DGraphics::drawTexture(const TextureResource &texture,
 		cx, cy, scaleX, scaleY, angle, 0x00000000, alpha);
 }
 
-DGraphics::FontResource DGraphics::loadFont(const wchar_t *fontName,
+DGraphics::FontResourcePtr DGraphics::loadFont(const wchar_t *fontName,
 	uint32_t startChar, uint32_t endChar, uint32_t w, uint32_t h)
 {
 	HRESULT hr = S_OK;
@@ -617,7 +617,7 @@ DGraphics::FontResource DGraphics::loadFont(const wchar_t *fontName,
 	return res;
 }
 
-void DGraphics::drawChar(const FontResource &font, wchar_t c, int dx, int dy,
+void DGraphics::drawChar(const FontResourcePtr &font, wchar_t c, int dx, int dy,
 	uint32_t color, float scaleX, float scaleY, float alpha,
 	int *nextx, int *nexty)
 {
@@ -636,7 +636,7 @@ void DGraphics::drawChar(const FontResource &font, wchar_t c, int dx, int dy,
 	}
 }
 
-void DGraphics::drawString(const FontResource &font, const wchar_t *str, int dx, int dy,
+void DGraphics::drawString(const FontResourcePtr &font, const wchar_t *str, int dx, int dy,
 	uint32_t color, int ajustX, float scaleX, float scaleY, float alpha,
 	int *nextx, int *nexty)
 {

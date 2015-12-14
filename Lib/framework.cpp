@@ -231,8 +231,6 @@ void Application::updateInternal()
 void Application::renderInternal()
 {
 	// TEST: frame skip
-	// if skip == 3, draw once per 4F
-	// So fps should be around 15.00
 	/*
 	uint32_t skip = 3;
 	::Sleep(17 * skip);
