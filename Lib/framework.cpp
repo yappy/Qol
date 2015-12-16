@@ -9,6 +9,91 @@ namespace framework {
 using error::checkWin32Result;
 
 ///////////////////////////////////////////////////////////////////////////////
+// class ResourceManager impl
+///////////////////////////////////////////////////////////////////////////////
+#pragma region ResourceManager
+
+ResourceManager::ResourceManager(size_t resSetCount) :
+	m_texMapVec(resSetCount), m_fontMapVec(resSetCount), m_seMapVec(resSetCount)
+{}
+
+namespace {
+
+template <class T, class U>
+void addResource(ResourceManager::ResMapVec<T> *targetMapVec,
+	size_t setId, const char * resId, std::function<U> loadFunc)
+{
+	IdString fixedResId;
+	util::createFixedString(&fixedResId, resId);
+	std::unordered_map<IdString, Resource<T>> &map =
+		targetMapVec->at(setId);
+	if (map.count(fixedResId) != 0) {
+		throw std::invalid_argument(std::string("Resource ID already exists: ") + resId);
+	}
+	// key = IdString(fixedResId)
+	// value = Resource<T>(loadfunc)
+	map.emplace(std::piecewise_construct,
+		std::forward_as_tuple(fixedResId),
+		std::forward_as_tuple(loadFunc));
+}
+
+}	// namespace
+
+void ResourceManager::addTexture(size_t setId, const char * resId,
+	std::function<graphics::DGraphics::TextureResourcePtr()> loadFunc)
+{
+	addResource(&m_texMapVec, setId, resId, loadFunc);
+}
+
+void ResourceManager::addFont(size_t setId, const char *resId,
+	std::function<graphics::DGraphics::FontResourcePtr()> loadFunc)
+{
+	addResource(&m_fontMapVec, setId, resId, loadFunc);
+}
+
+void ResourceManager::addSoundEffect(size_t setId, const char *resId,
+	std::function<sound::XAudio2::SeResourcePtr()> loadFunc)
+{
+	addResource(&m_seMapVec, setId, resId, loadFunc);
+}
+
+namespace {
+
+template <class T>
+void loadAll(ResourceManager::ResMapVec<T> *targetMapVec, size_t setId)
+{
+	for (auto &elem : targetMapVec->at(setId)) {
+		elem.second.load();
+	}
+}
+
+template <class T>
+void unloadAll(ResourceManager::ResMapVec<T> *targetMapVec, size_t setId)
+{
+	for (auto &elem : targetMapVec->at(setId)) {
+		elem.second.unload();
+	}
+}
+
+}	// namespace
+
+void ResourceManager::loadResourceSet(size_t setId)
+{
+	loadAll(&m_texMapVec, setId);
+	loadAll(&m_fontMapVec, setId);
+	loadAll(&m_seMapVec, setId);
+}
+
+void ResourceManager::unloadResourceSet(size_t setId)
+{
+	unloadAll(&m_texMapVec, setId);
+	unloadAll(&m_fontMapVec, setId);
+	unloadAll(&m_seMapVec, setId);
+}
+
+#pragma endregion
+
+///////////////////////////////////////////////////////////////////////////////
 // class FrameControl impl
 ///////////////////////////////////////////////////////////////////////////////
 #pragma region FrameControl
@@ -262,6 +347,45 @@ int Application::run()
 		}
 	}
 	return static_cast<int>(msg.wParam);
+}
+
+
+void Application::addTextureResource(size_t setId, const char *resId, const wchar_t *path)
+{
+	std::wstring pathCopy(path);
+	m_resMgr.addTexture(setId, resId, [this, pathCopy]() {
+		yappy::debug::writef(L"LoadTexture: %s", pathCopy.c_str());
+		return m_dg->loadTexture(pathCopy.c_str());
+	});
+}
+
+void Application::addFontResource(size_t setId, const char *resId,
+	const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
+	uint32_t w, uint32_t h)
+{
+	std::wstring fontNameCopy(fontName);
+	m_resMgr.addFont(setId, resId, [this, fontNameCopy,]() {
+		yappy::debug::writef(L"CreateFont: %s", fontNameCopy.c_str());
+		return m_dg->loadFont();
+	});
+}
+
+void Application::addSeResource(size_t setId, const char *resId, const wchar_t *path)
+{
+	std::wstring pathCopy(path);
+	m_resMgr.addSoundEffect(setId, resId, [this, pathCopy]() {
+		yappy::debug::writef(L"LoadSoundEffect: %s", pathCopy.c_str());
+		return m_ds->loadSoundEffect(pathCopy.c_str());
+	});
+}
+
+void Application::loadResourceSet(size_t setId)
+{
+	m_resMgr.loadResourceSet(setId);
+}
+void Application::unloadResourceSet(size_t setId)
+{
+	m_resMgr.unloadResourceSet(setId);
 }
 
 #pragma endregion

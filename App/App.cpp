@@ -45,8 +45,8 @@ void MyApp::init()
 
 	sound().playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
 
-	addResource(0, "testres1", L"../sampledata/test_400_300.png");
-	addResource(0, "testres2", L"../sampledata/circle.png");
+	addTextureResource(0, "testres1", L"../sampledata/test_400_300.png");
+	addTextureResource(0, "testres2", L"../sampledata/circle.png");
 	loadResourceSet(0);
 
 	/*
