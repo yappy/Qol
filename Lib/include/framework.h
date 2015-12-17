@@ -13,24 +13,30 @@ namespace framework {
 using IdString = util::IdString;
 
 template <class T>
-struct Resource : private util::noncopyable {
+class Resource : private util::noncopyable {
+public:
 	using PtrType = std::shared_ptr<T>;
 	using LoadFuncType = std::function<PtrType()>;
 
-	PtrType ptr;
-	LoadFuncType loadFunc;
-
-	explicit Resource(LoadFuncType loadFunc_) : loadFunc(loadFunc_) {}
+	explicit Resource(LoadFuncType loadFunc_) : m_loadFunc(loadFunc_) {}
+	const PtrType &getPtr() const
+	{
+		return m_ptr;
+	}
 	void load()
 	{
-		if (ptr == nullptr) {
-			ptr = loadFunc();
+		if (m_ptr == nullptr) {
+			m_ptr = m_loadFunc();
 		}
 	}
 	void unload()
 	{
-		ptr.reset();
+		m_ptr.reset();
 	}
+
+private:
+	PtrType m_ptr;
+	LoadFuncType m_loadFunc;
 };
 
 /** @brief Resource manager, which is owned by Application.
@@ -50,6 +56,13 @@ public:
 
 	void loadResourceSet(size_t setId);
 	void unloadResourceSet(size_t setId);
+
+	const graphics::DGraphics::TextureResourcePtr &getTexture(
+		size_t setId, const char *resId);
+	const graphics::DGraphics::FontResourcePtr &getFont(
+		size_t setId, const char *resId);
+	const sound::XAudio2::SeResourcePtr &getSoundEffect(
+		size_t setId, const char *resId);
 
 private:
 	// int setId -> char[16] resId -> Resource<T>

@@ -91,6 +91,42 @@ void ResourceManager::unloadResourceSet(size_t setId)
 	unloadAll(&m_seMapVec, setId);
 }
 
+namespace {
+
+template <class T>
+const typename Resource<T>::PtrType &getResource(
+	const std::vector<std::unordered_map<IdString, Resource<T>>> &mapVec,
+	size_t setId, const char *resId)
+{
+	IdString fixedResId;
+	util::createFixedString(&fixedResId, resId);
+	auto &map = mapVec.at(setId);
+	if (map.count(fixedResId) != 0) {
+		throw std::invalid_argument(std::string("Resource ID already exists: ") + resId);
+	}
+	return map.at(fixedResId).getPtr();
+}
+
+}
+
+const graphics::DGraphics::TextureResourcePtr &ResourceManager::getTexture(
+	size_t setId, const char *resId)
+{
+	return getResource(m_texMapVec, setId, resId);
+}
+
+const graphics::DGraphics::FontResourcePtr &ResourceManager::getFont(
+	size_t setId, const char *resId)
+{
+	return getResource(m_fontMapVec, setId, resId);
+}
+
+const sound::XAudio2::SeResourcePtr &ResourceManager::getSoundEffect(
+	size_t setId, const char *resId)
+{
+	return getResource(m_seMapVec, setId, resId);
+}
+
 #pragma endregion
 
 ///////////////////////////////////////////////////////////////////////////////
