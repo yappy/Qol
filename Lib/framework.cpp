@@ -364,9 +364,9 @@ void Application::addFontResource(size_t setId, const char *resId,
 	uint32_t w, uint32_t h)
 {
 	std::wstring fontNameCopy(fontName);
-	m_resMgr.addFont(setId, resId, [this, fontNameCopy,]() {
+	m_resMgr.addFont(setId, resId, [this, fontNameCopy, startChar, endChar, w, h]() {
 		yappy::debug::writef(L"CreateFont: %s", fontNameCopy.c_str());
-		return m_dg->loadFont();
+		return m_dg->loadFont(fontNameCopy.c_str(), startChar, endChar, w, h);
 	});
 }
 
