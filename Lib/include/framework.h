@@ -24,6 +24,7 @@
 namespace yappy {
 namespace framework {
 
+/// %Resource ID is fixed-length string; char[16].
 using IdString = util::IdString;
 
 template <class T>
@@ -33,23 +34,12 @@ public:
 	using LoadFuncType = std::function<PtrType()>;
 
 	explicit Resource(LoadFuncType loadFunc_) : m_loadFunc(loadFunc_) {}
-	const PtrType &getPtr() const
-	{
-		return m_ptr;
-	}
-	void load()
-	{
-		if (m_ptr == nullptr) {
-			m_ptr = m_loadFunc();
-		}
-	}
-	void unload()
-	{
-		m_ptr.reset();
-	}
+	const PtrType &getPtr() const { return m_resPtr; }
+	void load() { if (m_resPtr == nullptr) { m_resPtr = m_loadFunc(); } }
+	void unload() { m_resPtr.reset(); }
 
 private:
-	PtrType m_ptr;
+	PtrType m_resPtr;
 	LoadFuncType m_loadFunc;
 };
 
@@ -139,7 +129,7 @@ struct AppParam {
 	bool showCursor = false;
 };
 
-/** @brief User application base, managing window.
+/** @brief User application base, which manages a window and DirectX objects.
 * @details Please inherit this class and override protected methods.
 */
 class Application : private util::noncopyable {
@@ -159,22 +149,69 @@ public:
 	 */
 	int run();
 
+	/** @brief Get HWND of the window managed by this class.
+	 */
 	HWND getHWnd() { return m_hWnd.get(); }
+	/** @brief Get DirectGraphics manager.
+	 */
 	graphics::DGraphics &graph() { return *m_dg.get(); }
+	/** @brief Get XAudio2 manager.
+	 */
 	sound::XAudio2 &sound() { return *m_ds.get(); }
+	/** @brief Get DirectInput manager.
+	 */
 	input::DInput &input() { return *m_di.get(); }
 
+	/** @brief Register texture image resource.
+	 * @param[in] setId	%Resource set ID.
+	 * @param[in] resId	%Resource ID.
+	 * @param[in] path	File path.
+	 */
 	void addTextureResource(size_t setId, const char *resId, const wchar_t *path);
+	/** @brief Register font image resource.
+	 * @param[in] setId		%Resource set ID.
+	 * @param[in] resId		%Resource ID.
+	 * @param[in] fontName	Font family name.
+	 * @param[in] startChar	The first character.
+	 * @param[in] endChar	The last character.
+	 * @param[in] w			Font image width.
+	 * @param[in] h			Font image height.
+	 */
 	void addFontResource(size_t setId, const char *resId,
 		const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
 		uint32_t w, uint32_t h);
+	/** @brief Register sound effect resource.
+	 * @param[in] setId	%Resource set ID.
+	 * @param[in] resId	%Resource ID.
+	 * @param[in] path	File path.
+	 */
 	void addSeResource(size_t setId, const char *resId, const wchar_t *path);
+
+	/** @brief Load resources by resource set ID.
+	 * @param[in] setId	%Resource set ID.
+	 */
 	void loadResourceSet(size_t setId);
+	/** @brief Unload resources by resource set ID.
+	 * @param[in] setId	%Resource set ID.
+	 */
 	void unloadResourceSet(size_t setId);
+
+	/** @brief Get texture resource pointer.
+	 * @param[in] setId	%Resource set ID.
+	 * @param[in] resId	%Resource ID.
+	 */
 	const graphics::DGraphics::TextureResourcePtr &getTexture(
 		size_t setId, const char *resId);
+	/** @brief Get texture resource pointer.
+	 * @param[in] setId	%Resource set ID.
+	 * @param[in] resId	%Resource ID.
+	 */
 	const graphics::DGraphics::FontResourcePtr &getFont(
 		size_t setId, const char *resId);
+	/** @brief Get texture resource pointer.
+	 * @param[in] setId	%Resource set ID.
+	 * @param[in] resId	%Resource ID.
+	 */
 	const sound::XAudio2::SeResourcePtr &getSoundEffect(
 		size_t setId, const char *resId);
 
