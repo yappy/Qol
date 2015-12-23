@@ -25,28 +25,20 @@ protected:
 private:
 	//lua::Lua m_lua;
 	uint64_t m_frameCount = 0;
-
-	graphics::DGraphics::TextureResourcePtr notpow2, circle;
-	graphics::DGraphics::FontResourcePtr testfont, testjfont;
-	sound::XAudio2::SeResourcePtr testse;
 };
 
 void MyApp::init()
 {
-	//*
-	notpow2 = graph().loadTexture(L"../sampledata/test_400_300.png");
-	circle = graph().loadTexture(L"../sampledata/circle.png");
-
-	testfont = graph().loadFont(L"ＭＳ 明朝", 'A', 'Z', 16, 32);
-	testjfont = graph().loadFont(L"メイリオ", L'あ', L'ん', 128, 128);
-	//*/
-
-	testse = sound().loadSoundEffect(L"/C:/Windows/Media/chimes.wav");
-
 	sound().playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
 
-	addTextureResource(0, "testres1", L"../sampledata/test_400_300.png");
-	addTextureResource(0, "testres2", L"../sampledata/circle.png");
+	addTextureResource(0, "unyo", L"../sampledata/test_400_300.png");
+	addTextureResource(0, "maru", L"../sampledata/circle.png");
+
+	addFontResource(0, "e", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
+	addFontResource(0, "j", L"メイリオ", L'あ', L'ん', 128, 128);
+
+	addSeResource(0, "testse", L"/C:/Windows/Media/chimes.wav");
+
 	loadResourceSet(0);
 
 	/*
@@ -63,15 +55,19 @@ void MyApp::render()
 	//*
 	int test = static_cast<int>(m_frameCount * 5 % 768);
 
-	graph().drawTexture(circle, test, test);
-	graph().drawTexture(notpow2, 1024 / 2, 768 / 2, false, false, 0, 0, -1, -1, 200, 150, m_frameCount / 3.14f / 10);
+	auto unyo = getTexture(0, "unyo");
+	auto maru = getTexture(0, "maru");
+	graph().drawTexture(maru, test, test);
+	graph().drawTexture(unyo, 1024 / 2, 768 / 2, false, false, 0, 0, -1, -1, 200, 150, m_frameCount / 3.14f / 10);
 
+	auto testfont = getFont(0, "e");
 	graph().drawChar(testfont, 'Y', 100, 100);
 	graph().drawChar(testfont, 'A', 116, 100);
 	graph().drawChar(testfont, 'P', 132, 100);
 	graph().drawChar(testfont, 'P', 148, 100);
 	graph().drawChar(testfont, 'Y', 164, 100, 0x00ff00, 2, 2, 1.0f);
 
+	auto testjfont = getFont(0, "j");
 	graph().drawChar(testjfont, L'ほ', 100, 200);
 	graph().drawString(testjfont, L"ほわいと", 100, 600, 0x000000, -32);
 	//*/
@@ -82,6 +78,8 @@ void MyApp::update()
 {
 	//m_lua.callGlobal("update");
 	m_frameCount++;
+
+	auto testse = getSoundEffect(0, "testse");
 
 	std::array<bool, 256> keys = input().getKeys();
 	for (size_t i = 0U; i < keys.size(); i++) {

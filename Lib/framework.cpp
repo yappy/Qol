@@ -101,8 +101,8 @@ const typename Resource<T>::PtrType &getResource(
 	IdString fixedResId;
 	util::createFixedString(&fixedResId, resId);
 	auto &map = mapVec.at(setId);
-	if (map.count(fixedResId) != 0) {
-		throw std::invalid_argument(std::string("Resource ID already exists: ") + resId);
+	if (map.count(fixedResId) == 0) {
+		throw std::invalid_argument(std::string("Resource ID not found: ") + resId);
 	}
 	return map.at(fixedResId).getPtr();
 }
@@ -422,6 +422,21 @@ void Application::loadResourceSet(size_t setId)
 void Application::unloadResourceSet(size_t setId)
 {
 	m_resMgr.unloadResourceSet(setId);
+}
+
+const graphics::DGraphics::TextureResourcePtr &Application::getTexture(size_t setId, const char *resId)
+{
+	return m_resMgr.getTexture(setId, resId);
+}
+
+const graphics::DGraphics::FontResourcePtr &Application::getFont(size_t setId, const char *resId)
+{
+	return m_resMgr.getFont(setId, resId);
+}
+
+const sound::XAudio2::SeResourcePtr &Application::getSoundEffect(size_t setId, const char *resId)
+{
+	return m_resMgr.getSoundEffect(setId, resId);
 }
 
 #pragma endregion

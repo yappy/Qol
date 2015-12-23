@@ -137,6 +137,12 @@ public:
 	void addSeResource(size_t setId, const char *resId, const wchar_t *path);
 	void loadResourceSet(size_t setId);
 	void unloadResourceSet(size_t setId);
+	const graphics::DGraphics::TextureResourcePtr &getTexture(
+		size_t setId, const char *resId);
+	const graphics::DGraphics::FontResourcePtr &getFont(
+		size_t setId, const char *resId);
+	const sound::XAudio2::SeResourcePtr &getSoundEffect(
+		size_t setId, const char *resId);
 
 protected:
 	virtual void init() = 0;
