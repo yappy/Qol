@@ -1,3 +1,17 @@
+﻿/** @mainpage
+ * @section はじめに
+ * これは、QOL(生活の質)を高めるためのライブラリです。
+ * @section つぎに
+ * @ref framework.h の Application クラスとか。
+ * @ref debug.h , @ref util.h もおすすめです。
+ * @section おわりに
+ * ホワイト。
+ */
+
+/** @file
+ * @brief Game application main framework classes.
+ */
+
 #pragma once
 
 #include "util.h"
@@ -39,9 +53,7 @@ private:
 	LoadFuncType m_loadFunc;
 };
 
-/** @brief Resource manager, which is owned by Application.
-* @details
-*/
+
 class ResourceManager : private util::noncopyable {
 public:
 	explicit ResourceManager(size_t resSetCount = 1);
@@ -105,24 +117,46 @@ private:
 	uint32_t m_fpsFrameAcc = 0;
 };
 
+/** @brief Application parameters.
+ * @details Each field has default value.
+ */
 struct AppParam {
+	/// hInstance from WinMain.
 	HINSTANCE hInstance = nullptr;
+	/// nCmdShow from WinMain.
 	int nCmdShow = SW_SHOW;
+	/// Window class name.
 	const wchar_t *wndClsName = L"GameWndCls";
+	/// Window title string.
 	const wchar_t *title = L"GameApp";
+	/// hIcon for window class.
 	HICON hIcon = nullptr;
+	/// hIconSm for window class.
 	HICON hIconSm = nullptr;
+	/// Frame skip count.
 	uint32_t frameSkip = 0;
+	/// Whether shows cursor or not.
 	bool showCursor = false;
 };
 
 /** @brief User application base, managing window.
-* @details Please inherit this and override protected methods.
+* @details Please inherit this class and override protected methods.
 */
 class Application : private util::noncopyable {
 public:
+	/** @brief Constructor.
+	 * @details This needs AppParam and graphics::GraphicsParam.
+	 * @param[in] appParam		%Application parameters.
+	 * @param[in] graphParam	Graphics parameters.
+	 */
 	Application(const AppParam &appParam, const graphics::GraphicsParam &graphParam);
+	/** @brief Destructor.
+	 */
 	virtual ~Application();
+	/** @brief Start main loop.
+	 * @details Call init() .
+	 * @return msg.wParam, which should be returned from WinMain().
+	 */
 	int run();
 
 	HWND getHWnd() { return m_hWnd.get(); }
@@ -145,8 +179,17 @@ public:
 		size_t setId, const char *resId);
 
 protected:
+	/** @brief User initialization code.
+	 * @details Called at the beginning of run().
+	 */
 	virtual void init() = 0;
+	/** @brief Process frame.
+	 * @details Called at the beginning of every frame.
+	 */
 	virtual void update() = 0;
+	/** @brief Process rendering.
+	 * @details Called after update(), unless frame skipping.
+	 */
 	virtual void render() = 0;
 
 private:

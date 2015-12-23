@@ -83,8 +83,8 @@ public:
 	using FontResourcePtr = std::shared_ptr<FontResource>;
 
 	/**@brief Use texture size.
-	* @details You can use cw, ch in drawTexture().
-	*/
+	 * @details You can use cw, ch in drawTexture().
+	 */
 	static const int SrcSizeDefault = -1;
 
 	explicit DGraphics(const GraphicsParam &param);
@@ -94,8 +94,8 @@ public:
 	LRESULT onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 	/**@brief Load a texture.
-	  * @param[in] path file path
-	  */
+	 * @param[in] path file path
+	 */
 	TextureResourcePtr loadTexture(const wchar_t *path);
 
 	/** @brief Draw texture.
