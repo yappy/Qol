@@ -41,6 +41,17 @@ void MyApp::init()
 
 	loadResourceSet(0);
 
+	// performance test
+	{
+		debug::StopWatch(L"Resource ID hash");
+		uint32_t dummy = 0;
+		for (int i = 0; i < 10000; i++) {
+			const auto &r = getTexture(0, "unyo");
+			dummy += r->w;
+		}
+		debug::writef(L"%d", dummy);
+	}
+
 	/*
 	m_lua.loadTraceLib();
 	m_lua.loadGraphLib(this);
