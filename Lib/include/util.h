@@ -21,11 +21,14 @@ using IdString = std::array<char, 16>;
 
 template <size_t N>
 inline void createFixedString(std::array<char, N> *out, const char *src) {
-	if (std::strlen(src) >= N) {
+	size_t len = std::strlen(src);
+	if (len >= N) {
 		throw std::invalid_argument(std::string("String size too long: ") + src);
 	}
-	// strncpy fills the remainder with '\0'
-	::strncpy_s(out->data(), N, src, N);
+	// copy non-'\0' part
+	std::memcpy(out->data(), src, len);
+	// fills the remainder with '\0'
+	std::memset(out->data() + len, '\0', N - len);
 }
 
 
