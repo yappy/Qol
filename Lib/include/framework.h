@@ -22,6 +22,7 @@
 #include <functional>
 
 namespace yappy {
+/// Game application main framework.
 namespace framework {
 
 /// %Resource ID is fixed-length string; char[16].
