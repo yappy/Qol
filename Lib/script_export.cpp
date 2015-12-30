@@ -9,6 +9,8 @@ namespace lua_export {
 
 namespace {
 
+// Get reinterpret_cast<T *>(self.fieldName)
+// self is the first argument (stack[1])
 template <class T>
 inline T *getPtrFromSelf(lua_State *L, const char *fieldName)
 {
@@ -72,28 +74,19 @@ int trace::write(lua_State *L)
 // "graph" table
 ///////////////////////////////////////////////////////////////////////////////
 
-int graph::loadTexture(lua_State *L)
-{
-	auto *app = getPtrFromSelf<graphics::Application>(L, graph_RawFieldName);
-	const char *id = luaL_checkstring(L, 2);
-	const char *path = luaL_checkstring(L, 3);
-
-	app->loadTexture(id, util::utf82wc(path).get());
-
-	return 0;
-}
-
+/**
+ * (self, int setId, string resId)
+ */
 int graph::getTextureSize(lua_State *L)
 {
-	auto *app = getPtrFromSelf<graphics::Application>(L, graph_RawFieldName);
-	const char *id = luaL_checkstring(L, 2);
+	auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
+	int setId = static_cast<int>(luaL_checkinteger(L, 2));
+	const char *resId = luaL_checkstring(L, 3);
 
-	uint32_t w = 0;
-	uint32_t h = 0;
-	app->getTextureSize(id, &w, &h);
+	const auto &pTex = app->getTexture(setId, resId);
 
-	lua_pushinteger(L, w);
-	lua_pushinteger(L, h);
+	lua_pushinteger(L, pTex->w);
+	lua_pushinteger(L, pTex->h);
 
 	return 2;
 }
@@ -106,66 +99,49 @@ int graph::getTextureSize(lua_State *L)
  */
 int graph::drawTexture(lua_State *L)
 {
-	auto *app = getPtrFromSelf<graphics::Application>(L, graph_RawFieldName);
-	const char *id = luaL_checkstring(L, 2);
-	int dx = static_cast<int>(luaL_checkinteger(L, 3));
-	int dy = static_cast<int>(luaL_checkinteger(L, 4));
+	auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
+	int setId = static_cast<int>(luaL_checkinteger(L, 2));
+	const char *resId = luaL_checkstring(L, 3);
+	int dx = static_cast<int>(luaL_checkinteger(L, 4));
+	int dy = static_cast<int>(luaL_checkinteger(L, 5));
 
-	bool lrInv = getBooleanWithDefault(L, 5, false);
-	bool udInv = getBooleanWithDefault(L, 6, false);
-	int sx = getIntWithDefault(L, 7, 0);
-	int sy = getIntWithDefault(L, 8, 0);
-	int sw = getIntWithDefault(L, 9, 0);
-	int sh = getIntWithDefault(L, 10, 0);
-	int cx = getIntWithDefault(L, 11, 0);
-	int cy = getIntWithDefault(L, 12, 0);
-	float angle = getFloatWithDefault(L, 13, 0.0f);
-	float scaleX = getFloatWithDefault(L, 14, 1.0f);
-	float scaleY = getFloatWithDefault(L, 15, 1.0f);
-	float alpha = getFloatWithDefault(L, 16, 1.0f);
+	bool lrInv = getBooleanWithDefault(L, 6, false);
+	bool udInv = getBooleanWithDefault(L, 7, false);
+	int sx = getIntWithDefault(L, 8, 0);
+	int sy = getIntWithDefault(L, 9, 0);
+	int sw = getIntWithDefault(L, 10, 0);
+	int sh = getIntWithDefault(L, 11, 0);
+	int cx = getIntWithDefault(L, 12, 0);
+	int cy = getIntWithDefault(L, 13, 0);
+	float angle = getFloatWithDefault(L, 14, 0.0f);
+	float scaleX = getFloatWithDefault(L, 15, 1.0f);
+	float scaleY = getFloatWithDefault(L, 16, 1.0f);
+	float alpha = getFloatWithDefault(L, 17, 1.0f);
 
-	app->drawTexture(id, dx, dy, lrInv, udInv, sx, sy, sw, sh, cx, cy,
+	const auto &pTex = app->getTexture(setId, resId);
+	app->graph().drawTexture(pTex, dx, dy, lrInv, udInv, sx, sy, sw, sh, cx, cy,
 		angle, scaleX, scaleY, alpha);
-
-	return 0;
-}
-
-/*
-(string id, const wchar_t *fontName, string startChar, string endChar,
-uint32_t w, uint32_t h)
-*/
-int graph::loadFont(lua_State *L)
-{
-	auto *app = getPtrFromSelf<graphics::Application>(L, graph_RawFieldName);
-	const char *id = luaL_checkstring(L, 2);
-	const char *fontName = luaL_checkstring(L, 3);
-	const char *startCharStr = luaL_checkstring(L, 4);
-	const char *endCharStr = luaL_checkstring(L, 5);
-	int w = static_cast<int>(luaL_checkinteger(L, 6));
-	int h = static_cast<int>(luaL_checkinteger(L, 7));
-
-	wchar_t startChar = util::utf82wc(startCharStr)[0];
-	wchar_t endChar = util::utf82wc(endCharStr)[0];
-	app->loadFont(id, util::utf82wc(fontName).get(), startChar, endChar, w, h);
 
 	return 0;
 }
 
 int graph::drawString(lua_State *L)
 {
-	auto *app = getPtrFromSelf<graphics::Application>(L, graph_RawFieldName);
-	const char *id = luaL_checkstring(L, 2);
-	const char *str = luaL_checkstring(L, 3);
-	int dx = static_cast<int>(luaL_checkinteger(L, 4));
-	int dy = static_cast<int>(luaL_checkinteger(L, 5));
+	auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
+	int setId = static_cast<int>(luaL_checkinteger(L, 2));
+	const char *resId = luaL_checkstring(L, 3);
+	const char *str = luaL_checkstring(L, 4);
+	int dx = static_cast<int>(luaL_checkinteger(L, 5));
+	int dy = static_cast<int>(luaL_checkinteger(L, 6));
 
-	int color = getIntWithDefault(L, 6, 0x000000);
-	int ajustX = getIntWithDefault(L, 7, 0);
-	float scaleX = getFloatWithDefault(L, 8, 1.0f);
-	float scaleY = getFloatWithDefault(L, 9, 1.0f);
-	float alpha = getFloatWithDefault(L, 10, 1.0f);
+	int color = getIntWithDefault(L, 7, 0x000000);
+	int ajustX = getIntWithDefault(L, 8, 0);
+	float scaleX = getFloatWithDefault(L, 9, 1.0f);
+	float scaleY = getFloatWithDefault(L, 10, 1.0f);
+	float alpha = getFloatWithDefault(L, 11, 1.0f);
 
-	app->drawString(id, util::utf82wc(str).get(), dx, dy,
+	const auto &pFont = app->getFont(setId, resId);
+	app->graph().drawString(pFont, util::utf82wc(str).get(), dx, dy,
 		color, ajustX, scaleX, scaleY, alpha);
 
 	return 0;
