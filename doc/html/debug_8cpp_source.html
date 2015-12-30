@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lib
-   &#160;<span id="projectnumber">(04dd778) 2015-10-02 20:52:26 +0900 (HEAD -&gt; master)</span>
+   &#160;<span id="projectnumber">(4e8fabf) 2016-03-19 00:45:45 +0900 (HEAD -&gt; master, origin/master, origin/HEAD)</span>
    </div>
    <div id="projectbrief">QOLを高める</div>
   </td>
@@ -40,6 +40,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -63,6 +64,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -91,11 +93,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="contents">
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#include &quot;stdafx.h&quot;</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#include &lt;windows.h&gt;</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &quot;include/debug.h&quot;</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;include/util.h&quot;</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="debug_8h.html">include/debug.h</a>&quot;</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="util_8h.html">include/util.h</a>&quot;</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div>
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceyappy.html">yappy</a> {</div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">namespace </span>debug {</div>
+<div class="line"><a name="l00007"></a><span class="lineno"><a class="line" href="namespaceyappy_1_1debug.html">    7</a></span>&#160;<span class="keyword">namespace </span>debug {</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span>{</div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;</div>
@@ -107,13 +109,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;}</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="keywordtype">bool</span> enableDebugOutput() noexcept</div>
+<div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="namespaceyappy_1_1debug.html#ad36f7dc338b3ec5d4bc17139b72a218b">   19</a></span>&#160;<span class="keywordtype">bool</span> <a class="code" href="namespaceyappy_1_1debug.html#ad36f7dc338b3ec5d4bc17139b72a218b">enableDebugOutput</a>() noexcept</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;{</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    s_debugOut = <span class="keyword">true</span>;</div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keywordflow">return</span> s_debugOut;</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;}</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keywordtype">bool</span> enableConsoleOutput() noexcept </div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="namespaceyappy_1_1debug.html#a0add3b08978677800968746611d196ed">   25</a></span>&#160;<span class="keywordtype">bool</span> <a class="code" href="namespaceyappy_1_1debug.html#a0add3b08978677800968746611d196ed">enableConsoleOutput</a>() noexcept </div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;{</div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keywordflow">if</span> (s_consoleOut) {</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;        <span class="keywordflow">return</span> s_consoleOut;</div>
@@ -125,7 +127,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keywordflow">return</span> s_consoleOut;</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;}</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="keywordtype">bool</span> enableFileOutput(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *fileName) noexcept</div>
+<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="namespaceyappy_1_1debug.html#afff3e88cdb1955f6be9fbf970d77ebcf">   37</a></span>&#160;<span class="keywordtype">bool</span> <a class="code" href="namespaceyappy_1_1debug.html#afff3e88cdb1955f6be9fbf970d77ebcf">enableFileOutput</a>(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *fileName) noexcept</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;{</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <span class="keywordflow">if</span> (s_fileOut) {</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <span class="keywordflow">return</span> s_fileOut;</div>
@@ -139,7 +141,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keywordflow">return</span> s_fileOut;</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;}</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="keywordtype">void</span> shutdownDebugOutput() noexcept</div>
+<div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="namespaceyappy_1_1debug.html#afb58e3b9794a39dead8a9996f42601bc">   51</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespaceyappy_1_1debug.html#afb58e3b9794a39dead8a9996f42601bc">shutdownDebugOutput</a>() noexcept</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;{</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    s_debugOut = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
@@ -155,7 +157,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;}</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="keywordtype">void</span> write(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *str, <span class="keywordtype">bool</span> newline) noexcept</div>
+<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="namespaceyappy_1_1debug.html#a1eb446364d207eb060b83740b73b4bac">   67</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespaceyappy_1_1debug.html#a1eb446364d207eb060b83740b73b4bac">write</a>(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *str, <span class="keywordtype">bool</span> newline) noexcept</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;{</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="comment">// Debug Out</span></div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keywordflow">if</span> (s_debugOut) {</div>
@@ -176,30 +178,49 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    }</div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="comment">// File Out</span></div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="keywordflow">if</span> (s_fileOut) {</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        std::string mbstr = util::wc2utf8(str);</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        <span class="keywordflow">if</span> (newline) {</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;            mbstr += <span class="stringliteral">&quot;\n&quot;</span>;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        }</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;        DWORD written = 0;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        ::WriteFile(s_hFile, mbstr.c_str(), <span class="keyword">static_cast&lt;</span>DWORD<span class="keyword">&gt;</span>(mbstr.size()), &amp;written, NULL);</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        ::FlushFileBuffers(s_hFile);</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    }</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;}</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="keywordtype">void</span> writef(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *fmt, ...) noexcept</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;{</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    va_list args;</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    va_start(args, fmt);</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    <span class="keywordtype">wchar_t</span> buf[1024];</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    _vsnwprintf_s(buf, _TRUNCATE, fmt, args);</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    va_end(args);</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    write(buf, <span class="keyword">true</span>);</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;}</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;}</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;}</div>
-<div class="ttc" id="namespaceyappy_html"><div class="ttname"><a href="namespaceyappy.html">yappy</a></div><div class="ttdef"><b>Definition:</b> <a href="debug_8cpp_source.html#l00006">debug.cpp:6</a></div></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        <span class="keyword">auto</span> mbstr = <a class="code" href="namespaceyappy_1_1util.html#a98bad7a528396bc64da92a6c06a440b2">util::wc2utf8</a>(str);</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        DWORD written = 0;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        ::WriteFile(s_hFile, mbstr.get(), <span class="keyword">static_cast&lt;</span>DWORD<span class="keyword">&gt;</span>(strlen(mbstr.get())), &amp;written, <span class="keyword">nullptr</span>);</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        <span class="keywordflow">if</span> (newline) {</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;            ::WriteFile(s_hFile, <span class="stringliteral">&quot;\n&quot;</span>, 1, &amp;written, <span class="keyword">nullptr</span>);</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        }</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    }</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;}</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;</div>
+<div class="line"><a name="l00097"></a><span class="lineno"><a class="line" href="namespaceyappy_1_1debug.html#afd9b4c025e197e02b287daab175ffeac">   97</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespaceyappy_1_1debug.html#afd9b4c025e197e02b287daab175ffeac">writef</a>(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *fmt, ...) noexcept</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;{</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    va_list args;</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    va_start(args, fmt);</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    <span class="keywordtype">wchar_t</span> buf[1024];</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    _vsnwprintf_s(buf, _TRUNCATE, fmt, args);</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    va_end(args);</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    <a class="code" href="namespaceyappy_1_1debug.html#a1eb446364d207eb060b83740b73b4bac">write</a>(buf, <span class="keyword">true</span>);</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;}</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;</div>
+<div class="line"><a name="l00108"></a><span class="lineno"><a class="line" href="namespaceyappy_1_1debug.html#a03ffad910f61258b80aed7e22079bb57">  108</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespaceyappy_1_1debug.html#afd9b4c025e197e02b287daab175ffeac">writef</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *fmt, ...) noexcept</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;{</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    va_list args;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    va_start(args, fmt);</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="keywordtype">char</span> buf[1024];</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    vsnprintf_s(buf, _TRUNCATE, fmt, args);</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    va_end(args);</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    <a class="code" href="namespaceyappy_1_1debug.html#a1eb446364d207eb060b83740b73b4bac">write</a>(buf, <span class="keyword">true</span>);</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;}</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;}</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;}</div>
+<div class="ttc" id="namespaceyappy_1_1util_html_a98bad7a528396bc64da92a6c06a440b2"><div class="ttname"><a href="namespaceyappy_1_1util.html#a98bad7a528396bc64da92a6c06a440b2">yappy::util::wc2utf8</a></div><div class="ttdeci">std::unique_ptr&lt; char[]&gt; wc2utf8(const wchar_t *in)</div><div class="ttdoc">Wide char to UTF-8. </div><div class="ttdef"><b>Definition:</b> <a href="util_8h_source.html#l00104">util.h:104</a></div></div>
+<div class="ttc" id="namespaceyappy_1_1debug_html_ad36f7dc338b3ec5d4bc17139b72a218b"><div class="ttname"><a href="namespaceyappy_1_1debug.html#ad36f7dc338b3ec5d4bc17139b72a218b">yappy::debug::enableDebugOutput</a></div><div class="ttdeci">bool enableDebugOutput() noexcept</div><div class="ttdoc">Enables writing to OutputDebugString(). </div><div class="ttdef"><b>Definition:</b> <a href="debug_8cpp_source.html#l00019">debug.cpp:19</a></div></div>
+<div class="ttc" id="namespaceyappy_1_1debug_html_a1eb446364d207eb060b83740b73b4bac"><div class="ttname"><a href="namespaceyappy_1_1debug.html#a1eb446364d207eb060b83740b73b4bac">yappy::debug::write</a></div><div class="ttdeci">void write(const wchar_t *str, bool newline) noexcept</div><div class="ttdoc">Write debug string. </div><div class="ttdef"><b>Definition:</b> <a href="debug_8cpp_source.html#l00067">debug.cpp:67</a></div></div>
+<div class="ttc" id="debug_8h_html"><div class="ttname"><a href="debug_8h.html">debug.h</a></div><div class="ttdoc">Debug utilities. </div></div>
+<div class="ttc" id="namespaceyappy_1_1debug_html_afd9b4c025e197e02b287daab175ffeac"><div class="ttname"><a href="namespaceyappy_1_1debug.html#afd9b4c025e197e02b287daab175ffeac">yappy::debug::writef</a></div><div class="ttdeci">void writef(const wchar_t *fmt,...) noexcept</div><div class="ttdoc">Write debug message using format string like printf. </div><div class="ttdef"><b>Definition:</b> <a href="debug_8cpp_source.html#l00097">debug.cpp:97</a></div></div>
+<div class="ttc" id="namespaceyappy_1_1debug_html_afb58e3b9794a39dead8a9996f42601bc"><div class="ttname"><a href="namespaceyappy_1_1debug.html#afb58e3b9794a39dead8a9996f42601bc">yappy::debug::shutdownDebugOutput</a></div><div class="ttdeci">void shutdownDebugOutput() noexcept</div><div class="ttdoc">Flush buffers and free resources. </div><div class="ttdef"><b>Definition:</b> <a href="debug_8cpp_source.html#l00051">debug.cpp:51</a></div></div>
+<div class="ttc" id="namespaceyappy_html"><div class="ttname"><a href="namespaceyappy.html">yappy</a></div><div class="ttdef"><b>Definition:</b> <a href="config_8cpp_source.html#l00006">config.cpp:6</a></div></div>
+<div class="ttc" id="util_8h_html"><div class="ttname"><a href="util_8h.html">util.h</a></div><div class="ttdoc">Utilities. </div></div>
+<div class="ttc" id="namespaceyappy_1_1debug_html_afff3e88cdb1955f6be9fbf970d77ebcf"><div class="ttname"><a href="namespaceyappy_1_1debug.html#afff3e88cdb1955f6be9fbf970d77ebcf">yappy::debug::enableFileOutput</a></div><div class="ttdeci">bool enableFileOutput(const wchar_t *fileName) noexcept</div><div class="ttdoc">Enables writing to a file. </div><div class="ttdef"><b>Definition:</b> <a href="debug_8cpp_source.html#l00037">debug.cpp:37</a></div></div>
+<div class="ttc" id="namespaceyappy_1_1debug_html_a0add3b08978677800968746611d196ed"><div class="ttname"><a href="namespaceyappy_1_1debug.html#a0add3b08978677800968746611d196ed">yappy::debug::enableConsoleOutput</a></div><div class="ttdeci">bool enableConsoleOutput() noexcept</div><div class="ttdoc">Shows a console window and enables writing to it. </div><div class="ttdef"><b>Definition:</b> <a href="debug_8cpp_source.html#l00025">debug.cpp:25</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

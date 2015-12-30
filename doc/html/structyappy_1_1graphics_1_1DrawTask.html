@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lib
-   &#160;<span id="projectnumber">(04dd778) 2015-10-02 20:52:26 +0900 (HEAD -&gt; master)</span>
+   &#160;<span id="projectnumber">(4e8fabf) 2016-03-19 00:45:45 +0900 (HEAD -&gt; master, origin/master, origin/HEAD)</span>
    </div>
    <div id="projectbrief">QOLを高める</div>
   </td>
@@ -40,6 +40,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -89,6 +90,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="structyappy_1_1graphics_1_1DrawTask-members.html">List of all members</a>  </div>
@@ -97,11 +99,17 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:aa0ae692b40dee605e3dc8934ade13523"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa0ae692b40dee605e3dc8934ade13523"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>RvPtr</b> = Texture::RvPtr</td></tr>
+<tr class="separator:aa0ae692b40dee605e3dc8934ade13523"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a8637d74dbe0412e653a74a13dfe94e40"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8637d74dbe0412e653a74a13dfe94e40"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>DrawTask</b> (const <a class="el" href="structyappy_1_1graphics_1_1Texture.html">Texture</a> *texture_, int dx_, int dy_, bool lrInv_, bool udInv_, int sx_, int sy_, int sw_, int sh_, int cx_, int cy_, float scaleX_, float scaleY_, float angle_, float alpha_)</td></tr>
-<tr class="separator:a8637d74dbe0412e653a74a13dfe94e40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9fc32c1f3b1e71dc26bb1d8ad2d3553"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa9fc32c1f3b1e71dc26bb1d8ad2d3553"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>DrawTask</b> (const RvPtr &amp;pRV_, uint32_t texW_, uint32_t texH_, int dx_, int dy_, bool lrInv_, bool udInv_, int sx_, int sy_, int sw_, int sh_, int cx_, int cy_, float scaleX_, float scaleY_, float angle_, uint32_t fontColor_, float alpha_)</td></tr>
+<tr class="separator:aa9fc32c1f3b1e71dc26bb1d8ad2d3553"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38e27b69602074f493b4f8ed02f7246e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a38e27b69602074f493b4f8ed02f7246e"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>DrawTask</b> (const <a class="el" href="structyappy_1_1graphics_1_1DrawTask.html">DrawTask</a> &amp;)=default</td></tr>
 <tr class="separator:a38e27b69602074f493b4f8ed02f7246e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -111,9 +119,15 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:aedcf05a16603464ebf4f8f94362e5e62"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aedcf05a16603464ebf4f8f94362e5e62"></a>
-const <a class="el" href="structyappy_1_1graphics_1_1Texture.html">Texture</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>texture</b></td></tr>
-<tr class="separator:aedcf05a16603464ebf4f8f94362e5e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2607befb0c21de1757f5cc61afc8cdc9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2607befb0c21de1757f5cc61afc8cdc9"></a>
+const RvPtr &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>pRV</b></td></tr>
+<tr class="separator:a2607befb0c21de1757f5cc61afc8cdc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1590dbd5cade34d13d8fe616e85b2512"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1590dbd5cade34d13d8fe616e85b2512"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>texW</b></td></tr>
+<tr class="separator:a1590dbd5cade34d13d8fe616e85b2512"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aedfa136543fd2e915d0bf55b8a89422b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aedfa136543fd2e915d0bf55b8a89422b"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>texH</b></td></tr>
+<tr class="separator:aedfa136543fd2e915d0bf55b8a89422b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae01cc054aebefc763c25ad9f6f1bc4ef"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae01cc054aebefc763c25ad9f6f1bc4ef"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>dx</b></td></tr>
 <tr class="separator:ae01cc054aebefc763c25ad9f6f1bc4ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -153,13 +167,16 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>scaleY</b></td></tr>
 <tr class="memitem:a8c09f3181527bae91dab25ca28848bf8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8c09f3181527bae91dab25ca28848bf8"></a>
 float&#160;</td><td class="memItemRight" valign="bottom"><b>angle</b></td></tr>
 <tr class="separator:a8c09f3181527bae91dab25ca28848bf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a766cdc17dba8ab5700049643d02ac4bd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a766cdc17dba8ab5700049643d02ac4bd"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>fontColor</b></td></tr>
+<tr class="separator:a766cdc17dba8ab5700049643d02ac4bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94383e44fde67546d9671929fcd2133e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a94383e44fde67546d9671929fcd2133e"></a>
 float&#160;</td><td class="memItemRight" valign="bottom"><b>alpha</b></td></tr>
 <tr class="separator:a94383e44fde67546d9671929fcd2133e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p>Definition at line <a class="el" href="graphics_8h_source.html#l00060">60</a> of file <a class="el" href="graphics_8h_source.html">graphics.h</a>.</p>
+<p>Definition at line <a class="el" href="graphics_8h_source.html#l00038">38</a> of file <a class="el" href="graphics_8h_source.html">graphics.h</a>.</p>
 </div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li><a class="el" href="graphics_8h_source.html">graphics.h</a></li>
 </ul>

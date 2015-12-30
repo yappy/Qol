@@ -1,10 +1,10 @@
 var searchData=
 [
-  ['d3derror',['D3DError',['../classyappy_1_1error_1_1D3DError.html',1,'yappy::error']]],
-  ['dierror',['DIError',['../classyappy_1_1error_1_1DIError.html',1,'yappy::error']]],
-  ['dinput',['DInput',['../classyappy_1_1input_1_1DInput.html',1,'yappy::input']]],
-  ['drawtask',['DrawTask',['../structyappy_1_1graphics_1_1DrawTask.html',1,'yappy::graphics']]],
-  ['drawtexture',['drawTexture',['../classyappy_1_1graphics_1_1Application.html#a0dec7bd4ceea24ea55c1f4f8f339237c',1,'yappy::graphics::Application']]],
-  ['dserror',['DSError',['../classyappy_1_1error_1_1DSError.html',1,'yappy::error']]],
-  ['dxerror',['DXError',['../classyappy_1_1error_1_1DXError.html',1,'yappy::error']]]
+  ['callglobal',['callGlobal',['../classyappy_1_1lua_1_1Lua.html#a26e9c87ed9c55e587b96f77ff47853ff',1,'yappy::lua::Lua']]],
+  ['coinitialize',['CoInitialize',['../classyappy_1_1util_1_1CoInitialize.html',1,'yappy::util']]],
+  ['coinitialize',['CoInitialize',['../classyappy_1_1util_1_1CoInitialize.html#a380636952e0c8d234bb907c072bd3500',1,'yappy::util::CoInitialize']]],
+  ['comdeleter',['ComDeleter',['../structyappy_1_1util_1_1ComDeleter.html',1,'yappy::util']]],
+  ['comptr',['ComPtr',['../namespaceyappy_1_1util.html#a40e50805bce9308a25e63b9bb0d85622',1,'yappy::util']]],
+  ['configfile',['ConfigFile',['../classyappy_1_1config_1_1ConfigFile.html',1,'yappy::config']]],
+  ['createfixedstring',['createFixedString',['../namespaceyappy_1_1util.html#a40109b676fbe6d04a3bcc3e2102a203d',1,'yappy::util']]]
 ];

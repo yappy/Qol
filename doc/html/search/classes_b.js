@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['win32error',['Win32Error',['../classyappy_1_1error_1_1Win32Error.html',1,'yappy::error']]],
-  ['winsockerror',['WinSockError',['../classyappy_1_1error_1_1WinSockError.html',1,'yappy::error']]]
+  ['resource',['Resource',['../classyappy_1_1framework_1_1Resource.html',1,'yappy::framework']]],
+  ['resource',['resource',['../structyappy_1_1lua_1_1export_1_1resource.html',1,'yappy::lua::export']]],
+  ['resourcemanager',['ResourceManager',['../classyappy_1_1framework_1_1ResourceManager.html',1,'yappy::framework']]]
 ];

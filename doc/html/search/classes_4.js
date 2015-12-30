@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['handledeleter',['handleDeleter',['../structyappy_1_1util_1_1handleDeleter.html',1,'yappy::util']]],
-  ['hmmiodeleter',['hmmioDeleter',['../structyappy_1_1sound_1_1hmmioDeleter.html',1,'yappy::sound']]],
-  ['hwnddeleter',['hwndDeleter',['../structyappy_1_1graphics_1_1hwndDeleter.html',1,'yappy::graphics']]]
+  ['filedeleter',['FileDeleter',['../structyappy_1_1util_1_1FileDeleter.html',1,'yappy::util']]],
+  ['fonttexture',['FontTexture',['../structyappy_1_1graphics_1_1FontTexture.html',1,'yappy::graphics']]],
+  ['framecontrol',['FrameControl',['../classyappy_1_1framework_1_1FrameControl.html',1,'yappy::framework']]]
 ];

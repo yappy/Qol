@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lib
-   &#160;<span id="projectnumber">(04dd778) 2015-10-02 20:52:26 +0900 (HEAD -&gt; master)</span>
+   &#160;<span id="projectnumber">(4e8fabf) 2016-03-19 00:45:45 +0900 (HEAD -&gt; master, origin/master, origin/HEAD)</span>
    </div>
    <div id="projectbrief">QOLを高める</div>
   </td>
@@ -40,6 +40,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -63,6 +64,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -91,7 +93,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="contents">
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#pragma once</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;</div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &quot;util.h&quot;</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="util_8h.html">util.h</a>&quot;</span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#define DIRECTINPUT_VERSION 0x0800</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;dinput.h&gt;</span></div>
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
@@ -113,24 +115,29 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    ~<a class="code" href="classyappy_1_1input_1_1DInput.html">DInput</a>();</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <span class="keywordtype">void</span> updateControllers(HWND hwnd, <span class="keywordtype">bool</span> foreground = <span class="keyword">true</span>, <span class="keywordtype">bool</span> exclusive = <span class="keyword">false</span>);</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="keywordtype">void</span> processFrame();</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    KeyData getKeys() <span class="keyword">const</span> noexcept;</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keywordtype">int</span> getPadCount() <span class="keyword">const</span> noexcept;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keywordtype">void</span> getPadState(DIJOYSTATE *out, <span class="keywordtype">int</span> index) <span class="keyword">const</span> noexcept;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    KeyData getKeys() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keywordtype">int</span> getPadCount() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keywordtype">void</span> getPadState(DIJOYSTATE *out, <span class="keywordtype">int</span> index) <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    util::IUnknownPtr&lt;IDirectInput8&gt; m_pDi;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    util::IUnknownPtr&lt;IDirectInputDevice8&gt; m_pKeyDevice;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <a class="code" href="namespaceyappy_1_1util.html#a40e50805bce9308a25e63b9bb0d85622">util::ComPtr&lt;IDirectInput8&gt;</a> m_pDi;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <a class="code" href="namespaceyappy_1_1util.html#a40e50805bce9308a25e63b9bb0d85622">util::ComPtr&lt;IDirectInputDevice8&gt;</a> m_pKeyDevice;</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    std::vector&lt;DIDEVICEINSTANCE&gt; m_padInstList;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    std::vector&lt;util::IUnknownPtr&lt;IDirectInputDevice8&gt;&gt; m_pPadDevs;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    std::vector&lt;util::ComPtr&lt;IDirectInputDevice8&gt;&gt; m_pPadDevs;</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    KeyData m_key;</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    std::vector&lt;DIJOYSTATE&gt; m_pad;</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;};</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;}</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;}</div>
-<div class="ttc" id="classyappy_1_1util_1_1noncopyable_html"><div class="ttname"><a href="classyappy_1_1util_1_1noncopyable.html">yappy::util::noncopyable</a></div><div class="ttdef"><b>Definition:</b> <a href="util_8h_source.html#l00011">util.h:11</a></div></div>
-<div class="ttc" id="namespaceyappy_html"><div class="ttname"><a href="namespaceyappy.html">yappy</a></div><div class="ttdef"><b>Definition:</b> <a href="debug_8cpp_source.html#l00006">debug.cpp:6</a></div></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">const</span> <span class="keywordtype">char</span> *dikToString(<span class="keywordtype">int</span> dik);</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *dikToWString(<span class="keywordtype">int</span> dik);</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;}</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;}</div>
+<div class="ttc" id="classyappy_1_1util_1_1noncopyable_html"><div class="ttname"><a href="classyappy_1_1util_1_1noncopyable.html">yappy::util::noncopyable</a></div><div class="ttdoc">Noncopyable class. </div><div class="ttdef"><b>Definition:</b> <a href="util_8h_source.html#l00024">util.h:24</a></div></div>
+<div class="ttc" id="namespaceyappy_html"><div class="ttname"><a href="namespaceyappy.html">yappy</a></div><div class="ttdef"><b>Definition:</b> <a href="config_8cpp_source.html#l00006">config.cpp:6</a></div></div>
+<div class="ttc" id="util_8h_html"><div class="ttname"><a href="util_8h.html">util.h</a></div><div class="ttdoc">Utilities. </div></div>
 <div class="ttc" id="classyappy_1_1input_1_1DInput_html"><div class="ttname"><a href="classyappy_1_1input_1_1DInput.html">yappy::input::DInput</a></div><div class="ttdef"><b>Definition:</b> <a href="input_8h_source.html#l00013">input.h:13</a></div></div>
+<div class="ttc" id="namespaceyappy_1_1util_html_a40e50805bce9308a25e63b9bb0d85622"><div class="ttname"><a href="namespaceyappy_1_1util.html#a40e50805bce9308a25e63b9bb0d85622">yappy::util::ComPtr</a></div><div class="ttdeci">std::unique_ptr&lt; T, ComDeleter &gt; ComPtr</div><div class="ttdoc">unique_ptr of IUnknown with ComDeleter. </div><div class="ttdef"><b>Definition:</b> <a href="util_8h_source.html#l00087">util.h:87</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

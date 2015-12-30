@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lib
-   &#160;<span id="projectnumber">(04dd778) 2015-10-02 20:52:26 +0900 (HEAD -&gt; master)</span>
+   &#160;<span id="projectnumber">(4e8fabf) 2016-03-19 00:45:45 +0900 (HEAD -&gt; master, origin/master, origin/HEAD)</span>
    </div>
    <div id="projectbrief">QOLを高める</div>
   </td>
@@ -40,6 +40,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -84,7 +85,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>yappy</b></li><li class="navelem"><b>debug</b></li><li class="navelem"><a class="el" href="classyappy_1_1debug_1_1StopWatch.html">StopWatch</a></li>  </ul>
+<li class="navelem"><b>yappy</b></li><li class="navelem"><a class="el" href="namespaceyappy_1_1debug.html">debug</a></li><li class="navelem"><a class="el" href="classyappy_1_1debug_1_1StopWatch.html">StopWatch</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -95,26 +96,99 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">yappy::debug::StopWatch Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Stop watch utility for performance measurement.  
+ <a href="classyappy_1_1debug_1_1StopWatch.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="debug_8h_source.html">debug.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for yappy::debug::StopWatch:</div>
 <div class="dyncontent">
  <div class="center">
   <img src="classyappy_1_1debug_1_1StopWatch.png" usemap="#yappy::debug::StopWatch_map" alt=""/>
   <map id="yappy::debug::StopWatch_map" name="yappy::debug::StopWatch_map">
-<area href="classyappy_1_1util_1_1noncopyable.html" alt="yappy::util::noncopyable" shape="rect" coords="0,0,154,24"/>
+<area href="classyappy_1_1util_1_1noncopyable.html" title="Noncopyable class. " alt="yappy::util::noncopyable" shape="rect" coords="0,0,154,24"/>
 </map>
  </div></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a89ba8fa76d11634392e7ce8e74897687"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a89ba8fa76d11634392e7ce8e74897687"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>StopWatch</b> (const wchar_t *msg)</td></tr>
+<tr class="memitem:a89ba8fa76d11634392e7ce8e74897687"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1debug_1_1StopWatch.html#a89ba8fa76d11634392e7ce8e74897687">StopWatch</a> (const wchar_t *msg)</td></tr>
+<tr class="memdesc:a89ba8fa76d11634392e7ce8e74897687"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. Starts the timer.  <a href="#a89ba8fa76d11634392e7ce8e74897687">More...</a><br /></td></tr>
 <tr class="separator:a89ba8fa76d11634392e7ce8e74897687"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57267daffb66f1be27d51caf710fa51c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1debug_1_1StopWatch.html#a57267daffb66f1be27d51caf710fa51c">~StopWatch</a> ()</td></tr>
+<tr class="memdesc:a57267daffb66f1be27d51caf710fa51c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor. Stop the timer.  <a href="#a57267daffb66f1be27d51caf710fa51c">More...</a><br /></td></tr>
+<tr class="separator:a57267daffb66f1be27d51caf710fa51c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p>Definition at line <a class="el" href="debug_8h_source.html#l00035">35</a> of file <a class="el" href="debug_8h_source.html">debug.h</a>.</p>
-</div><hr/>The documentation for this class was generated from the following file:<ul>
+<div class="textblock"><p>Stop watch utility for performance measurement. </p>
+<p>Time is measured by QueryPerformanceCounter() API. </p>
+
+<p>Definition at line <a class="el" href="debug_8h_source.html#l00083">83</a> of file <a class="el" href="debug_8h_source.html">debug.h</a>.</p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a89ba8fa76d11634392e7ce8e74897687"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">yappy::debug::StopWatch::StopWatch </td>
+          <td>(</td>
+          <td class="paramtype">const wchar_t *&#160;</td>
+          <td class="paramname"><em>msg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructor. Starts the timer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">msg</td><td>String message for printing result. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="debug_8h_source.html#l00088">88</a> of file <a class="el" href="debug_8h_source.html">debug.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a57267daffb66f1be27d51caf710fa51c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">yappy::debug::StopWatch::~StopWatch </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Destructor. Stop the timer. </p>
+<p>Result will be printed automatically. </p>
+
+<p>Definition at line <a class="el" href="debug_8h_source.html#l00096">96</a> of file <a class="el" href="debug_8h_source.html">debug.h</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="debug_8h_source.html">debug.h</a></li>
 </ul>
 </div><!-- contents -->

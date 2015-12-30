@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lib
-   &#160;<span id="projectnumber">(04dd778) 2015-10-02 20:52:26 +0900 (HEAD -&gt; master)</span>
+   &#160;<span id="projectnumber">(4e8fabf) 2016-03-19 00:45:45 +0900 (HEAD -&gt; master, origin/master, origin/HEAD)</span>
    </div>
    <div id="projectbrief">QOLを高める</div>
   </td>
@@ -40,6 +40,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -63,6 +64,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -98,24 +100,24 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespaceyappy.html">yappy</a> {</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">namespace </span>file {</div>
+<div class="line"><a name="l00010"></a><span class="lineno"><a class="line" href="namespaceyappy_1_1file.html">   10</a></span>&#160;<span class="keyword">namespace </span>file {</div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">using</span> error::checkWin32Result;</div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">namespace </span>{</div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">class </span>FileLoader : <span class="keyword">private</span> util::noncopyable {</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">class </span>FileLoader : <span class="keyword">private</span> <a class="code" href="classyappy_1_1util_1_1noncopyable.html">util::noncopyable</a> {</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    FileLoader() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    <span class="keyword">virtual</span> ~FileLoader() {}</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    <span class="keyword">virtual</span> std::vector&lt;uint8_t&gt; loadFile(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *fileName) = 0;</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    <span class="keyword">virtual</span> ~FileLoader() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    <span class="keyword">virtual</span> std::vector&lt;uint8_t&gt; <a class="code" href="namespaceyappy_1_1file.html#a55b98e52b493f7e87750bd7d11decc4e">loadFile</a>(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *fileName) = 0;</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;};</div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">class </span>FsFileLoader : <span class="keyword">public</span> FileLoader {</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    FsFileLoader(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *rootDir) : m_rootDir(rootDir) {}</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keyword">virtual</span> ~FsFileLoader()<span class="keyword"> override </span>{}</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keyword">virtual</span> std::vector&lt;uint8_t&gt; loadFile(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *fileName) <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keyword">virtual</span> std::vector&lt;uint8_t&gt; <a class="code" href="namespaceyappy_1_1file.html#a55b98e52b493f7e87750bd7d11decc4e">loadFile</a>(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *fileName) <span class="keyword">override</span>;</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keyword">private</span>:</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    std::wstring m_rootDir;</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;};</div>
@@ -125,7 +127,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;};</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment">// impls</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;Bytes FsFileLoader::loadFile(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *fileName)</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<a class="code" href="namespaceyappy_1_1file.html#abc123180a586d812f25cd1830cd22009">Bytes</a> FsFileLoader::loadFile(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *fileName)</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;{</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    std::wstring path;</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordflow">if</span> (fileName[0] == L<span class="charliteral">&#39;/&#39;</span>) {</div>
@@ -152,7 +154,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        path.c_str(), GENERIC_READ, FILE_SHARE_READ, <span class="keyword">nullptr</span>, OPEN_EXISTING,</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        FILE_ATTRIBUTE_NORMAL, <span class="keyword">nullptr</span>);</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    checkWin32Result(tmphFile != INVALID_HANDLE_VALUE, <span class="stringliteral">&quot;CreateFile() failed&quot;</span>);</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    util::HandlePtr hFile(tmphFile);</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <a class="code" href="namespaceyappy_1_1util.html#a197502bfa4d7c735678c7917ea4a9ba9">util::HandlePtr</a> hFile(tmphFile);</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    BOOL b = FALSE;</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <span class="comment">// get size to avoid realloc</span></div>
@@ -163,7 +165,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    checkWin32Result(fileSize.HighPart == 0, <span class="stringliteral">&quot;File size is too large&quot;</span>);</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    checkWin32Result(fileSize.LowPart &lt; 0x80000000, <span class="stringliteral">&quot;File size is too large&quot;</span>);</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    <span class="comment">// read</span></div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    Bytes bin(fileSize.LowPart);</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <a class="code" href="namespaceyappy_1_1file.html#abc123180a586d812f25cd1830cd22009">Bytes</a> bin(fileSize.LowPart);</div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    DWORD readSize = 0;</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    b = ::ReadFile(hFile.get(), bin.data(), fileSize.LowPart, &amp;readSize, <span class="keyword">nullptr</span>);</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    error::checkWin32Result(b != 0, <span class="stringliteral">&quot;ReadFile() failed&quot;</span>);</div>
@@ -179,18 +181,18 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;}   <span class="comment">// namespace</span></div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="keywordtype">void</span> initWithFileSystem(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *rootDir)</div>
+<div class="line"><a name="l00091"></a><span class="lineno"><a class="line" href="namespaceyappy_1_1file.html#a33f916bd5386a6d302f0dfba5dd4d5c8">   91</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespaceyappy_1_1file.html#a33f916bd5386a6d302f0dfba5dd4d5c8">initWithFileSystem</a>(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *rootDir)</div>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;{</div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    s_fileLoader.reset(<span class="keyword">new</span> FsFileLoader(rootDir));</div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;}</div>
 <div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="keywordtype">void</span> initWithArchiveFile(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *archiveFile)</div>
+<div class="line"><a name="l00096"></a><span class="lineno"><a class="line" href="namespaceyappy_1_1file.html#af79cd4c94997998a647d839282889500">   96</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="namespaceyappy_1_1file.html#af79cd4c94997998a647d839282889500">initWithArchiveFile</a>(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *archiveFile)</div>
 <div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;{</div>
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <span class="comment">// TODO</span></div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;Not implemented&quot;</span>);</div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;}</div>
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;std::vector&lt;uint8_t&gt; loadFile(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *fileName)</div>
+<div class="line"><a name="l00102"></a><span class="lineno"><a class="line" href="namespaceyappy_1_1file.html#a55b98e52b493f7e87750bd7d11decc4e">  102</a></span>&#160;std::vector&lt;uint8_t&gt; <a class="code" href="namespaceyappy_1_1file.html#a55b98e52b493f7e87750bd7d11decc4e">loadFile</a>(<span class="keyword">const</span> <span class="keywordtype">wchar_t</span> *fileName)</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;{</div>
 <div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="keywordflow">if</span> (s_fileLoader == <span class="keyword">nullptr</span>) {</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;FileLoader is not initialized.&quot;</span>);</div>
@@ -200,7 +202,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;</div>
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;}   <span class="comment">// namespace file</span></div>
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;}   <span class="comment">// namespace test</span></div>
-<div class="ttc" id="namespaceyappy_html"><div class="ttname"><a href="namespaceyappy.html">yappy</a></div><div class="ttdef"><b>Definition:</b> <a href="debug_8cpp_source.html#l00006">debug.cpp:6</a></div></div>
+<div class="ttc" id="classyappy_1_1util_1_1noncopyable_html"><div class="ttname"><a href="classyappy_1_1util_1_1noncopyable.html">yappy::util::noncopyable</a></div><div class="ttdoc">Noncopyable class. </div><div class="ttdef"><b>Definition:</b> <a href="util_8h_source.html#l00024">util.h:24</a></div></div>
+<div class="ttc" id="namespaceyappy_1_1file_html_a55b98e52b493f7e87750bd7d11decc4e"><div class="ttname"><a href="namespaceyappy_1_1file.html#a55b98e52b493f7e87750bd7d11decc4e">yappy::file::loadFile</a></div><div class="ttdeci">std::vector&lt; uint8_t &gt; loadFile(const wchar_t *fileName)</div><div class="ttdoc">Load file from abstract file system. </div><div class="ttdef"><b>Definition:</b> <a href="file_8cpp_source.html#l00102">file.cpp:102</a></div></div>
+<div class="ttc" id="namespaceyappy_html"><div class="ttname"><a href="namespaceyappy.html">yappy</a></div><div class="ttdef"><b>Definition:</b> <a href="config_8cpp_source.html#l00006">config.cpp:6</a></div></div>
+<div class="ttc" id="namespaceyappy_1_1file_html_a33f916bd5386a6d302f0dfba5dd4d5c8"><div class="ttname"><a href="namespaceyappy_1_1file.html#a33f916bd5386a6d302f0dfba5dd4d5c8">yappy::file::initWithFileSystem</a></div><div class="ttdeci">void initWithFileSystem(const wchar_t *rootDir)</div><div class="ttdoc">Uses real file system. </div><div class="ttdef"><b>Definition:</b> <a href="file_8cpp_source.html#l00091">file.cpp:91</a></div></div>
+<div class="ttc" id="namespaceyappy_1_1file_html_af79cd4c94997998a647d839282889500"><div class="ttname"><a href="namespaceyappy_1_1file.html#af79cd4c94997998a647d839282889500">yappy::file::initWithArchiveFile</a></div><div class="ttdeci">void initWithArchiveFile(const wchar_t *archiveFile)</div><div class="ttdoc">Uses archive file. </div><div class="ttdef"><b>Definition:</b> <a href="file_8cpp_source.html#l00096">file.cpp:96</a></div></div>
+<div class="ttc" id="namespaceyappy_1_1util_html_a197502bfa4d7c735678c7917ea4a9ba9"><div class="ttname"><a href="namespaceyappy_1_1util.html#a197502bfa4d7c735678c7917ea4a9ba9">yappy::util::HandlePtr</a></div><div class="ttdeci">std::unique_ptr&lt; HANDLE, HandleDeleter &gt; HandlePtr</div><div class="ttdoc">unique_ptr of HANDLE with HandleDeleter. </div><div class="ttdef"><b>Definition:</b> <a href="util_8h_source.html#l00063">util.h:63</a></div></div>
+<div class="ttc" id="namespaceyappy_1_1file_html_abc123180a586d812f25cd1830cd22009"><div class="ttname"><a href="namespaceyappy_1_1file.html#abc123180a586d812f25cd1830cd22009">yappy::file::Bytes</a></div><div class="ttdeci">std::vector&lt; uint8_t &gt; Bytes</div><div class="ttdoc">File byte sequence. Vector of uint8_t. </div><div class="ttdef"><b>Definition:</b> <a href="file_8h_source.html#l00025">file.h:25</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

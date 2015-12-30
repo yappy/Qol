@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lib
-   &#160;<span id="projectnumber">(04dd778) 2015-10-02 20:52:26 +0900 (HEAD -&gt; master)</span>
+   &#160;<span id="projectnumber">(4e8fabf) 2016-03-19 00:45:45 +0900 (HEAD -&gt; master, origin/master, origin/HEAD)</span>
    </div>
    <div id="projectbrief">QOLを高める</div>
   </td>
@@ -40,6 +40,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -89,6 +90,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classyappy_1_1sound_1_1XAudio2-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -101,37 +103,55 @@ Inheritance diagram for yappy::sound::XAudio2:</div>
  <div class="center">
   <img src="classyappy_1_1sound_1_1XAudio2.png" usemap="#yappy::sound::XAudio2_map" alt=""/>
   <map id="yappy::sound::XAudio2_map" name="yappy::sound::XAudio2_map">
-<area href="classyappy_1_1util_1_1noncopyable.html" alt="yappy::util::noncopyable" shape="rect" coords="0,0,148,24"/>
+<area href="classyappy_1_1util_1_1noncopyable.html" title="Noncopyable class. " alt="yappy::util::noncopyable" shape="rect" coords="0,0,148,24"/>
 </map>
  </div></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:ac58b59900f9f380ace2327dd53be8fd5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac58b59900f9f380ace2327dd53be8fd5"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>SeResource</b> = const <a class="el" href="structyappy_1_1sound_1_1SoundEffect.html">SoundEffect</a></td></tr>
+<tr class="separator:ac58b59900f9f380ace2327dd53be8fd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8faba922c6b6fd1b9ca5056a06854d42"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8faba922c6b6fd1b9ca5056a06854d42"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>SeResourcePtr</b> = std::shared_ptr&lt; <a class="el" href="structyappy_1_1sound_1_1SoundEffect.html">SeResource</a> &gt;</td></tr>
+<tr class="separator:a8faba922c6b6fd1b9ca5056a06854d42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab14de9f8dc1b4c9f83ee64d5be7bfa81"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab14de9f8dc1b4c9f83ee64d5be7bfa81"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>BgmResource</b> = <a class="el" href="structyappy_1_1sound_1_1Bgm.html">Bgm</a></td></tr>
+<tr class="separator:ab14de9f8dc1b4c9f83ee64d5be7bfa81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1517888aea63d52e00f59f4fce135a43"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1517888aea63d52e00f59f4fce135a43"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>BgmResourcePtr</b> = std::shared_ptr&lt; <a class="el" href="structyappy_1_1sound_1_1Bgm.html">BgmResource</a> &gt;</td></tr>
+<tr class="separator:a1517888aea63d52e00f59f4fce135a43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:af5ef0fafd2e307f32dac21bbbe4d5187"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af5ef0fafd2e307f32dac21bbbe4d5187"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>loadSoundEffect</b> (const char *id, const wchar_t *path)</td></tr>
-<tr class="separator:af5ef0fafd2e307f32dac21bbbe4d5187"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca7e64631ef868a2f460f856c1623e63"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aca7e64631ef868a2f460f856c1623e63"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>playSoundEffect</b> (const char *id)</td></tr>
-<tr class="separator:aca7e64631ef868a2f460f856c1623e63"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4f589c89cfab8d739c8c2d71efeba27c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4f589c89cfab8d739c8c2d71efeba27c"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isPlayingAnySoundEffect</b> () const  noexcept</td></tr>
-<tr class="separator:a4f589c89cfab8d739c8c2d71efeba27c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ad217fc637fec1c1e7872e8b03154d0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9ad217fc637fec1c1e7872e8b03154d0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>stopAllSoundEffect</b> ()</td></tr>
-<tr class="separator:a9ad217fc637fec1c1e7872e8b03154d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95acd4687c46f5ceb585680493ccb16d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a95acd4687c46f5ceb585680493ccb16d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>playBgm</b> (const wchar_t *path)</td></tr>
-<tr class="separator:a95acd4687c46f5ceb585680493ccb16d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adc8fecb65d07a68a8c814cfbac209d7a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adc8fecb65d07a68a8c814cfbac209d7a"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>stopBgm</b> () noexcept</td></tr>
-<tr class="separator:adc8fecb65d07a68a8c814cfbac209d7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e8d2fffaa218f12dbff074af17bf83f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9e8d2fffaa218f12dbff074af17bf83f"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>processFrame</b> ()</td></tr>
 <tr class="separator:a9e8d2fffaa218f12dbff074af17bf83f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bac067d321c971d4a354a21cdd1eb3b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6bac067d321c971d4a354a21cdd1eb3b"></a>
+SeResourcePtr&#160;</td><td class="memItemRight" valign="bottom"><b>loadSoundEffect</b> (const wchar_t *path)</td></tr>
+<tr class="separator:a6bac067d321c971d4a354a21cdd1eb3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a821d293d6272aeb02f4a28414ecdd5e0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a821d293d6272aeb02f4a28414ecdd5e0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>playSoundEffect</b> (const SeResourcePtr &amp;se)</td></tr>
+<tr class="separator:a821d293d6272aeb02f4a28414ecdd5e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab99e4a7bb499cf0ae32acda6dadcbc98"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab99e4a7bb499cf0ae32acda6dadcbc98"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isPlayingAnySoundEffect</b> () const </td></tr>
+<tr class="separator:ab99e4a7bb499cf0ae32acda6dadcbc98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ad217fc637fec1c1e7872e8b03154d0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9ad217fc637fec1c1e7872e8b03154d0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>stopAllSoundEffect</b> ()</td></tr>
+<tr class="separator:a9ad217fc637fec1c1e7872e8b03154d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bc5595115aeea93300615070c61969c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3bc5595115aeea93300615070c61969c"></a>
+BgmResourcePtr&#160;</td><td class="memItemRight" valign="bottom"><b>loadBgm</b> (const wchar_t *path)</td></tr>
+<tr class="separator:a3bc5595115aeea93300615070c61969c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a976e51981b1ad2a1b20972242fdcb1a4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a976e51981b1ad2a1b20972242fdcb1a4"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>playBgm</b> (const BgmResourcePtr &amp;bgm)</td></tr>
+<tr class="separator:a976e51981b1ad2a1b20972242fdcb1a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3b13339c7f5d6399727065ecd73706f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af3b13339c7f5d6399727065ecd73706f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>stopBgm</b> ()</td></tr>
+<tr class="separator:af3b13339c7f5d6399727065ecd73706f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p>Definition at line <a class="el" href="sound_8h_source.html#l00048">48</a> of file <a class="el" href="sound_8h_source.html">sound.h</a>.</p>
+<p>Definition at line <a class="el" href="sound_8h_source.html#l00072">72</a> of file <a class="el" href="sound_8h_source.html">sound.h</a>.</p>
 </div><hr/>The documentation for this class was generated from the following files:<ul>
 <li><a class="el" href="sound_8h_source.html">sound.h</a></li>
 <li><a class="el" href="sound_8cpp_source.html">sound.cpp</a></li>
