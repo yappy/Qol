@@ -172,6 +172,7 @@
     <ClInclude Include="include\debug.h" />
     <ClInclude Include="include\exceptions.h" />
     <ClInclude Include="include\file.h" />
+    <ClInclude Include="include\framework.h" />
     <ClInclude Include="include\graphics.h" />
     <ClInclude Include="include\input.h" />
     <ClInclude Include="include\network.h" />
@@ -186,6 +187,7 @@
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="exceptions.cpp" />
     <ClCompile Include="file.cpp" />
+    <ClCompile Include="framework.cpp" />
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="network.cpp" />

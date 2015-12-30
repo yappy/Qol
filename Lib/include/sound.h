@@ -43,16 +43,20 @@ struct SoundEffect : private util::noncopyable {
 	WAVEFORMATEX format;
 	file::Bytes samples;
 	SoundEffect() = default;
+	~SoundEffect() = default;
 };
 
 class XAudio2 : private util::noncopyable {
 public:
+	using SeResource = const SoundEffect;
+	using SeResourcePtr = std::shared_ptr<SeResource>;
+
 	XAudio2();
 	~XAudio2();
 
 	// Sound Effect
-	void loadSoundEffect(const char *id, const wchar_t *path);
-	void playSoundEffect(const char *id);
+	SeResourcePtr loadSoundEffect(const wchar_t *path);
+	void playSoundEffect(const SeResourcePtr &se);
 	bool isPlayingAnySoundEffect() const noexcept;
 	void stopAllSoundEffect();
 
@@ -72,7 +76,6 @@ private:
 	MasterVoicePtr m_pMasterVoice;
 
 	// Sound Effect
-	std::unordered_map<std::string, SoundEffect> m_seMap;
 	std::vector<SourceVoicePtr> m_playingSeList;
 	SourceVoicePtr *findFreeSeEntry() noexcept;
 

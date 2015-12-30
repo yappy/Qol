@@ -83,7 +83,21 @@ void Lua::loadTraceLib()
 	lua_setglobal(L, "trace");
 }
 
-void Lua::loadGraphLib(graphics::Application *app)
+void Lua::callWithResourceLib(const char *funcName, framework::Application *app)
+{
+	callGlobal(funcName,
+		[app](lua_State *L) {
+			// args
+			// stack[1]: resource function table
+			luaL_newlib(L, lua_export::resource_RegList);
+			lua_pushstring(L, lua_export::resource_RawFieldName);
+			lua_pushlightuserdata(L, app);
+			lua_settable(L, -3);
+		}, 1,
+		[](lua_State *L) {}, 0);
+}
+
+void Lua::loadGraphLib(framework::Application *app)
 {
 	lua_State *L = m_lua.get();
 	luaL_newlib(L, lua_export::graph_RegList);
@@ -93,12 +107,12 @@ void Lua::loadGraphLib(graphics::Application *app)
 	lua_setglobal(L, "graph");
 }
 
-void Lua::loadSoundLib(sound::XAudio2 *sound)
+void Lua::loadSoundLib(framework::Application *app)
 {
 	lua_State *L = m_lua.get();
 	luaL_newlib(L, lua_export::sound_RegList);
 	lua_pushstring(L, lua_export::sound_RawFieldName);
-	lua_pushlightuserdata(L, sound);
+	lua_pushlightuserdata(L, app);
 	lua_settable(L, -3);
 	lua_setglobal(L, "sound");
 }
