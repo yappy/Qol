@@ -5,6 +5,7 @@
 #include <lua.hpp>
 
 namespace yappy {
+/// Lua scripting library.
 namespace lua {
 
 class LuaError : public std::runtime_error {
@@ -16,11 +17,21 @@ private:
 	std::string m_what;
 };
 
+/** @brief Lua state manager.
+ * @details Each Lua object manages one lua_State.
+ */
 class Lua {
 public:
+	/** @brief Create new lua_State and open standard libs.
+	 */
 	Lua();
+	/** @brief Destruct lua_State.
+	 */
 	~Lua() = default;
 
+	/** @brief Returns lua_State which this object has.
+	 * @return lua_State
+	 */
 	lua_State *getLuaState() { return m_lua.get(); }
 
 	void loadTraceLib();
@@ -28,17 +39,41 @@ public:
 	void loadGraphLib(framework::Application *app);
 	void loadSoundLib(framework::Application *app);
 
+	/** @brief Load script file and eval it.
+	 * @param[in] fileName	Script file name.
+	 * @param[in] name		Chunk name. It will be used by Lua runtime for debug message.
+	 *						If null, fileName is used.
+	 */
 	void loadFile(const wchar_t *fileName, const char *name = nullptr);
 
+	/** @brief Calls global function.
+	 * @details pushParamFunc and getRetFunc must be able to be called by:
+	 * @code
+	 * pushParamFunc(lua_State *);
+	 * getRetFunc(lua_State *);
+	 * @endcode
+	 * (lambda expr is recommended)
+	 * @code
+	 * [](lua_State *L) {
+	 *     lua_pushXXX(L, ...);
+	 * }
+	 * @endcode
+	 *
+	 * @param[in] funcName		Function name.
+	 * @param[in] pushParamFunc	Will be called just before lua_pcall().
+	 * @param[in] narg			Args count.
+	 * @param[in] getRetFunc	Will be called just after lua_pcall().
+	 * @param[in] nret			Return values count.
+	 */
 	template <class ParamFunc, class RetFunc>
 	void callGlobal(const char *funcName,
-		ParamFunc pushParamFunc, int narg, RetFunc getRetFunc, int nret)
+		ParamFunc pushArgFunc, int narg, RetFunc getRetFunc, int nret)
 	{
 		lua_State *L = m_lua.get();
 		// push global function
 		lua_getglobal(L, funcName);
-		// push parameters
-		pushParamFunc(L);
+		// push args
+		pushArgFunc(L);
 		// call
 		int ret = lua_pcall(L, narg, nret, 0);
 		if (ret != LUA_OK) {
@@ -47,11 +82,16 @@ public:
 		// get results
 		getRetFunc(L);
 	}
+	/** @brief Calls global function. (No args, no return values)
+	 * @param[in] funcName		Function name.
+	 */
 	void callGlobal(const char *funcName)
 	{
 		callGlobal(funcName, [](lua_State *L) {}, 0, [](lua_State *L) {}, 0);
 	}
 
+	/** @brief Dump Lua stack for debug.
+	 */
 	void dumpStack(void);
 
 private:
