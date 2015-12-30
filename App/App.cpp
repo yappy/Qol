@@ -6,7 +6,7 @@
 #include <debug.h>
 #include <file.h>
 #include <config.h>
-//#include <script.h>
+#include <script.h>
 #include <framework.h>
 #include <array>
 
@@ -23,12 +23,13 @@ protected:
 	void update() override;
 	void render() override;
 private:
-	//lua::Lua m_lua;
+	lua::Lua m_lua;
 	uint64_t m_frameCount = 0;
 };
 
 void MyApp::init()
 {
+	/*
 	sound().playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
 
 	addTextureResource(0, "unyo", L"../sampledata/test_400_300.png");
@@ -40,6 +41,21 @@ void MyApp::init()
 	addSeResource(0, "testse", L"/C:/Windows/Media/chimes.wav");
 
 	loadResourceSet(0);
+	*/
+
+	//*
+	m_lua.loadTraceLib();
+	m_lua.loadGraphLib(this);
+	m_lua.loadSoundLib(this);
+
+	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
+
+	m_lua.callWithResourceLib("load", this);
+	addSeResource(0, "testse", L"/C:/Windows/Media/chimes.wav");
+	loadResourceSet(0);
+
+	m_lua.callGlobal("start");
+	//*/
 
 	// performance test
 	{
@@ -51,19 +67,11 @@ void MyApp::init()
 		}
 		debug::writef(L"%d", dummy);
 	}
-
-	/*
-	m_lua.loadTraceLib();
-	m_lua.loadGraphLib(this);
-	m_lua.loadSoundLib(&m_sound);
-	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
-	m_lua.callGlobal("init");
-	*/
 }
 
 void MyApp::render()
 {
-	//*
+	/*
 	int test = static_cast<int>(m_frameCount * 5 % 768);
 
 	auto unyo = getTexture(0, "unyo");
@@ -82,12 +90,12 @@ void MyApp::render()
 	graph().drawChar(testjfont, L'ほ', 100, 200);
 	graph().drawString(testjfont, L"ほわいと", 100, 600, 0x000000, -32);
 	//*/
-	//m_lua.callGlobal("draw");
+	m_lua.callGlobal("draw");
 }
 
 void MyApp::update()
 {
-	//m_lua.callGlobal("update");
+	m_lua.callGlobal("update");
 	m_frameCount++;
 
 	auto testse = getSoundEffect(0, "testse");

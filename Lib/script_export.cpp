@@ -71,6 +71,63 @@ int trace::write(lua_State *L)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// "resource" table
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+* (self, int setId, string resId, string path)
+*/
+int resource::addTexture(lua_State *L)
+{
+	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
+	int setId = static_cast<int>(luaL_checkinteger(L, 2));
+	const char *resId = luaL_checkstring(L, 3);
+	const char *path = luaL_checkstring(L, 4);
+
+	app->addTextureResource(setId, resId, util::utf82wc(path).get());
+
+	return 0;
+}
+
+/**
+* (self, int setId, string resId, string path)
+*/
+int resource::addFont(lua_State *L)
+{
+	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
+	int setId = static_cast<int>(luaL_checkinteger(L, 2));
+	const char *resId = luaL_checkstring(L, 3);
+	const char *fontName = luaL_checkstring(L, 4);
+	const char *startCharStr = luaL_checkstring(L, 5);
+	const char *endCharStr = luaL_checkstring(L, 6);
+	int w = static_cast<int>(luaL_checkinteger(L, 7));
+	int h = static_cast<int>(luaL_checkinteger(L, 8));
+
+	wchar_t startChar = util::utf82wc(startCharStr)[0];
+	wchar_t endChar = util::utf82wc(endCharStr)[0];
+
+	app->addFontResource(setId, resId, util::utf82wc(fontName).get(),
+		startChar, endChar, w, h);
+
+	return 0;
+}
+
+/**
+* (self, int setId, string resId, string path)
+*/
+int resource::addSe(lua_State *L)
+{
+	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
+	int setId = static_cast<int>(luaL_checkinteger(L, 2));
+	const char *resId = luaL_checkstring(L, 3);
+	const char *path = luaL_checkstring(L, 4);
+
+	app->addSeResource(setId, resId, util::utf82wc(path).get());
+
+	return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // "graph" table
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -153,19 +210,19 @@ int graph::drawString(lua_State *L)
 
 int sound::playBgm(lua_State *L)
 {
-	auto *sound = getPtrFromSelf<yappy::sound::XAudio2>(L, sound_RawFieldName);
+	auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
 	const char *path = luaL_checkstring(L, 2);
 
-	sound->playBgm(util::utf82wc(path).get());
+	app->sound().playBgm(util::utf82wc(path).get());
 
 	return 0;
 }
 
 int sound::stopBgm(lua_State *L)
 {
-	auto *sound = getPtrFromSelf<yappy::sound::XAudio2>(L, sound_RawFieldName);
+	auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
 
-	sound->stopBgm();
+	app->sound().stopBgm();
 
 	return 0;
 }

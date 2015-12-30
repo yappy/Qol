@@ -83,6 +83,20 @@ void Lua::loadTraceLib()
 	lua_setglobal(L, "trace");
 }
 
+void Lua::callWithResourceLib(const char *funcName, framework::Application *app)
+{
+	callGlobal(funcName,
+		[app](lua_State *L) {
+			// args
+			// stack[1]: resource function table
+			luaL_newlib(L, lua_export::resource_RegList);
+			lua_pushstring(L, lua_export::resource_RawFieldName);
+			lua_pushlightuserdata(L, app);
+			lua_settable(L, -3);
+		}, 1,
+		[](lua_State *L) {}, 0);
+}
+
 void Lua::loadGraphLib(framework::Application *app)
 {
 	lua_State *L = m_lua.get();
