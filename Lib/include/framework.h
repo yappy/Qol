@@ -19,6 +19,8 @@
 #include "graphics.h"
 #include "sound.h"
 #include "input.h"
+#include <atomic>
+#include <thread>
 #include <functional>
 
 namespace yappy {
@@ -80,6 +82,58 @@ private:
 	ResMapVec<graphics::DGraphics::TextureResource> m_texMapVec;
 	ResMapVec<graphics::DGraphics::FontResource>    m_fontMapVec;
 	ResMapVec<sound::XAudio2::SeResource>           m_seMapVec;
+};
+
+
+class SceneBase : private util::noncopyable {
+public:
+	SceneBase() = default;
+	virtual ~SceneBase()
+	{
+		m_cancel.store(true);
+		if (m_thread.joinable()) {
+			m_thread.join();
+		}
+	}
+
+	void startLoadThread()
+	{
+		// move
+		m_thread = std::thread([this]() {
+			for (int i = 0; i < 10000; i++) {
+				if (m_cancel.load()) {
+					debug::writeLine(L"cancel!");
+					break;
+				}
+				debug::writef(L"%d...", i);
+				::Sleep(1);
+			}
+			m_loading.store(false);
+		});
+	}
+	bool isLoadFinished()
+	{
+		if (m_thread.joinable()) {
+			if (m_loading.load()) {
+				return false;
+			}
+			else {
+				m_thread.join();
+				return true;
+			}
+		}
+		else {
+			return true;
+		}
+	}
+
+protected:
+	virtual void loadOnSubThread(std::atomic_bool &cancel) = 0;
+
+private:
+	std::thread m_thread;
+	std::atomic_bool m_cancel = false;
+	std::atomic_bool m_loading = false;
 };
 
 
