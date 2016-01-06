@@ -98,16 +98,10 @@ public:
 
 	void startLoadThread()
 	{
+		m_loading.store(true);
 		// move
 		m_thread = std::thread([this]() {
-			for (int i = 0; i < 10000; i++) {
-				if (m_cancel.load()) {
-					debug::writeLine(L"cancel!");
-					break;
-				}
-				debug::writef(L"%d...", i);
-				::Sleep(1);
-			}
+			loadOnSubThread(m_cancel);
 			m_loading.store(false);
 		});
 	}

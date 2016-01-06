@@ -12,6 +12,21 @@
 
 using namespace yappy;
 
+class TestScene : public framework::SceneBase {
+protected:
+	void loadOnSubThread(std::atomic_bool &cancel)
+	{
+		for (int i = 0; i < 3000; i++) {
+			if (cancel.load()) {
+				debug::writeLine(L"cancel!");
+				break;
+			}
+			debug::writef(L"%d...", i);
+			::Sleep(1);
+		}
+	}
+};
+
 class MyApp : public framework::Application {
 public:
 	MyApp(const framework::AppParam &appParam,
@@ -23,6 +38,7 @@ protected:
 	void update() override;
 	void render() override;
 private:
+	TestScene m_testScene;
 	lua::Lua m_lua;
 	uint64_t m_frameCount = 0;
 };
@@ -67,6 +83,9 @@ void MyApp::init()
 		}
 		debug::writef(L"%d", dummy);
 	}
+
+	// sub thread start
+	m_testScene.startLoadThread();
 }
 
 void MyApp::render()
@@ -90,7 +109,9 @@ void MyApp::render()
 	graph().drawChar(testjfont, L'ほ', 100, 200);
 	graph().drawString(testjfont, L"ほわいと", 100, 600, 0x000000, -32);
 	//*/
-	m_lua.callGlobal("draw");
+	if (m_testScene.isLoadFinished()) {
+		m_lua.callGlobal("draw");
+	}
 }
 
 void MyApp::update()
