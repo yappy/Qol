@@ -20,7 +20,7 @@
 #include "sound.h"
 #include "input.h"
 #include <atomic>
-#include <thread>
+#include <future>
 #include <functional>
 
 namespace yappy {
@@ -90,44 +90,46 @@ public:
 	SceneBase() = default;
 	virtual ~SceneBase()
 	{
+		// set cancel flag
 		m_cancel.store(true);
-		if (m_thread.joinable()) {
-			m_thread.join();
-		}
+		// m_future destructor will wait for sub thread
 	}
 
 	void startLoadThread()
 	{
-		m_loading.store(true);
-		// move
-		m_thread = std::thread([this]() {
+		// move assign
+		m_future = std::async(std::launch::async, [this]() {
+			// can throw an exception
 			loadOnSubThread(m_cancel);
-			m_loading.store(false);
 		});
 	}
-	bool isLoadFinished()
+	bool checkLoadStatus()
 	{
-		if (m_thread.joinable()) {
-			if (m_loading.load()) {
-				return false;
-			}
-			else {
-				m_thread.join();
+		if (m_future.valid()) {
+			auto status = m_future.wait_for(std::chrono::seconds(0));
+			switch (status) {
+			case std::future_status::ready:
+				// complete or exception
+				// make m_future invalid
+				// if an exception is thrown in sub thread, throw it
+				m_future.get();
 				return true;
+			case std::future_status::timeout:
+				// not yet
+				return false;
+			default:
+				ASSERT(false);
 			}
 		}
-		else {
-			return true;
-		}
+		return true;
 	}
 
 protected:
 	virtual void loadOnSubThread(std::atomic_bool &cancel) = 0;
 
 private:
-	std::thread m_thread;
 	std::atomic_bool m_cancel = false;
-	std::atomic_bool m_loading = false;
+	std::future<void> m_future;
 };
 
 

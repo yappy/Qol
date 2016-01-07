@@ -109,7 +109,7 @@ void MyApp::render()
 	graph().drawChar(testjfont, L'ほ', 100, 200);
 	graph().drawString(testjfont, L"ほわいと", 100, 600, 0x000000, -32);
 	//*/
-	if (m_testScene.isLoadFinished()) {
+	if (m_testScene.checkLoadStatus()) {
 		m_lua.callGlobal("draw");
 	}
 }
