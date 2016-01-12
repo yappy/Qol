@@ -68,7 +68,7 @@ void MyApp::init()
 
 	m_lua.callWithResourceLib("load", this);
 	addSeResource(0, "testse", L"/C:/Windows/Media/chimes.wav");
-	loadResourceSet(0);
+	loadResourceSet(0, std::atomic_bool());
 
 	m_lua.callGlobal("start");
 	//*/

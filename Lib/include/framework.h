@@ -64,7 +64,7 @@ public:
 	void addSoundEffect(size_t setId, const char *resId,
 		std::function<sound::XAudio2::SeResourcePtr()> loadFunc);
 
-	void loadResourceSet(size_t setId);
+	void loadResourceSet(size_t setId, std::atomic_bool &cancel);
 	void unloadResourceSet(size_t setId);
 
 	const graphics::DGraphics::TextureResourcePtr &getTexture(
@@ -246,7 +246,7 @@ public:
 	/** @brief Load resources by resource set ID.
 	 * @param[in] setId	%Resource set ID.
 	 */
-	void loadResourceSet(size_t setId);
+	void loadResourceSet(size_t setId, std::atomic_bool &cancel);
 	/** @brief Unload resources by resource set ID.
 	 * @param[in] setId	%Resource set ID.
 	 */

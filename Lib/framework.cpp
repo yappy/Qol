@@ -81,9 +81,12 @@ void ResourceManager::addSoundEffect(size_t setId, const char *resId,
 namespace {
 
 template <class T>
-void loadAll(ResourceManager::ResMapVec<T> *targetMapVec, size_t setId)
+void loadAll(ResourceManager::ResMapVec<T> *targetMapVec, size_t setId, std::atomic_bool &cancel)
 {
 	for (auto &elem : targetMapVec->at(setId)) {
+		if (cancel.load()) {
+			break;
+		}
 		elem.second.load();
 	}
 }
@@ -98,11 +101,11 @@ void unloadAll(ResourceManager::ResMapVec<T> *targetMapVec, size_t setId)
 
 }	// namespace
 
-void ResourceManager::loadResourceSet(size_t setId)
+void ResourceManager::loadResourceSet(size_t setId, std::atomic_bool &cancel)
 {
-	loadAll(&m_texMapVec, setId);
-	loadAll(&m_fontMapVec, setId);
-	loadAll(&m_seMapVec, setId);
+	loadAll(&m_texMapVec, setId, cancel);
+	loadAll(&m_fontMapVec, setId, cancel);
+	loadAll(&m_seMapVec, setId, cancel);
 }
 
 void ResourceManager::unloadResourceSet(size_t setId)
@@ -436,9 +439,9 @@ void Application::addSeResource(size_t setId, const char *resId, const wchar_t *
 	});
 }
 
-void Application::loadResourceSet(size_t setId)
+void Application::loadResourceSet(size_t setId, std::atomic_bool &cancel)
 {
-	m_resMgr.loadResourceSet(setId);
+	m_resMgr.loadResourceSet(setId, cancel);
 }
 void Application::unloadResourceSet(size_t setId)
 {
