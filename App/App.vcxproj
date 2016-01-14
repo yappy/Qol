@@ -138,6 +138,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>$(TargetDir)Lib.lib;$(TargetDir)lua.lib;$(TargetDir)libogg_static.lib;$(TargetDir)libvorbis_static.lib;$(TargetDir)libvorbisfile_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -159,6 +160,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>$(TargetDir)Lib.lib;$(TargetDir)lua.lib;$(TargetDir)libogg_static.lib;$(TargetDir)libvorbis_static.lib;$(TargetDir)libvorbisfile_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
