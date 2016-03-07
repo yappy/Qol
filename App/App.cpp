@@ -21,9 +21,10 @@ protected:
 				debug::writeLine(L"cancel!");
 				break;
 			}
-			debug::writef(L"%d...", i);
+			//debug::writef(L"%d...", i);
 			::Sleep(1);
 		}
+		debug::writeLine(L"sub thread complete!");
 	}
 };
 
@@ -75,10 +76,10 @@ void MyApp::init()
 
 	// performance test
 	{
-		debug::StopWatch(L"Resource ID hash");
+		debug::StopWatch timer(L"Resource ID hash");
 		uint32_t dummy = 0;
 		for (int i = 0; i < 10000; i++) {
-			const auto &r = getTexture(0, "unyo");
+			const auto r = getTexture(0, "unyo");
 			dummy += r->w;
 		}
 		debug::writef(L"%d", dummy);

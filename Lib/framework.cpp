@@ -118,7 +118,7 @@ void ResourceManager::unloadResourceSet(size_t setId)
 namespace {
 
 template <class T>
-const typename Resource<T>::PtrType &getResource(
+const typename Resource<T>::PtrType getResource(
 	const std::vector<std::unordered_map<IdString, Resource<T>>> &mapVec,
 	size_t setId, const char *resId)
 {
@@ -133,19 +133,19 @@ const typename Resource<T>::PtrType &getResource(
 
 }
 
-const graphics::DGraphics::TextureResourcePtr &ResourceManager::getTexture(
+const graphics::DGraphics::TextureResourcePtr ResourceManager::getTexture(
 	size_t setId, const char *resId)
 {
 	return getResource(m_texMapVec, setId, resId);
 }
 
-const graphics::DGraphics::FontResourcePtr &ResourceManager::getFont(
+const graphics::DGraphics::FontResourcePtr ResourceManager::getFont(
 	size_t setId, const char *resId)
 {
 	return getResource(m_fontMapVec, setId, resId);
 }
 
-const sound::XAudio2::SeResourcePtr &ResourceManager::getSoundEffect(
+const sound::XAudio2::SeResourcePtr ResourceManager::getSoundEffect(
 	size_t setId, const char *resId)
 {
 	return getResource(m_seMapVec, setId, resId);
@@ -448,17 +448,17 @@ void Application::unloadResourceSet(size_t setId)
 	m_resMgr.unloadResourceSet(setId);
 }
 
-const graphics::DGraphics::TextureResourcePtr &Application::getTexture(size_t setId, const char *resId)
+const graphics::DGraphics::TextureResourcePtr Application::getTexture(size_t setId, const char *resId)
 {
 	return m_resMgr.getTexture(setId, resId);
 }
 
-const graphics::DGraphics::FontResourcePtr &Application::getFont(size_t setId, const char *resId)
+const graphics::DGraphics::FontResourcePtr Application::getFont(size_t setId, const char *resId)
 {
 	return m_resMgr.getFont(setId, resId);
 }
 
-const sound::XAudio2::SeResourcePtr &Application::getSoundEffect(size_t setId, const char *resId)
+const sound::XAudio2::SeResourcePtr Application::getSoundEffect(size_t setId, const char *resId)
 {
 	return m_resMgr.getSoundEffect(setId, resId);
 }

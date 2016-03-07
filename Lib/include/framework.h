@@ -42,11 +42,46 @@ public:
 	using LoadFuncType = std::function<PtrType()>;
 
 	explicit Resource(LoadFuncType loadFunc_) : m_loadFunc(loadFunc_) {}
-	const PtrType &getPtr() const { return m_resPtr; }
-	void load() { if (m_resPtr == nullptr) { m_resPtr = m_loadFunc(); } }
-	void unload() { m_resPtr.reset(); }
+	~Resource() = default;
+
+	const PtrType getPtr() const
+	{
+		std::lock_guard<std::mutex> lock(m_lock);
+		if (m_resPtr == nullptr) {
+			throw std::runtime_error("Resource not loaded");
+		}
+		return m_resPtr;
+	}
+	void load()
+	{
+		{
+			std::lock_guard<std::mutex> lock(m_lock);
+			if (m_resPtr != nullptr) {
+				return;
+			}
+			m_loading = true;
+		}
+		auto res = m_loadFunc();
+		{
+			std::lock_guard<std::mutex> lock(m_lock);
+			if (!m_loading) {
+				throw std::runtime_error("Multiple load async detected");
+			}
+			m_loading = false;
+			m_resPtr = res;
+		}
+	}
+	void unload() {
+		std::lock_guard<std::mutex> lock(m_lock);
+		if (m_loading) {
+			throw std::runtime_error("Unload resource while loading");
+		}
+		m_resPtr.reset();
+	}
 
 private:
+	mutable std::mutex m_lock;
+	bool m_loading = false;
 	PtrType m_resPtr;
 	LoadFuncType m_loadFunc;
 };
@@ -67,11 +102,11 @@ public:
 	void loadResourceSet(size_t setId, std::atomic_bool &cancel);
 	void unloadResourceSet(size_t setId);
 
-	const graphics::DGraphics::TextureResourcePtr &getTexture(
+	const graphics::DGraphics::TextureResourcePtr getTexture(
 		size_t setId, const char *resId);
-	const graphics::DGraphics::FontResourcePtr &getFont(
+	const graphics::DGraphics::FontResourcePtr getFont(
 		size_t setId, const char *resId);
-	const sound::XAudio2::SeResourcePtr &getSoundEffect(
+	const sound::XAudio2::SeResourcePtr getSoundEffect(
 		size_t setId, const char *resId);
 
 private:
@@ -256,19 +291,19 @@ public:
 	 * @param[in] setId	%Resource set ID.
 	 * @param[in] resId	%Resource ID.
 	 */
-	const graphics::DGraphics::TextureResourcePtr &getTexture(
+	const graphics::DGraphics::TextureResourcePtr getTexture(
 		size_t setId, const char *resId);
 	/** @brief Get texture resource pointer.
 	 * @param[in] setId	%Resource set ID.
 	 * @param[in] resId	%Resource ID.
 	 */
-	const graphics::DGraphics::FontResourcePtr &getFont(
+	const graphics::DGraphics::FontResourcePtr getFont(
 		size_t setId, const char *resId);
 	/** @brief Get texture resource pointer.
 	 * @param[in] setId	%Resource set ID.
 	 * @param[in] resId	%Resource ID.
 	 */
-	const sound::XAudio2::SeResourcePtr &getSoundEffect(
+	const sound::XAudio2::SeResourcePtr getSoundEffect(
 		size_t setId, const char *resId);
 
 protected:
