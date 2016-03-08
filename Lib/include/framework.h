@@ -138,7 +138,7 @@ public:
 			loadOnSubThread(m_cancel);
 		});
 	}
-	bool checkLoadStatus()
+	void updateLoadStatus()
 	{
 		if (m_future.valid()) {
 			auto status = m_future.wait_for(std::chrono::seconds(0));
@@ -148,19 +148,28 @@ public:
 				// make m_future invalid
 				// if an exception is thrown in sub thread, throw it
 				m_future.get();
-				return true;
+				// load complete event
+				onLoadComplete();
+				break;
 			case std::future_status::timeout:
 				// not yet
-				return false;
+				break;
 			default:
 				ASSERT(false);
 			}
 		}
-		return true;
 	}
+	bool isLoadCompleted()
+	{
+		return !m_future.valid();
+	}
+
+	virtual void update() = 0;
+	virtual void render() = 0;
 
 protected:
 	virtual void loadOnSubThread(std::atomic_bool &cancel) = 0;
+	virtual void onLoadComplete() = 0;
 
 private:
 	std::atomic_bool m_cancel = false;

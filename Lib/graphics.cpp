@@ -346,6 +346,19 @@ void DGraphics::initializeD3D()
 	}
 	debug::writeLine(L"Creating blend state OK");
 
+	// Multithread
+	{
+		debug::writeLine(L"Set multithreading...");
+
+		ID3D10Multithread *ptmpMt = nullptr;
+		hr = m_pDevice->QueryInterface(__uuidof(ID3D10Multithread), (void **)&ptmpMt);
+		checkDXResult<D3DError>(hr, "QueryInterface(IDXGIDevice1) failed");
+		util::IUnknownPtr<ID3D10Multithread> pMt(ptmpMt, util::iunknownDeleter);
+		pMt->SetMultithreadProtected(TRUE);
+
+		debug::writeLine(L"Set multithreading OK");
+	}
+
 	// fullscreen initially
 	/*
 	DXGI_ERROR_NOT_CURRENTLY_AVAILABLE (quote from dx11 document)

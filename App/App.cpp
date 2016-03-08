@@ -12,39 +12,42 @@
 
 using namespace yappy;
 
-class TestScene : public framework::SceneBase {
-protected:
-	void loadOnSubThread(std::atomic_bool &cancel)
-	{
-		for (int i = 0; i < 3000; i++) {
-			if (cancel.load()) {
-				debug::writeLine(L"cancel!");
-				break;
-			}
-			//debug::writef(L"%d...", i);
-			::Sleep(1);
-		}
-		debug::writeLine(L"sub thread complete!");
-	}
-};
+class MyApp;
+std::unique_ptr<MyApp> g_app;
 
 class MyApp : public framework::Application {
 public:
 	MyApp(const framework::AppParam &appParam,
-		const graphics::GraphicsParam &graphParam) :
-		Application(appParam, graphParam)
+		const graphics::GraphicsParam &graphParam)
+		: Application(appParam, graphParam)
 	{}
+
 protected:
 	void init() override;
 	void update() override;
 	void render() override;
+
 private:
-	TestScene m_testScene;
-	lua::Lua m_lua;
+	std::unique_ptr<framework::SceneBase> m_testScene;
 	uint64_t m_frameCount = 0;
 };
 
-void MyApp::init()
+class TestScene : public framework::SceneBase {
+public:
+	TestScene();
+	~TestScene() = default;
+
+protected:
+	void loadOnSubThread(std::atomic_bool &cancel) override;
+	void onLoadComplete() override;
+	void update() override;
+	void render() override;
+
+private:
+	lua::Lua m_lua;
+};
+
+TestScene::TestScene()
 {
 	/*
 	sound().playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
@@ -60,64 +63,64 @@ void MyApp::init()
 	loadResourceSet(0);
 	*/
 
-	//*
 	m_lua.loadTraceLib();
-	m_lua.loadGraphLib(this);
-	m_lua.loadSoundLib(this);
+	m_lua.loadGraphLib(g_app.get());
+	m_lua.loadSoundLib(g_app.get());
 
 	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
 
-	m_lua.callWithResourceLib("load", this);
-	addSeResource(0, "testse", L"/C:/Windows/Media/chimes.wav");
-	loadResourceSet(0, std::atomic_bool());
-
-	m_lua.callGlobal("start");
-	//*/
-
-	// performance test
-	{
-		debug::StopWatch timer(L"Resource ID hash");
-		uint32_t dummy = 0;
-		for (int i = 0; i < 10000; i++) {
-			const auto r = getTexture(0, "unyo");
-			dummy += r->w;
-		}
-		debug::writef(L"%d", dummy);
-	}
-
-	// sub thread start
-	m_testScene.startLoadThread();
+	m_lua.callWithResourceLib("load", g_app.get());
+	g_app->addSeResource(0, "testse", L"/C:/Windows/Media/chimes.wav");
 }
 
-void MyApp::render()
+void TestScene::loadOnSubThread(std::atomic_bool &cancel)
 {
-	/*
-	int test = static_cast<int>(m_frameCount * 5 % 768);
-
-	auto unyo = getTexture(0, "unyo");
-	auto maru = getTexture(0, "maru");
-	graph().drawTexture(maru, test, test);
-	graph().drawTexture(unyo, 1024 / 2, 768 / 2, false, false, 0, 0, -1, -1, 200, 150, m_frameCount / 3.14f / 10);
-
-	auto testfont = getFont(0, "e");
-	graph().drawChar(testfont, 'Y', 100, 100);
-	graph().drawChar(testfont, 'A', 116, 100);
-	graph().drawChar(testfont, 'P', 132, 100);
-	graph().drawChar(testfont, 'P', 148, 100);
-	graph().drawChar(testfont, 'Y', 164, 100, 0x00ff00, 2, 2, 1.0f);
-
-	auto testjfont = getFont(0, "j");
-	graph().drawChar(testjfont, L'ほ', 100, 200);
-	graph().drawString(testjfont, L"ほわいと", 100, 600, 0x000000, -32);
-	//*/
-	if (m_testScene.checkLoadStatus()) {
-		m_lua.callGlobal("draw");
+	g_app->loadResourceSet(0, cancel);
+	// dummy 1000ms load time
+	for (int i = 0; i < 1000; i++) {
+		Sleep(1);
 	}
+	debug::writeLine(L"sub thread complete!");
+}
+
+void TestScene::onLoadComplete()
+{
+	m_lua.callGlobal("start");
+}
+
+void TestScene::update()
+{
+	updateLoadStatus();
+	if (!isLoadCompleted()) {
+		return;
+	}
+	m_lua.callGlobal("update");
+}
+
+void TestScene::render()
+{
+	if (!isLoadCompleted()) {
+		// Loading screen
+		return;
+	}
+	m_lua.callGlobal("draw");
+}
+
+void MyApp::init()
+{
+	m_testScene = std::make_unique<TestScene>();
+
+	// sub thread start
+	m_testScene->startLoadThread();
 }
 
 void MyApp::update()
 {
-	m_lua.callGlobal("update");
+	m_testScene->update();
+	if (!m_testScene->isLoadCompleted()) {
+		return;
+	}
+
 	m_frameCount++;
 
 	auto testse = getSoundEffect(0, "testse");
@@ -160,6 +163,31 @@ void MyApp::update()
 			}
 		}
 	}
+}
+
+void MyApp::render()
+{
+	m_testScene->render();
+
+	/*
+	int test = static_cast<int>(m_frameCount * 5 % 768);
+
+	auto unyo = getTexture(0, "unyo");
+	auto maru = getTexture(0, "maru");
+	graph().drawTexture(maru, test, test);
+	graph().drawTexture(unyo, 1024 / 2, 768 / 2, false, false, 0, 0, -1, -1, 200, 150, m_frameCount / 3.14f / 10);
+
+	auto testfont = getFont(0, "e");
+	graph().drawChar(testfont, 'Y', 100, 100);
+	graph().drawChar(testfont, 'A', 116, 100);
+	graph().drawChar(testfont, 'P', 132, 100);
+	graph().drawChar(testfont, 'P', 148, 100);
+	graph().drawChar(testfont, 'Y', 164, 100, 0x00ff00, 2, 2, 1.0f);
+
+	auto testjfont = getFont(0, "j");
+	graph().drawChar(testjfont, L'ほ', 100, 200);
+	graph().drawString(testjfont, L"ほわいと", 100, 600, 0x000000, -32);
+	//*/
 }
 
 
@@ -242,8 +270,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		graphParam.h = 768;
 		graphParam.fullScreen = config.fullscreen;
 
-		MyApp app(appParam, graphParam);
-		result = app.run();
+		g_app = std::make_unique<MyApp>(appParam, graphParam);
+		result = g_app->run();
 	}
 	catch (const std::exception &ex) {
 		debug::writef(L"Error: %s", util::utf82wc(ex.what()).get());
