@@ -25,6 +25,11 @@ namespace yappy {
 /// Game application main framework.
 namespace framework {
 
+/** @brief Command line utility.
+* @return Parsed result vector. (argc-argv compatible)
+*/
+std::vector<std::wstring> parseCommandLine();
+
 /// %Resource ID is fixed-length string; char[16].
 using IdString = util::IdString;
 

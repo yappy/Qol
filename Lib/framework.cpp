@@ -8,6 +8,27 @@ namespace framework {
 
 using error::checkWin32Result;
 
+std::vector<std::wstring> parseCommandLine()
+{
+	// get as const pointer
+	const WCHAR *cmdline = ::GetCommandLineW();
+
+	// covert to argc, argv
+	// "quoted string including spaces" will be resolved
+	int argc = -1;
+	WCHAR **tmpArgv = ::CommandLineToArgvW(cmdline, &argc);
+	checkWin32Result(tmpArgv != nullptr, "CommandLineToArgvW() failed");
+	// use unique_ptr<T[]> for operator []
+	// LocalFree() instead of delete[]
+	auto del = [](WCHAR **ptr) {
+		::LocalFree(ptr);
+	};
+	std::unique_ptr<WCHAR *[], decltype(del)> argv(tmpArgv, del);
+
+	std::vector<std::wstring> result(&argv[0], &argv[argc]);
+	return result;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // class ResourceManager impl
 ///////////////////////////////////////////////////////////////////////////////
