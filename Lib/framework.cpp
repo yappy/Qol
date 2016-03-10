@@ -245,7 +245,10 @@ double FrameControl::getFramePerSec()
 ///////////////////////////////////////////////////////////////////////////////
 #pragma region Application
 
-Application::Application(const AppParam &appParam, const graphics::GraphicsParam &graphParam):
+Application::Application(const AppParam &appParam,
+	const graphics::GraphicsParam &graphParam,
+	size_t resSetCount) :
+	m_resMgr(resSetCount),
 	m_param(appParam),
 	m_graphParam(graphParam),
 	m_frameCtrl(graphParam.refreshRate, appParam.frameSkip)

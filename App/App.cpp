@@ -19,8 +19,22 @@ class MyApp : public framework::Application {
 public:
 	MyApp(const framework::AppParam &appParam,
 		const graphics::GraphicsParam &graphParam)
-		: Application(appParam, graphParam)
+		: Application(appParam, graphParam, 2)
 	{}
+
+	enum class SceneId {
+		Main,
+		Sub,
+		Count
+	};
+	std::unique_ptr<framework::SceneBase> &getScene(SceneId id)
+	{
+		return m_scenes[static_cast<uint32_t>(id)];
+	}
+	void setScene(SceneId id)
+	{
+		m_pCurrentScene = getScene(id).get();
+	}
 
 protected:
 	void init() override;
@@ -28,26 +42,31 @@ protected:
 	void render() override;
 
 private:
-	std::unique_ptr<framework::SceneBase> m_testScene;
 	uint64_t m_frameCount = 0;
+	std::array<std::unique_ptr<framework::SceneBase>,
+		static_cast<size_t>(SceneId::Count)> m_scenes;
+	framework::SceneBase *m_pCurrentScene = nullptr;
 };
 
-class TestScene : public framework::SceneBase {
+class MainScene : public framework::AsyncLoadScene {
 public:
-	TestScene();
-	~TestScene() = default;
+	MainScene();
+	~MainScene() = default;
+
+	// Scene specific initialization on enter
+	void setup();
 
 protected:
 	void loadOnSubThread(std::atomic_bool &cancel) override;
-	void onLoadComplete() override;
 	void update() override;
 	void render() override;
 
 private:
+	bool m_loading = false;
 	lua::Lua m_lua;
 };
 
-TestScene::TestScene()
+MainScene::MainScene()
 {
 	/*
 	sound().playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
@@ -63,6 +82,9 @@ TestScene::TestScene()
 	loadResourceSet(0);
 	*/
 
+	g_app->addSeResource(1, "testse", L"/C:/Windows/Media/chimes.wav");
+	g_app->loadResourceSet(1, std::atomic_bool());
+
 	m_lua.loadTraceLib();
 	m_lua.loadGraphLib(g_app.get());
 	m_lua.loadSoundLib(g_app.get());
@@ -70,10 +92,15 @@ TestScene::TestScene()
 	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
 
 	m_lua.callWithResourceLib("load", g_app.get());
-	g_app->addSeResource(0, "testse", L"/C:/Windows/Media/chimes.wav");
 }
 
-void TestScene::loadOnSubThread(std::atomic_bool &cancel)
+void MainScene::setup()
+{
+	m_loading = true;
+	startLoadThread();
+}
+
+void MainScene::loadOnSubThread(std::atomic_bool &cancel)
 {
 	g_app->loadResourceSet(0, cancel);
 	// dummy 1000ms load time
@@ -83,21 +110,22 @@ void TestScene::loadOnSubThread(std::atomic_bool &cancel)
 	debug::writeLine(L"sub thread complete!");
 }
 
-void TestScene::onLoadComplete()
+void MainScene::update()
 {
-	m_lua.callGlobal("start");
-}
-
-void TestScene::update()
-{
-	updateLoadStatus();
-	if (!isLoadCompleted()) {
-		return;
+	if (m_loading) {
+		updateLoadStatus();
+		if (isLoadCompleted()) {
+			m_loading = false;
+			m_lua.callGlobal("start");
+		}
+		else {
+			return;
+		}
 	}
 	m_lua.callGlobal("update");
 }
 
-void TestScene::render()
+void MainScene::render()
 {
 	if (!isLoadCompleted()) {
 		// Loading screen
@@ -108,22 +136,22 @@ void TestScene::render()
 
 void MyApp::init()
 {
-	m_testScene = std::make_unique<TestScene>();
+	m_scenes[static_cast<uint32_t>(SceneId::Main)] = std::make_unique<MainScene>();
+	// TODO
+	// m_scenes[static_cast<uint32_t>(SceneId::Sub)] = std::make_unique<SubScene>();
 
-	// sub thread start
-	m_testScene->startLoadThread();
+	auto mainScene = static_cast<MainScene *>(getScene(SceneId::Main).get());
+	mainScene->setup();
+	setScene(SceneId::Main);
 }
 
 void MyApp::update()
 {
-	m_testScene->update();
-	if (!m_testScene->isLoadCompleted()) {
-		return;
-	}
+	m_pCurrentScene->update();
 
 	m_frameCount++;
 
-	auto testse = getSoundEffect(0, "testse");
+	auto testse = getSoundEffect(1, "testse");
 
 	std::array<bool, 256> keys = input().getKeys();
 	for (size_t i = 0U; i < keys.size(); i++) {
@@ -167,7 +195,7 @@ void MyApp::update()
 
 void MyApp::render()
 {
-	m_testScene->render();
+	m_pCurrentScene->render();
 
 	/*
 	int test = static_cast<int>(m_frameCount * 5 % 768);

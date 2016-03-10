@@ -123,12 +123,24 @@ private:
 class SceneBase : private util::noncopyable {
 public:
 	SceneBase() = default;
-	virtual ~SceneBase()
+	virtual ~SceneBase() = default;
+
+	virtual void update() = 0;
+	virtual void render() = 0;
+};
+
+class AsyncLoadScene : public SceneBase {
+public:
+	AsyncLoadScene() = default;
+	virtual ~AsyncLoadScene() override
 	{
 		// set cancel flag
 		m_cancel.store(true);
 		// m_future destructor will wait for sub thread
 	}
+
+protected:
+	virtual void loadOnSubThread(std::atomic_bool &cancel) = 0;
 
 	void startLoadThread()
 	{
@@ -148,8 +160,6 @@ public:
 				// make m_future invalid
 				// if an exception is thrown in sub thread, throw it
 				m_future.get();
-				// load complete event
-				onLoadComplete();
 				break;
 			case std::future_status::timeout:
 				// not yet
@@ -163,13 +173,6 @@ public:
 	{
 		return !m_future.valid();
 	}
-
-	virtual void update() = 0;
-	virtual void render() = 0;
-
-protected:
-	virtual void loadOnSubThread(std::atomic_bool &cancel) = 0;
-	virtual void onLoadComplete() = 0;
 
 private:
 	std::atomic_bool m_cancel = false;
@@ -239,7 +242,8 @@ public:
 	 * @param[in] appParam		%Application parameters.
 	 * @param[in] graphParam	Graphics parameters.
 	 */
-	Application(const AppParam &appParam, const graphics::GraphicsParam &graphParam);
+	Application(const AppParam &appParam, const graphics::GraphicsParam &graphParam,
+		size_t resSetCount);
 	/** @brief Destructor.
 	 */
 	virtual ~Application();
