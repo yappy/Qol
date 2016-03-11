@@ -3,143 +3,34 @@
 
 #include "stdafx.h"
 #include "App.h"
+#include "resource.h"
 #include <debug.h>
 #include <file.h>
 #include <config.h>
-#include <script.h>
-#include <framework.h>
 #include <array>
 
-using namespace yappy;
+MyApp::MyApp(const framework::AppParam &appParam,
+	const graphics::GraphicsParam &graphParam)
+	: Application(appParam, graphParam, 2)
+{}
 
-class MyApp;
-std::unique_ptr<MyApp> g_app;
-
-class MyApp : public framework::Application {
-public:
-	MyApp(const framework::AppParam &appParam,
-		const graphics::GraphicsParam &graphParam)
-		: Application(appParam, graphParam, 2)
-	{}
-
-	enum class SceneId {
-		Main,
-		Sub,
-		Count
-	};
-	std::unique_ptr<framework::SceneBase> &getScene(SceneId id)
-	{
-		return m_scenes[static_cast<uint32_t>(id)];
-	}
-	void setScene(SceneId id)
-	{
-		m_pCurrentScene = getScene(id).get();
-	}
-
-protected:
-	void init() override;
-	void update() override;
-	void render() override;
-
-private:
-	uint64_t m_frameCount = 0;
-	std::array<std::unique_ptr<framework::SceneBase>,
-		static_cast<size_t>(SceneId::Count)> m_scenes;
-	framework::SceneBase *m_pCurrentScene = nullptr;
-};
-
-class MainScene : public framework::AsyncLoadScene {
-public:
-	MainScene();
-	~MainScene() = default;
-
-	// Scene specific initialization on enter
-	void setup();
-
-protected:
-	void loadOnSubThread(std::atomic_bool &cancel) override;
-	void update() override;
-	void render() override;
-
-private:
-	bool m_loading = false;
-	lua::Lua m_lua;
-};
-
-MainScene::MainScene()
+std::unique_ptr<framework::SceneBase> &MyApp::getScene(SceneId id)
 {
-	/*
-	sound().playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
-
-	addTextureResource(0, "unyo", L"../sampledata/test_400_300.png");
-	addTextureResource(0, "maru", L"../sampledata/circle.png");
-
-	addFontResource(0, "e", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
-	addFontResource(0, "j", L"メイリオ", L'あ', L'ん', 128, 128);
-
-	addSeResource(0, "testse", L"/C:/Windows/Media/chimes.wav");
-
-	loadResourceSet(0);
-	*/
-
-	g_app->addSeResource(1, "testse", L"/C:/Windows/Media/chimes.wav");
-	g_app->loadResourceSet(1, std::atomic_bool());
-
-	m_lua.loadTraceLib();
-	m_lua.loadGraphLib(g_app.get());
-	m_lua.loadSoundLib(g_app.get());
-
-	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
-
-	m_lua.callWithResourceLib("load", g_app.get());
+	return m_scenes[static_cast<uint32_t>(id)];
 }
 
-void MainScene::setup()
+void MyApp::setScene(SceneId id)
 {
-	m_loading = true;
-	startLoadThread();
-}
-
-void MainScene::loadOnSubThread(std::atomic_bool &cancel)
-{
-	g_app->loadResourceSet(0, cancel);
-	// dummy 1000ms load time
-	for (int i = 0; i < 1000; i++) {
-		Sleep(1);
-	}
-	debug::writeLine(L"sub thread complete!");
-}
-
-void MainScene::update()
-{
-	if (m_loading) {
-		updateLoadStatus();
-		if (isLoadCompleted()) {
-			m_loading = false;
-			m_lua.callGlobal("start");
-		}
-		else {
-			return;
-		}
-	}
-	m_lua.callGlobal("update");
-}
-
-void MainScene::render()
-{
-	if (!isLoadCompleted()) {
-		// Loading screen
-		return;
-	}
-	m_lua.callGlobal("draw");
+	m_pCurrentScene = getScene(id).get();
 }
 
 void MyApp::init()
 {
-	m_scenes[static_cast<uint32_t>(SceneId::Main)] = std::make_unique<MainScene>();
+	m_scenes[static_cast<uint32_t>(SceneId::Main)] = std::make_unique<MainScene>(this);
 	// TODO
-	// m_scenes[static_cast<uint32_t>(SceneId::Sub)] = std::make_unique<SubScene>();
+	// m_scenes[static_cast<uint32_t>(SceneId::Sub)] = std::make_unique<SubScene>(this);
 
+	// set initial scene
 	auto mainScene = static_cast<MainScene *>(getScene(SceneId::Main).get());
 	mainScene->setup();
 	setScene(SceneId::Main);
@@ -149,8 +40,7 @@ void MyApp::update()
 {
 	m_pCurrentScene->update();
 
-	m_frameCount++;
-
+#pragma region input test
 	auto testse = getSoundEffect(1, "testse");
 
 	std::array<bool, 256> keys = input().getKeys();
@@ -191,6 +81,7 @@ void MyApp::update()
 			}
 		}
 	}
+#pragma endregion
 }
 
 void MyApp::render()
@@ -298,8 +189,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		graphParam.h = 768;
 		graphParam.fullScreen = config.fullscreen;
 
-		g_app = std::make_unique<MyApp>(appParam, graphParam);
-		result = g_app->run();
+		auto app = std::make_unique<MyApp>(appParam, graphParam);
+		result = app->run();
+		// destruct app
 	}
 	catch (const std::exception &ex) {
 		debug::writef(L"Error: %s", util::utf82wc(ex.what()).get());
