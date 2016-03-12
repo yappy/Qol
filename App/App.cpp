@@ -3,141 +3,52 @@
 
 #include "stdafx.h"
 #include "App.h"
+#include "resource.h"
 #include <debug.h>
 #include <file.h>
 #include <config.h>
-#include <script.h>
-#include <framework.h>
 #include <array>
 
-using namespace yappy;
+MyApp::MyApp(const framework::AppParam &appParam,
+	const graphics::GraphicsParam &graphParam)
+	: Application(appParam, graphParam, ResSetId::Count)
+{}
 
-class MyApp : public framework::Application {
-public:
-	MyApp(const framework::AppParam &appParam,
-		const graphics::GraphicsParam &graphParam) :
-		Application(appParam, graphParam)
-	{}
-protected:
-	void init() override;
-	void update() override;
-	void render() override;
-private:
-	lua::Lua m_lua;
-	uint64_t m_frameCount = 0;
-};
+std::unique_ptr<framework::SceneBase> &MyApp::getScene(SceneId id)
+{
+	return m_scenes[static_cast<uint32_t>(id)];
+}
+
+void MyApp::setScene(SceneId id)
+{
+	m_pCurrentScene = getScene(id).get();
+}
 
 void MyApp::init()
 {
-	/*
-	sound().playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
+	// load common resource
+	addFontResource(ResSetId::Common, "e", L"ＭＳ 明朝", 0x00, 0xff, 16, 32);
+	addFontResource(ResSetId::Common, "j", L"メイリオ", L'あ', L'ん', 128, 128);
+	addSeResource(ResSetId::Common, "testse", L"/C:/Windows/Media/chord.wav");
+	loadResourceSet(ResSetId::Common, std::atomic_bool());
 
-	addTextureResource(0, "unyo", L"../sampledata/test_400_300.png");
-	addTextureResource(0, "maru", L"../sampledata/circle.png");
+	m_scenes[static_cast<uint32_t>(SceneId::Main)] = std::make_unique<MainScene>(this);
+	m_scenes[static_cast<uint32_t>(SceneId::Sub)] = std::make_unique<SubScene>(this);
 
-	addFontResource(0, "e", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
-	addFontResource(0, "j", L"メイリオ", L'あ', L'ん', 128, 128);
-
-	addSeResource(0, "testse", L"/C:/Windows/Media/chimes.wav");
-
-	loadResourceSet(0);
-	*/
-
-	//*
-	m_lua.loadTraceLib();
-	m_lua.loadGraphLib(this);
-	m_lua.loadSoundLib(this);
-
-	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
-
-	m_lua.callWithResourceLib("load", this);
-	addSeResource(0, "testse", L"/C:/Windows/Media/chimes.wav");
-	loadResourceSet(0);
-
-	m_lua.callGlobal("start");
-	//*/
-
-	// performance test
-	{
-		debug::StopWatch(L"Resource ID hash");
-		uint32_t dummy = 0;
-		for (int i = 0; i < 10000; i++) {
-			const auto &r = getTexture(0, "unyo");
-			dummy += r->w;
-		}
-		debug::writef(L"%d", dummy);
-	}
-}
-
-void MyApp::render()
-{
-	/*
-	int test = static_cast<int>(m_frameCount * 5 % 768);
-
-	auto unyo = getTexture(0, "unyo");
-	auto maru = getTexture(0, "maru");
-	graph().drawTexture(maru, test, test);
-	graph().drawTexture(unyo, 1024 / 2, 768 / 2, false, false, 0, 0, -1, -1, 200, 150, m_frameCount / 3.14f / 10);
-
-	auto testfont = getFont(0, "e");
-	graph().drawChar(testfont, 'Y', 100, 100);
-	graph().drawChar(testfont, 'A', 116, 100);
-	graph().drawChar(testfont, 'P', 132, 100);
-	graph().drawChar(testfont, 'P', 148, 100);
-	graph().drawChar(testfont, 'Y', 164, 100, 0x00ff00, 2, 2, 1.0f);
-
-	auto testjfont = getFont(0, "j");
-	graph().drawChar(testjfont, L'ほ', 100, 200);
-	graph().drawString(testjfont, L"ほわいと", 100, 600, 0x000000, -32);
-	//*/
-	m_lua.callGlobal("draw");
+	// set initial scene
+	auto mainScene = getSceneAs<MainScene>(SceneId::Main);
+	mainScene->setup();
+	setScene(SceneId::Main);
 }
 
 void MyApp::update()
 {
-	m_lua.callGlobal("update");
-	m_frameCount++;
+	m_pCurrentScene->update();
+}
 
-	auto testse = getSoundEffect(0, "testse");
-
-	std::array<bool, 256> keys = input().getKeys();
-	for (size_t i = 0U; i < keys.size(); i++) {
-		if (keys[i]) {
-			debug::writef(L"Key 0x%02x", i);
-			sound().playSoundEffect(testse);
-		}
-	}
-	for (int i = 0; i < input().getPadCount(); i++) {
-		DIJOYSTATE state;
-		input().getPadState(&state, i);
-		for (int b = 0; b < 32; b++) {
-			if (state.rgbButtons[b] & 0x80) {
-				debug::writef(L"pad[%d].button%d", i, b);
-				sound().playSoundEffect(testse);
-			}
-		}
-		{
-			// left stick
-			if (std::abs(state.lX) > input::DInput::AXIS_THRESHOLD) {
-				debug::writef(L"pad[%d].x=%ld", i, state.lX);
-			}
-			if (std::abs(state.lY) > input::DInput::AXIS_THRESHOLD) {
-				debug::writef(L"pad[%d].y=%ld", i, state.lY);
-			}
-			// right stick
-			if (std::abs(state.lZ) > input::DInput::AXIS_THRESHOLD) {
-				debug::writef(L"pad[%d].z=%ld", i, state.lZ);
-			}
-			if (std::abs(state.lRz) > input::DInput::AXIS_THRESHOLD) {
-				debug::writef(L"pad[%d].rz=%ld", i, state.lRz);
-			}
-		}
-		for (int b = 0; b < 4; b++) {
-			if (state.rgdwPOV[b] != -1) {
-				debug::writef(L"pad[%d].POV%d=%u", i, b, state.rgdwPOV[b]);
-			}
-		}
-	}
+void MyApp::render()
+{
+	m_pCurrentScene->render();
 }
 
 
@@ -220,8 +131,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		graphParam.h = 768;
 		graphParam.fullScreen = config.fullscreen;
 
-		MyApp app(appParam, graphParam);
-		result = app.run();
+		auto app = std::make_unique<MyApp>(appParam, graphParam);
+		result = app->run();
+		// destruct app
 	}
 	catch (const std::exception &ex) {
 		debug::writef(L"Error: %s", util::utf82wc(ex.what()).get());

@@ -190,5 +190,116 @@ void DInput::getPadState(DIJOYSTATE *out, int index) const noexcept
 	*out = m_pad.at(index);
 }
 
+
+namespace {
+
+struct DikConvEntry {
+	const char *str;
+	const wchar_t *wstr;
+};
+
+#define ENT(s) {s, L##s}
+const DikConvEntry DikConvTable[DInput::KEY_NUM] = {
+	// 0x00-0xff
+	ENT("?"),		ENT("ESCAPE"),	ENT("1"),		ENT("2"),
+	ENT("3"),		ENT("4"),		ENT("5"),		ENT("6"),
+	ENT("7"),		ENT("8"),		ENT("9"),		ENT("0"),
+	ENT("MINUS"),	ENT("EQUALS"),	ENT("BACK"),	ENT("TAB"),
+	// 0x10-0x1f
+	ENT("Q"),		ENT("W"),		ENT("E"),		ENT("R"),
+	ENT("T"),		ENT("Y"),		ENT("U"),		ENT("I"),
+	ENT("O"),		ENT("P"),		ENT("LBRACKET"),ENT("RBRACKET"),
+	ENT("RETURN"),	ENT("LCONTROL"),ENT("A"),		ENT("S"),
+	// 0x20-0x2f
+	ENT("D"),		ENT("F"),		ENT("G"),		ENT("H"),
+	ENT("J"),		ENT("K"),		ENT("L"),		ENT("SEMIC"),
+	ENT("APOST"),	ENT("GRAVE"),	ENT("LSHIFT"),	ENT("BSLASH"),
+	ENT("Z"),		ENT("X"),		ENT("C"),		ENT("V"),
+	// 0x30-0x3f
+	ENT("B"),		ENT("N"),		ENT("M"),		ENT("COMMA"),
+	ENT("PERIOD"),	ENT("SLASH"),	ENT("RSHIFT"),	ENT("MULT"),
+	ENT("LMENU"),	ENT("SPACE"),	ENT("CAPITAL"),	ENT("F1"),
+	ENT("F2"),		ENT("F3"),		ENT("F4"),		ENT("F5"),
+	// 0x40-0x4f
+	ENT("F6"),		ENT("F7"),		ENT("F8"),		ENT("F9"),
+	ENT("F10"),		ENT("NUMLOCK"),	ENT("SCROLL"),	ENT("NUMPAD7"),
+	ENT("NUMPAD8"),	ENT("NUMPAD9"),	ENT("SUB"),		ENT("NUMPAD4"),
+	ENT("NUMPAD5"),	ENT("NUMPAD6"),	ENT("ADD"),		ENT("NUMPAD1"),
+	// 0x50-0x5f
+	ENT("NUMPAD2"),	ENT("NUMPAD3"),	ENT("NUMPAD0"),	ENT("DECIMAL"),
+	ENT("?"),		ENT("?"),		ENT("OEM_102"),	ENT("F11"),
+	ENT("F12"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	// 0x60-0x6f
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("F13"),		ENT("F14"),		ENT("F15"),		ENT("?"),
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	// 0x70-0x7f
+	ENT("KANA"),	ENT("?"),		ENT("?"),		ENT("ABNT_C1"),
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("CONVERT"),	ENT("?"),		ENT("NOCONV"),
+	ENT("?"),		ENT("YEN"),		ENT("ABNT_C2"),	ENT("?"),
+	// 0x80-0x8f
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("NUMPADEQ"),ENT("?"),		ENT("?"),
+	// 0x90-0x9f
+	ENT("PREVTR"),	ENT("AT"),		ENT("COLON"),	ENT("ULINE"),
+	ENT("KANJI"),	ENT("STOP"),	ENT("AX"),		ENT("UNLABEL"),
+	ENT("?"),		ENT("NEXTTR"),	ENT("?"),		ENT("?"),
+	ENT("NUMPADET"),ENT("RCONTROL"),ENT("?"),		ENT("?"),
+	// 0xa0-0xaf
+	ENT("MUTE"),	ENT("CALC"),	ENT("PLYPAUSE"),ENT("?"),
+	ENT("MSTOP"),	ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("?"),		ENT("VOLDOWN"),	ENT("?"),
+	// 0xb0-0xbf
+	ENT("VOLUP"),	ENT("?"),		ENT("WEBHOME"),	ENT("NUMPADCM"),
+	ENT("?"),		ENT("DIVIDE"),	ENT("?"),		ENT("SYSRQ"),
+	ENT("RMENU"),	ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("?"),		ENT("?"),	ENT("?"),
+	// 0xc0-0xcf
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("PAUSE"),	ENT("?"),		ENT("HOME"),
+	ENT("UP"),		ENT("PGUP"),	ENT("?"),		ENT("LEFT"),
+	ENT("?"),		ENT("RIGHT"),	ENT("?"),		ENT("END"),
+	// 0xd0-0xdf
+	ENT("DOWN"),	ENT("PGDN"),	ENT("INSERT"),	ENT("DELETE"),
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("LWIN"),
+	ENT("RWIN"),	ENT("APPS"),	ENT("POWER"),	ENT("SLEEP"),
+	// 0xe0-0xef
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("WAKE"),
+	ENT("?"),		ENT("WEBSCH"),	ENT("WEBFAV"),	ENT("WEBREF"),
+	ENT("WEBSTOP"),	ENT("WEBFWD"),	ENT("WEBBACK"),	ENT("MYCOM"),
+	ENT("MAIL"),	ENT("MEDIASEL"),ENT("?"),		ENT("?"),
+	// 0xf0-0xff
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+	ENT("?"),		ENT("?"),		ENT("?"),		ENT("?"),
+};
+#undef ENT
+
+}	// namespace
+
+const char *dikToString(int dik)
+{
+	if (dik < 0 || dik >= 256) {
+		throw std::logic_error("invalid DIK");
+	}
+	return DikConvTable[dik].str;
+}
+
+const wchar_t *dikToWString(int dik)
+{
+	if (dik < 0 || dik >= 256) {
+		throw std::logic_error("invalid DIK");
+	}
+	return DikConvTable[dik].wstr;
+}
+
 }
 }

@@ -19,6 +19,8 @@
 #include "graphics.h"
 #include "sound.h"
 #include "input.h"
+#include <atomic>
+#include <future>
 #include <functional>
 
 namespace yappy {
@@ -40,11 +42,46 @@ public:
 	using LoadFuncType = std::function<PtrType()>;
 
 	explicit Resource(LoadFuncType loadFunc_) : m_loadFunc(loadFunc_) {}
-	const PtrType &getPtr() const { return m_resPtr; }
-	void load() { if (m_resPtr == nullptr) { m_resPtr = m_loadFunc(); } }
-	void unload() { m_resPtr.reset(); }
+	~Resource() = default;
+
+	const PtrType getPtr() const
+	{
+		std::lock_guard<std::mutex> lock(m_lock);
+		if (m_resPtr == nullptr) {
+			throw std::runtime_error("Resource not loaded");
+		}
+		return m_resPtr;
+	}
+	void load()
+	{
+		{
+			std::lock_guard<std::mutex> lock(m_lock);
+			if (m_resPtr != nullptr) {
+				return;
+			}
+			m_loading = true;
+		}
+		auto res = m_loadFunc();
+		{
+			std::lock_guard<std::mutex> lock(m_lock);
+			if (!m_loading) {
+				throw std::runtime_error("Multiple load async detected");
+			}
+			m_loading = false;
+			m_resPtr = res;
+		}
+	}
+	void unload() {
+		std::lock_guard<std::mutex> lock(m_lock);
+		if (m_loading) {
+			throw std::runtime_error("Unload resource while loading");
+		}
+		m_resPtr.reset();
+	}
 
 private:
+	mutable std::mutex m_lock;
+	bool m_loading = false;
 	PtrType m_resPtr;
 	LoadFuncType m_loadFunc;
 };
@@ -62,14 +99,14 @@ public:
 	void addSoundEffect(size_t setId, const char *resId,
 		std::function<sound::XAudio2::SeResourcePtr()> loadFunc);
 
-	void loadResourceSet(size_t setId);
+	void loadResourceSet(size_t setId, std::atomic_bool &cancel);
 	void unloadResourceSet(size_t setId);
 
-	const graphics::DGraphics::TextureResourcePtr &getTexture(
+	const graphics::DGraphics::TextureResourcePtr getTexture(
 		size_t setId, const char *resId);
-	const graphics::DGraphics::FontResourcePtr &getFont(
+	const graphics::DGraphics::FontResourcePtr getFont(
 		size_t setId, const char *resId);
-	const sound::XAudio2::SeResourcePtr &getSoundEffect(
+	const sound::XAudio2::SeResourcePtr getSoundEffect(
 		size_t setId, const char *resId);
 
 private:
@@ -80,6 +117,66 @@ private:
 	ResMapVec<graphics::DGraphics::TextureResource> m_texMapVec;
 	ResMapVec<graphics::DGraphics::FontResource>    m_fontMapVec;
 	ResMapVec<sound::XAudio2::SeResource>           m_seMapVec;
+};
+
+
+class SceneBase : private util::noncopyable {
+public:
+	SceneBase() = default;
+	virtual ~SceneBase() = default;
+
+	virtual void update() = 0;
+	virtual void render() = 0;
+};
+
+class AsyncLoadScene : public SceneBase {
+public:
+	AsyncLoadScene() = default;
+	virtual ~AsyncLoadScene() override
+	{
+		// set cancel flag
+		m_cancel.store(true);
+		// m_future destructor will wait for sub thread
+	}
+
+protected:
+	virtual void loadOnSubThread(std::atomic_bool &cancel) = 0;
+
+	void startLoadThread()
+	{
+		// move assign
+		m_future = std::async(std::launch::async, [this]() {
+			// can throw an exception
+			loadOnSubThread(m_cancel);
+		});
+	}
+	void updateLoadStatus()
+	{
+		if (m_future.valid()) {
+			auto status = m_future.wait_for(std::chrono::seconds(0));
+			switch (status) {
+			case std::future_status::ready:
+				// complete or exception
+				// make m_future invalid
+				// if an exception is thrown in sub thread, throw it
+				m_future.get();
+				break;
+			case std::future_status::timeout:
+				// not yet
+				break;
+			default:
+				ASSERT(false);
+			}
+		}
+	}
+	bool isLoadCompleted()
+	{
+		return !m_future.valid();
+	}
+
+private:
+	std::atomic_bool m_cancel = false;
+	std::future<void> m_future;
 };
 
 
@@ -145,7 +242,8 @@ public:
 	 * @param[in] appParam		%Application parameters.
 	 * @param[in] graphParam	Graphics parameters.
 	 */
-	Application(const AppParam &appParam, const graphics::GraphicsParam &graphParam);
+	Application(const AppParam &appParam, const graphics::GraphicsParam &graphParam,
+		size_t resSetCount);
 	/** @brief Destructor.
 	 */
 	virtual ~Application();
@@ -196,7 +294,7 @@ public:
 	/** @brief Load resources by resource set ID.
 	 * @param[in] setId	%Resource set ID.
 	 */
-	void loadResourceSet(size_t setId);
+	void loadResourceSet(size_t setId, std::atomic_bool &cancel);
 	/** @brief Unload resources by resource set ID.
 	 * @param[in] setId	%Resource set ID.
 	 */
@@ -206,19 +304,19 @@ public:
 	 * @param[in] setId	%Resource set ID.
 	 * @param[in] resId	%Resource ID.
 	 */
-	const graphics::DGraphics::TextureResourcePtr &getTexture(
+	const graphics::DGraphics::TextureResourcePtr getTexture(
 		size_t setId, const char *resId);
 	/** @brief Get texture resource pointer.
 	 * @param[in] setId	%Resource set ID.
 	 * @param[in] resId	%Resource ID.
 	 */
-	const graphics::DGraphics::FontResourcePtr &getFont(
+	const graphics::DGraphics::FontResourcePtr getFont(
 		size_t setId, const char *resId);
 	/** @brief Get texture resource pointer.
 	 * @param[in] setId	%Resource set ID.
 	 * @param[in] resId	%Resource ID.
 	 */
-	const sound::XAudio2::SeResourcePtr &getSoundEffect(
+	const sound::XAudio2::SeResourcePtr getSoundEffect(
 		size_t setId, const char *resId);
 
 protected:

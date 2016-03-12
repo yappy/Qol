@@ -35,5 +35,8 @@ private:
 	std::vector<DIJOYSTATE> m_pad;
 };
 
+const char *dikToString(int dik);
+const wchar_t *dikToWString(int dik);
+
 }
 }

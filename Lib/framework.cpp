@@ -81,9 +81,12 @@ void ResourceManager::addSoundEffect(size_t setId, const char *resId,
 namespace {
 
 template <class T>
-void loadAll(ResourceManager::ResMapVec<T> *targetMapVec, size_t setId)
+void loadAll(ResourceManager::ResMapVec<T> *targetMapVec, size_t setId, std::atomic_bool &cancel)
 {
 	for (auto &elem : targetMapVec->at(setId)) {
+		if (cancel.load()) {
+			break;
+		}
 		elem.second.load();
 	}
 }
@@ -98,11 +101,11 @@ void unloadAll(ResourceManager::ResMapVec<T> *targetMapVec, size_t setId)
 
 }	// namespace
 
-void ResourceManager::loadResourceSet(size_t setId)
+void ResourceManager::loadResourceSet(size_t setId, std::atomic_bool &cancel)
 {
-	loadAll(&m_texMapVec, setId);
-	loadAll(&m_fontMapVec, setId);
-	loadAll(&m_seMapVec, setId);
+	loadAll(&m_texMapVec, setId, cancel);
+	loadAll(&m_fontMapVec, setId, cancel);
+	loadAll(&m_seMapVec, setId, cancel);
 }
 
 void ResourceManager::unloadResourceSet(size_t setId)
@@ -115,7 +118,7 @@ void ResourceManager::unloadResourceSet(size_t setId)
 namespace {
 
 template <class T>
-const typename Resource<T>::PtrType &getResource(
+const typename Resource<T>::PtrType getResource(
 	const std::vector<std::unordered_map<IdString, Resource<T>>> &mapVec,
 	size_t setId, const char *resId)
 {
@@ -130,19 +133,19 @@ const typename Resource<T>::PtrType &getResource(
 
 }
 
-const graphics::DGraphics::TextureResourcePtr &ResourceManager::getTexture(
+const graphics::DGraphics::TextureResourcePtr ResourceManager::getTexture(
 	size_t setId, const char *resId)
 {
 	return getResource(m_texMapVec, setId, resId);
 }
 
-const graphics::DGraphics::FontResourcePtr &ResourceManager::getFont(
+const graphics::DGraphics::FontResourcePtr ResourceManager::getFont(
 	size_t setId, const char *resId)
 {
 	return getResource(m_fontMapVec, setId, resId);
 }
 
-const sound::XAudio2::SeResourcePtr &ResourceManager::getSoundEffect(
+const sound::XAudio2::SeResourcePtr ResourceManager::getSoundEffect(
 	size_t setId, const char *resId)
 {
 	return getResource(m_seMapVec, setId, resId);
@@ -242,7 +245,10 @@ double FrameControl::getFramePerSec()
 ///////////////////////////////////////////////////////////////////////////////
 #pragma region Application
 
-Application::Application(const AppParam &appParam, const graphics::GraphicsParam &graphParam):
+Application::Application(const AppParam &appParam,
+	const graphics::GraphicsParam &graphParam,
+	size_t resSetCount) :
+	m_resMgr(resSetCount),
 	m_param(appParam),
 	m_graphParam(graphParam),
 	m_frameCtrl(graphParam.refreshRate, appParam.frameSkip)
@@ -436,26 +442,26 @@ void Application::addSeResource(size_t setId, const char *resId, const wchar_t *
 	});
 }
 
-void Application::loadResourceSet(size_t setId)
+void Application::loadResourceSet(size_t setId, std::atomic_bool &cancel)
 {
-	m_resMgr.loadResourceSet(setId);
+	m_resMgr.loadResourceSet(setId, cancel);
 }
 void Application::unloadResourceSet(size_t setId)
 {
 	m_resMgr.unloadResourceSet(setId);
 }
 
-const graphics::DGraphics::TextureResourcePtr &Application::getTexture(size_t setId, const char *resId)
+const graphics::DGraphics::TextureResourcePtr Application::getTexture(size_t setId, const char *resId)
 {
 	return m_resMgr.getTexture(setId, resId);
 }
 
-const graphics::DGraphics::FontResourcePtr &Application::getFont(size_t setId, const char *resId)
+const graphics::DGraphics::FontResourcePtr Application::getFont(size_t setId, const char *resId)
 {
 	return m_resMgr.getFont(setId, resId);
 }
 
-const sound::XAudio2::SeResourcePtr &Application::getSoundEffect(size_t setId, const char *resId)
+const sound::XAudio2::SeResourcePtr Application::getSoundEffect(size_t setId, const char *resId)
 {
 	return m_resMgr.getSoundEffect(setId, resId);
 }
