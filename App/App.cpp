@@ -11,7 +11,7 @@
 
 MyApp::MyApp(const framework::AppParam &appParam,
 	const graphics::GraphicsParam &graphParam)
-	: Application(appParam, graphParam, 2)
+	: Application(appParam, graphParam, ResSetId::Count)
 {}
 
 std::unique_ptr<framework::SceneBase> &MyApp::getScene(SceneId id)
@@ -26,12 +26,17 @@ void MyApp::setScene(SceneId id)
 
 void MyApp::init()
 {
+	// load common resource
+	addFontResource(ResSetId::Common, "e", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
+	addFontResource(ResSetId::Common, "j", L"メイリオ", L'あ', L'ん', 128, 128);
+	addSeResource(ResSetId::Common, "testse", L"/C:/Windows/Media/chord.wav");
+	loadResourceSet(ResSetId::Common, std::atomic_bool());
+
 	m_scenes[static_cast<uint32_t>(SceneId::Main)] = std::make_unique<MainScene>(this);
-	// TODO
-	// m_scenes[static_cast<uint32_t>(SceneId::Sub)] = std::make_unique<SubScene>(this);
+	m_scenes[static_cast<uint32_t>(SceneId::Sub)] = std::make_unique<SubScene>(this);
 
 	// set initial scene
-	auto mainScene = static_cast<MainScene *>(getScene(SceneId::Main).get());
+	auto mainScene = getSceneAs<MainScene>(SceneId::Main);
 	mainScene->setup();
 	setScene(SceneId::Main);
 }
@@ -39,74 +44,11 @@ void MyApp::init()
 void MyApp::update()
 {
 	m_pCurrentScene->update();
-
-#pragma region input test
-	auto testse = getSoundEffect(1, "testse");
-
-	std::array<bool, 256> keys = input().getKeys();
-	for (size_t i = 0U; i < keys.size(); i++) {
-		if (keys[i]) {
-			debug::writef(L"Key 0x%02x", i);
-			sound().playSoundEffect(testse);
-		}
-	}
-	for (int i = 0; i < input().getPadCount(); i++) {
-		DIJOYSTATE state;
-		input().getPadState(&state, i);
-		for (int b = 0; b < 32; b++) {
-			if (state.rgbButtons[b] & 0x80) {
-				debug::writef(L"pad[%d].button%d", i, b);
-				sound().playSoundEffect(testse);
-			}
-		}
-		{
-			// left stick
-			if (std::abs(state.lX) > input::DInput::AXIS_THRESHOLD) {
-				debug::writef(L"pad[%d].x=%ld", i, state.lX);
-			}
-			if (std::abs(state.lY) > input::DInput::AXIS_THRESHOLD) {
-				debug::writef(L"pad[%d].y=%ld", i, state.lY);
-			}
-			// right stick
-			if (std::abs(state.lZ) > input::DInput::AXIS_THRESHOLD) {
-				debug::writef(L"pad[%d].z=%ld", i, state.lZ);
-			}
-			if (std::abs(state.lRz) > input::DInput::AXIS_THRESHOLD) {
-				debug::writef(L"pad[%d].rz=%ld", i, state.lRz);
-			}
-		}
-		for (int b = 0; b < 4; b++) {
-			if (state.rgdwPOV[b] != -1) {
-				debug::writef(L"pad[%d].POV%d=%u", i, b, state.rgdwPOV[b]);
-			}
-		}
-	}
-#pragma endregion
 }
 
 void MyApp::render()
 {
 	m_pCurrentScene->render();
-
-	/*
-	int test = static_cast<int>(m_frameCount * 5 % 768);
-
-	auto unyo = getTexture(0, "unyo");
-	auto maru = getTexture(0, "maru");
-	graph().drawTexture(maru, test, test);
-	graph().drawTexture(unyo, 1024 / 2, 768 / 2, false, false, 0, 0, -1, -1, 200, 150, m_frameCount / 3.14f / 10);
-
-	auto testfont = getFont(0, "e");
-	graph().drawChar(testfont, 'Y', 100, 100);
-	graph().drawChar(testfont, 'A', 116, 100);
-	graph().drawChar(testfont, 'P', 132, 100);
-	graph().drawChar(testfont, 'P', 148, 100);
-	graph().drawChar(testfont, 'Y', 164, 100, 0x00ff00, 2, 2, 1.0f);
-
-	auto testjfont = getFont(0, "j");
-	graph().drawChar(testjfont, L'ほ', 100, 200);
-	graph().drawString(testjfont, L"ほわいと", 100, 600, 0x000000, -32);
-	//*/
 }
 
 

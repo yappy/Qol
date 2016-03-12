@@ -11,6 +11,15 @@ enum class SceneId {
 	Count
 };
 
+struct ResSetId {
+	ResSetId() = delete;
+	enum {
+		Common,
+		Main,
+		Count
+	};
+};
+
 class MyApp : public framework::Application {
 public:
 	MyApp(const framework::AppParam &appParam,
@@ -18,6 +27,11 @@ public:
 	~MyApp() = default;
 
 	std::unique_ptr<framework::SceneBase> &getScene(SceneId id);
+	template <class T>
+	T *getSceneAs(SceneId id)
+	{
+		return static_cast<T *>(getScene(id).get());
+	}
 	void setScene(SceneId id);
 
 protected:
@@ -40,14 +54,29 @@ public:
 
 	// Scene specific initialization at scene start
 	void setup();
+	void update() override;
+	void render() override;
 
 protected:
 	void loadOnSubThread(std::atomic_bool &cancel) override;
+
+private:
+	MyApp *m_app;
+	bool m_loading = false;
+	lua::Lua m_lua;
+};
+
+class SubScene : public framework::SceneBase {
+public:
+	explicit SubScene(MyApp *app);
+	~SubScene() = default;
+
+	// Scene specific initialization at scene start
+	void setup();
 	void update() override;
 	void render() override;
 
 private:
 	MyApp *m_app;
 	bool m_loading = false;
-	lua::Lua m_lua;
 };

@@ -3,23 +3,6 @@
 
 MainScene::MainScene(MyApp *app) : m_app(app)
 {
-	/*
-	sound().playBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
-
-	addTextureResource(0, "unyo", L"../sampledata/test_400_300.png");
-	addTextureResource(0, "maru", L"../sampledata/circle.png");
-
-	addFontResource(0, "e", L"‚l‚r –¾’©", 'A', 'Z', 16, 32);
-	addFontResource(0, "j", L"ƒƒCƒŠƒI", L'‚ ', L'‚ñ', 128, 128);
-
-	addSeResource(0, "testse", L"/C:/Windows/Media/chimes.wav");
-
-	loadResourceSet(0);
-	*/
-
-	m_app->addSeResource(1, "testse", L"/C:/Windows/Media/chimes.wav");
-	m_app->loadResourceSet(1, std::atomic_bool());
-
 	m_lua.loadTraceLib();
 	m_lua.loadGraphLib(m_app);
 	m_lua.loadSoundLib(m_app);
@@ -57,7 +40,18 @@ void MainScene::update()
 			return;
 		}
 	}
+
+	auto keys = m_app->input().getKeys();
+
 	m_lua.callGlobal("update");
+
+	if (keys[DIK_SPACE]) {
+		// SPACE to sub scene
+		auto *next = m_app->getSceneAs<SubScene>(SceneId::Sub);
+		next->setup();
+		next->update();
+		m_app->setScene(SceneId::Sub);
+	}
 }
 
 void MainScene::render()
