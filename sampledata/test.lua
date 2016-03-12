@@ -41,6 +41,7 @@ function draw()
 
 	graph:drawString(0, "j", "ほ", 100, 200, 0x0000ff);
 	graph:drawString(0, "j", "ほわいと", 100, 600, 0x000000, -32);
+	graph:drawString(0, "e", "SPACE key: goto C++ impl scene", 0, 0);
 end
 
 return a, b, c, d;

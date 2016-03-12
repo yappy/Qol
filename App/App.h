@@ -78,5 +78,6 @@ public:
 
 private:
 	MyApp *m_app;
-	bool m_loading = false;
+	input::DInput::KeyData m_keyData;
+	int m_supressSeFrame;
 };

@@ -27,7 +27,7 @@ void MyApp::setScene(SceneId id)
 void MyApp::init()
 {
 	// load common resource
-	addFontResource(ResSetId::Common, "e", L"ＭＳ 明朝", 'A', 'Z', 16, 32);
+	addFontResource(ResSetId::Common, "e", L"ＭＳ 明朝", 0x00, 0xff, 16, 32);
 	addFontResource(ResSetId::Common, "j", L"メイリオ", L'あ', L'ん', 128, 128);
 	addSeResource(ResSetId::Common, "testse", L"/C:/Windows/Media/chord.wav");
 	loadResourceSet(ResSetId::Common, std::atomic_bool());

@@ -9,28 +9,42 @@ SubScene::SubScene(MyApp *app) : m_app(app)
 
 void SubScene::setup()
 {
-
+	m_supressSeFrame = 0;
 }
 
 void SubScene::update()
 {
+	bool sePlayed = false;
+	if (m_supressSeFrame > 0) {
+		m_supressSeFrame--;
+	}
 	// input test
 	auto testse = m_app->getSoundEffect(ResSetId::Common, "testse");
 
+	// key
 	auto keys = m_app->input().getKeys();
-	for (size_t i = 0U; i < keys.size(); i++) {
+	m_keyData = keys;
+	for (size_t i = 0; i < keys.size(); i++) {
 		if (keys[i]) {
 			debug::writef(L"Key 0x%02x", i);
-			m_app->sound().playSoundEffect(testse);
+			if (m_supressSeFrame == 0) {
+				m_app->sound().playSoundEffect(testse);
+				sePlayed = true;
+			}
 		}
 	}
+
+	// gamepads
 	for (int i = 0; i < m_app->input().getPadCount(); i++) {
 		DIJOYSTATE state;
 		m_app->input().getPadState(&state, i);
 		for (int b = 0; b < 32; b++) {
 			if (state.rgbButtons[b] & 0x80) {
 				debug::writef(L"pad[%d].button%d", i, b);
-				m_app->sound().playSoundEffect(testse);
+				if (m_supressSeFrame == 0) {
+					m_app->sound().playSoundEffect(testse);
+					sePlayed = true;
+				}
 			}
 		}
 		{
@@ -55,9 +69,25 @@ void SubScene::update()
 			}
 		}
 	}
+
+	if (sePlayed) {
+		m_supressSeFrame = 10;
+	}
 }
 
 void SubScene::render()
 {
-	
+	auto font = m_app->getFont(ResSetId::Common, "e");
+
+	m_app->graph().drawString(font, L"Pressing keys:", 0, 0);
+
+	int y = 32;
+	for (size_t i = 0; i < m_keyData.size(); i++) {
+		if (m_keyData[i]) {
+			m_app->graph().drawString(
+				font, input::dikToWString(static_cast<int>(i)),
+				0, y);
+			y += 32;
+		}
+	}
 }
