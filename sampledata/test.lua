@@ -22,8 +22,14 @@ function start()
 	sound:playBgm("../sampledata/Epoq-Lepidoptera.ogg");
 end
 
-function update()
+function update(keyinput)
 	frame = frame + 1;
+
+	for k, v in pairs(keyinput) do
+		if v then
+			trace.write("Key input in lua: " .. k);
+		end
+	end
 end
 
 function draw()

@@ -199,7 +199,7 @@ struct DikConvEntry {
 };
 
 #define ENT(s) {s, L##s}
-const DikConvEntry DikConvTable[256] = {
+const DikConvEntry DikConvTable[DInput::KEY_NUM] = {
 	// 0x00-0xff
 	ENT("?"),		ENT("ESCAPE"),	ENT("1"),		ENT("2"),
 	ENT("3"),		ENT("4"),		ENT("5"),		ENT("6"),
