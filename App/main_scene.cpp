@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "App.h"
 
-MainScene::MainScene(MyApp *app) : m_app(app)
+MainScene::MainScene(MyApp *app) : m_app(app), m_lua(LuaHeapSize)
 {
 	m_lua.loadTraceLib();
 	m_lua.loadGraphLib(m_app);
