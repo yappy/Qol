@@ -20,7 +20,7 @@ private:
 /** @brief Lua state manager.
  * @details Each Lua object manages one lua_State.
  */
-class Lua {
+class Lua : private util::noncopyable {
 public:
 	/** @brief Create new lua_State and open standard libs.
 	 */
