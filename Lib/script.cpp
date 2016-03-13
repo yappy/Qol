@@ -105,9 +105,10 @@ void Lua::loadTraceLib()
 	lua_setglobal(L, "trace");
 }
 
-void Lua::callWithResourceLib(const char *funcName, framework::Application *app)
+void Lua::callWithResourceLib(const char *funcName, framework::Application *app,
+	int instLimit)
 {
-	callGlobal(funcName,
+	callGlobal(funcName, instLimit,
 		[app](lua_State *L) {
 			// args
 			// stack[1]: resource function table

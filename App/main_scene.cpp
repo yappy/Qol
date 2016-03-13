@@ -43,7 +43,7 @@ void MainScene::update()
 
 	auto keys = m_app->input().getKeys();
 
-	m_lua.callGlobal("update", [&keys](lua_State *L) {
+	m_lua.callGlobal("update", 0, [&keys](lua_State *L) {
 		// arg1: key input table str->bool
 		const int Count = static_cast<int>(keys.size());
 		lua_createtable(L, 0, Count);
@@ -53,7 +53,7 @@ void MainScene::update()
 			lua_pushboolean(L, keys[i]);
 			lua_settable(L, -3);
 		}
-	}, 1, [](lua_State *L) {}, 0);
+	}, 1);
 
 	if (keys[DIK_SPACE]) {
 		// SPACE to sub scene

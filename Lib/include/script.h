@@ -35,7 +35,8 @@ public:
 	lua_State *getLuaState() { return m_lua.get(); }
 
 	void loadTraceLib();
-	void callWithResourceLib(const char *funcName, framework::Application *app);
+	void callWithResourceLib(const char *funcName, framework::Application *app,
+		int instLimit = 0);
 	void loadGraphLib(framework::Application *app);
 	void loadSoundLib(framework::Application *app);
 
@@ -64,17 +65,16 @@ public:
 	 * @endcode
 	 *
 	 * @param[in] funcName		Function name.
+	 * @param[in] instLimit		Instruction count limit for prevent inf loop. (no limit if 0)
 	 * @param[in] pushParamFunc	Will be called just before lua_pcall().
 	 * @param[in] narg			Args count.
 	 * @param[in] getRetFunc	Will be called just after lua_pcall().
 	 * @param[in] nret			Return values count.
-	 * @param[in] instLimit		Instruction count limit for prevent inf loop. (no limit if 0)
 	 */
 	template <class ParamFunc = doNothing, class RetFunc = doNothing>
-	void callGlobal(const char *funcName,
+	void callGlobal(const char *funcName, int instLimit = 0,
 		ParamFunc pushArgFunc = doNothing(), int narg = 0,
-		RetFunc getRetFunc = doNothing(), int nret = 0,
-		int instLimit = 0)
+		RetFunc getRetFunc = doNothing(), int nret = 0)
 	{
 		lua_State *L = m_lua.get();
 		lua_getglobal(L, funcName);
