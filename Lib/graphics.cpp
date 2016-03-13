@@ -346,6 +346,19 @@ void DGraphics::initializeD3D()
 	}
 	debug::writeLine(L"Creating blend state OK");
 
+	// Multithread
+	{
+		debug::writeLine(L"Set multithreading...");
+
+		ID3D10Multithread *ptmpMt = nullptr;
+		hr = m_pDevice->QueryInterface(__uuidof(ID3D10Multithread), (void **)&ptmpMt);
+		checkDXResult<D3DError>(hr, "QueryInterface(IDXGIDevice1) failed");
+		util::IUnknownPtr<ID3D10Multithread> pMt(ptmpMt, util::iunknownDeleter);
+		pMt->SetMultithreadProtected(TRUE);
+
+		debug::writeLine(L"Set multithreading OK");
+	}
+
 	// fullscreen initially
 	/*
 	DXGI_ERROR_NOT_CURRENTLY_AVAILABLE (quote from dx11 document)
@@ -621,12 +634,15 @@ void DGraphics::drawChar(const FontResourcePtr &font, wchar_t c, int dx, int dy,
 	uint32_t color, float scaleX, float scaleY, float alpha,
 	int *nextx, int *nexty)
 {
-	// Set alpha 0xff
-	color |= 0xff000000;
-	auto *pRV = font->pRVList.at(c - font->startChar).get();
-	m_drawTaskList.emplace_back(pRV, font->w, font->h,
-		dx, dy, false, false, 0, 0, font->w, font->h,
-		0, 0, scaleX, scaleY, 0.0f, color, alpha);
+	// skip if space
+	if (!::iswspace(c)) {
+		// Set alpha 0xff
+		color |= 0xff000000;
+		auto *pRV = font->pRVList.at(c - font->startChar).get();
+		m_drawTaskList.emplace_back(pRV, font->w, font->h,
+			dx, dy, false, false, 0, 0, font->w, font->h,
+			0, 0, scaleX, scaleY, 0.0f, color, alpha);
+	}
 
 	if (nextx != nullptr) {
 		*nextx = dx + font->w;
