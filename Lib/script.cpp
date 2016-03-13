@@ -59,12 +59,12 @@ LUALIB_API void my_luaL_openlibs(lua_State *L) {
 
 }	// namespace
 
-void Lua::luaDeleter(lua_State *lua)
+void Lua::LuaDeleter::operator()(lua_State *lua)
 {
 	::lua_close(lua);
 }
 
-Lua::Lua() : m_lua(nullptr, luaDeleter)
+Lua::Lua()
 {
 	lua_State *tmpLua = ::luaL_newstate();
 	if (tmpLua == nullptr) {

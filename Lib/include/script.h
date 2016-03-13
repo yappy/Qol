@@ -95,10 +95,10 @@ public:
 	void dumpStack(void);
 
 private:
-	static void luaDeleter(lua_State *lua);
-	using LuaDeleterType = decltype(&luaDeleter);
-
-	std::unique_ptr<lua_State, LuaDeleterType> m_lua;
+	struct LuaDeleter {
+		void operator()(lua_State *L);
+	};
+	std::unique_ptr<lua_State, LuaDeleter> m_lua;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
