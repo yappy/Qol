@@ -86,6 +86,8 @@ XAudio2::XAudio2() :
 	m_pBgmVoice(nullptr),
 	m_pBgmFile(nullptr)
 {
+	debug::writeLine(L"Initializing XAudio2...");
+
 	HRESULT hr = S_OK;
 
 	IXAudio2 *ptmpIXAudio2 = nullptr;
@@ -101,9 +103,13 @@ XAudio2::XAudio2() :
 	hr = m_pIXAudio->CreateMasteringVoice(&ptmpMasterVoice);
 	checkDXResult<XAudioError>(hr, "IXAudio2::CreateMasteringVoice() failed");
 	m_pMasterVoice.reset(ptmpMasterVoice);
+
+	debug::writeLine(L"Initializing XAudio2 OK");
 }
 
-XAudio2::~XAudio2() {}
+XAudio2::~XAudio2() {
+	debug::writeLine(L"Finalize XAudio2");
+}
 
 void XAudio2::processFrame()
 {
