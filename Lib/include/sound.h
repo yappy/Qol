@@ -26,17 +26,19 @@ struct hmmioDeleter {
 	}
 };
 
-inline void voiceDeleter(IXAudio2Voice *pv)
-{
-	pv->DestroyVoice();
-}
-typedef decltype(&voiceDeleter) VoiceDeleterType;
+struct voiceDeleter {
+	void operator()(IXAudio2Voice *pv)
+	{
+		pv->DestroyVoice();
+	}
+};
 
-inline void oggFileDeleter(OggVorbis_File *ovf)
-{
-	ov_clear(ovf);
-}
-typedef decltype(&oggFileDeleter) oggFileDeleterType;
+struct oggFileDeleter {
+	void operator()(OggVorbis_File *ovf)
+	{
+		ov_clear(ovf);
+	}
+};
 #pragma endregion
 
 struct SoundEffect : private util::noncopyable {
@@ -54,6 +56,8 @@ public:
 	XAudio2();
 	~XAudio2();
 
+	void processFrame();
+
 	// Sound Effect
 	SeResourcePtr loadSoundEffect(const wchar_t *path);
 	void playSoundEffect(const SeResourcePtr &se);
@@ -63,25 +67,29 @@ public:
 	// BGM
 	void playBgm(const wchar_t *path);
 	void stopBgm() noexcept;
-	void processFrame();
 
 private:
 	using IXAudio2Ptr		= util::IUnknownPtr<IXAudio2>;
-	using SourceVoicePtr	= std::unique_ptr<IXAudio2SourceVoice, VoiceDeleterType>;
-	using MasterVoicePtr	= std::unique_ptr<IXAudio2MasteringVoice, VoiceDeleterType>;
-	using OggFilePtr		= std::unique_ptr<OggVorbis_File, oggFileDeleterType>;
+	using SourceVoicePtr	= std::unique_ptr<IXAudio2SourceVoice, voiceDeleter>;
+	using MasterVoicePtr	= std::unique_ptr<IXAudio2MasteringVoice, voiceDeleter>;
+	using OggFilePtr		= std::unique_ptr<OggVorbis_File, oggFileDeleter>;
 
 	util::Com m_com;
 	IXAudio2Ptr m_pIXAudio;
 	MasterVoicePtr m_pMasterVoice;
 
 	// Sound Effect
-	std::vector<SourceVoicePtr> m_playingSeList;
-	SourceVoicePtr *findFreeSeEntry() noexcept;
+	using PyaingSeElem = std::tuple<SeResourcePtr, SourceVoicePtr>;
+	std::array<PyaingSeElem, SoundEffectPlayMax> m_playingSeList;
+
+	PyaingSeElem *findFreeSeEntry() noexcept;
+	void checkSePlayEnd() noexcept;
 
 	// BGM
-	SourceVoicePtr m_pBgmVoice;
+	// raw wave buffer, which must be deleted after m_pBgmVoice destruction
 	std::unique_ptr<char[]> m_pBgmBuffer;
+	// play m_pBgmBuffer at another thread
+	SourceVoicePtr m_pBgmVoice;
 	OggFilePtr m_pBgmFile;
 	file::Bytes m_ovFileBin;
 	uint32_t m_readPos;
