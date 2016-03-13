@@ -80,8 +80,10 @@ private:
 	SourceVoicePtr *findFreeSeEntry() noexcept;
 
 	// BGM
-	SourceVoicePtr m_pBgmVoice;
+	// raw wave buffer, which must be deleted after m_pBgmVoice destruct
 	std::unique_ptr<char[]> m_pBgmBuffer;
+	// play m_pBgmBuffer at another thread
+	SourceVoicePtr m_pBgmVoice;
 	OggFilePtr m_pBgmFile;
 	file::Bytes m_ovFileBin;
 	uint32_t m_readPos;

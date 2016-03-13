@@ -82,8 +82,8 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 XAudio2::XAudio2() :
 	m_pIXAudio(nullptr, util::iunknownDeleter),
 	m_pMasterVoice(nullptr, voiceDeleter),
-	m_pBgmVoice(nullptr, voiceDeleter),
 	m_pBgmBuffer(new char[BgmBufferSize * BgmBufferCount]),
+	m_pBgmVoice(nullptr, voiceDeleter),
 	m_pBgmFile(nullptr, oggFileDeleter)
 {
 	HRESULT hr = S_OK;
