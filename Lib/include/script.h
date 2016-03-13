@@ -46,6 +46,10 @@ public:
 	 */
 	void loadFile(const wchar_t *fileName, const char *name = nullptr);
 
+	struct doNothing {
+		void operator ()(lua_State *L) {}
+	};
+
 	/** @brief Calls global function.
 	 * @details pushParamFunc and getRetFunc must be able to be called by:
 	 * @code
@@ -64,30 +68,22 @@ public:
 	 * @param[in] narg			Args count.
 	 * @param[in] getRetFunc	Will be called just after lua_pcall().
 	 * @param[in] nret			Return values count.
+	 * @param[in] instLimit		Instruction count limit for prevent inf loop. (no limit if 0)
 	 */
-	template <class ParamFunc, class RetFunc>
+	template <class ParamFunc = doNothing, class RetFunc = doNothing>
 	void callGlobal(const char *funcName,
-		ParamFunc pushArgFunc, int narg, RetFunc getRetFunc, int nret)
+		ParamFunc pushArgFunc = doNothing(), int narg = 0,
+		RetFunc getRetFunc = doNothing(), int nret = 0,
+		int instLimit = 0)
 	{
 		lua_State *L = m_lua.get();
-		// push global function
 		lua_getglobal(L, funcName);
 		// push args
 		pushArgFunc(L);
 		// call
-		int ret = lua_pcall(L, narg, nret, 0);
-		if (ret != LUA_OK) {
-			throw LuaError("Call global function failed", L);
-		}
+		pcallWithLimit(L, narg, nret, 0, instLimit);
 		// get results
 		getRetFunc(L);
-	}
-	/** @brief Calls global function. (No args, no return values)
-	 * @param[in] funcName		Function name.
-	 */
-	void callGlobal(const char *funcName)
-	{
-		callGlobal(funcName, [](lua_State *L) {}, 0, [](lua_State *L) {}, 0);
 	}
 
 	/** @brief Dump Lua stack for debug.
@@ -99,6 +95,9 @@ private:
 		void operator()(lua_State *L);
 	};
 	std::unique_ptr<lua_State, LuaDeleter> m_lua;
+
+	static int pcallWithLimit(lua_State *L,
+		int narg, int nret, int msgh, int instLimit);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

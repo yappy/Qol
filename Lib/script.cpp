@@ -28,6 +28,28 @@ int atpanic(lua_State *L)
 	// Don't return
 }
 
+// lua_Hook which always raises an error
+void alwaysErrorHook(lua_State *L, lua_Debug *ar)
+{
+	luaL_error(L, "Execute instructions count exceeded");
+}
+
+class LuaHook : private util::noncopyable {
+public:
+	explicit LuaHook(lua_State *L, lua_Hook hook, int count) : m_lua(L)
+	{
+		if (count != 0) {
+			lua_sethook(m_lua, hook, LUA_MASKCOUNT, count);
+		}
+	}
+	~LuaHook()
+	{
+		lua_sethook(m_lua, nullptr, 0, 0);
+	}
+private:
+	lua_State *m_lua;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Copied from linit.c
 ///////////////////////////////////////////////////////////////////////////////
@@ -137,6 +159,17 @@ void Lua::loadFile(const wchar_t *fileName, const char *name)
 	if (ret != LUA_OK) {
 		throw LuaError("Execute chunk failed", L);
 	}
+}
+
+int Lua::pcallWithLimit(lua_State *L,
+	int narg, int nret, int msgh, int instLimit)
+{
+	LuaHook hook(L, alwaysErrorHook, instLimit);
+	int ret = lua_pcall(L, narg, nret, 0);
+	if (ret != LUA_OK) {
+		throw LuaError("Call global function failed", L);
+	}
+	return ret;
 }
 
 void Lua::dumpStack()
