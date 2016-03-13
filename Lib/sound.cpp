@@ -81,10 +81,10 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 
 XAudio2::XAudio2() :
 	m_pIXAudio(nullptr, util::iunknownDeleter),
-	m_pMasterVoice(nullptr, voiceDeleter),
+	m_pMasterVoice(nullptr),
 	m_pBgmBuffer(new char[BgmBufferSize * BgmBufferCount]),
-	m_pBgmVoice(nullptr, voiceDeleter),
-	m_pBgmFile(nullptr, oggFileDeleter)
+	m_pBgmVoice(nullptr),
+	m_pBgmFile(nullptr)
 {
 	HRESULT hr = S_OK;
 
@@ -101,15 +101,58 @@ XAudio2::XAudio2() :
 	hr = m_pIXAudio->CreateMasteringVoice(&ptmpMasterVoice);
 	checkDXResult<XAudioError>(hr, "IXAudio2::CreateMasteringVoice() failed");
 	m_pMasterVoice.reset(ptmpMasterVoice);
-
-	// m_playingSeList[SoundEffectPlayMax] filled by nullptr
-	m_playingSeList.reserve(SoundEffectPlayMax);
-	for (uint32_t i = 0; i < SoundEffectPlayMax; i++) {
-		m_playingSeList.emplace_back(nullptr, voiceDeleter);
-	}
 }
 
 XAudio2::~XAudio2() {}
+
+void XAudio2::processFrame()
+{
+	HRESULT hr = S_OK;
+
+	// SE playing end polling
+	checkSePlayEnd();
+
+	// BGM
+	if (m_pBgmVoice == nullptr) {
+		return;
+	}
+	XAUDIO2_VOICE_STATE state = { 0 };
+	m_pBgmVoice->GetState(&state);
+	if (state.BuffersQueued >= BgmBufferCount) {
+		//debug::writeLine(L"not yet!");
+		return;
+	}
+
+	uint32_t readSum = 0;
+	uint32_t base = m_writePos * BgmBufferSize;
+	while (BgmBufferSize - readSum >= BgmOvReadSize) {
+		long size = ::ov_read(m_pBgmFile.get(),
+			&m_pBgmBuffer[base + readSum],
+			BgmOvReadSize, 0, 2, 1, nullptr);
+		if (size < 0) {
+			throw OggVorbisError("ov_read() failed", size);
+		}
+		readSum += size;
+		if (size == 0) {
+			// stream end; seek to loop point
+			// TODO: loop point
+			int ret = ::ov_time_seek(m_pBgmFile.get(), 0.0);
+			if (ret < 0) {
+				throw OggVorbisError("ov_time_seek() failed", ret);
+			}
+		}
+	}
+
+	// submit source buffer
+	XAUDIO2_BUFFER buffer = { 0 };
+	buffer.AudioBytes = static_cast<UINT32>(readSum);
+	buffer.pAudioData = reinterpret_cast<BYTE *>(&m_pBgmBuffer[base]);
+	hr = m_pBgmVoice->SubmitSourceBuffer(&buffer);
+	checkDXResult<XAudioError>(hr, "IXAudio2SourceVoice::SubmitSourceBuffer() failed");
+	//debug::writeLine(L"push back!");
+
+	m_writePos = (m_writePos + 1) % BgmBufferCount;
+}
 
 XAudio2::SeResourcePtr XAudio2::loadSoundEffect(const wchar_t *path)
 {
@@ -121,12 +164,15 @@ XAudio2::SeResourcePtr XAudio2::loadSoundEffect(const wchar_t *path)
 void XAudio2::playSoundEffect(const SeResourcePtr &se)
 {
 	// find playing src voice list entry
-	SourceVoicePtr *ppEntry = findFreeSeEntry();
+	PyaingSeElem *ppEntry = findFreeSeEntry();
 	if (ppEntry == nullptr) {
 		debug::writeLine("Warning: SE playing list is full!");
 		return;
 	}
-	ASSERT(*ppEntry == nullptr);
+	SeResourcePtr &entryBuf = std::get<0>(*ppEntry);
+	SourceVoicePtr &entryVoice = std::get<1>(*ppEntry);
+	ASSERT(entryBuf == nullptr);
+	ASSERT(entryVoice == nullptr);
 
 	XAUDIO2_BUFFER buffer = { 0 };
 	ASSERT(se->samples.size() <= file::FileSizeMax);
@@ -139,7 +185,7 @@ void XAudio2::playSoundEffect(const SeResourcePtr &se)
 	IXAudio2SourceVoice *ptmpSrcVoice = nullptr;
 	hr = m_pIXAudio->CreateSourceVoice(&ptmpSrcVoice, &se->format);
 	checkDXResult<XAudioError>(hr, "IXAudio2::CreateSourceVoice() failed");
-	SourceVoicePtr pSrcVoice(ptmpSrcVoice, voiceDeleter);
+	SourceVoicePtr pSrcVoice(ptmpSrcVoice);
 
 	// submit source buffer
 	hr = pSrcVoice->SubmitSourceBuffer(&buffer);
@@ -147,19 +193,24 @@ void XAudio2::playSoundEffect(const SeResourcePtr &se)
 	hr = pSrcVoice->Start();
 	checkDXResult<XAudioError>(hr, "IXAudio2SourceVoice::Start() failed");
 
+	// keep shared_ptr reference in *this 
+	entryBuf = se;
 	// set the source voice element
-	*ppEntry = std::move(pSrcVoice);
+	entryVoice = std::move(pSrcVoice);
 }
 
 bool XAudio2::isPlayingAnySoundEffect() const noexcept
 {
-	for (const auto &pSrcVoice : m_playingSeList) {
-		if (pSrcVoice == nullptr) {
+	for (const auto &entry : m_playingSeList) {
+		const SeResourcePtr &entryBuf = std::get<0>(entry);
+		const SourceVoicePtr &entryVoice = std::get<1>(entry);
+		if (entryBuf == nullptr) {
+			ASSERT(entryVoice == nullptr);
 			continue;
 		}
 		// check if playing is end
 		XAUDIO2_VOICE_STATE state = { 0 };
-		pSrcVoice->GetState(&state);
+		entryVoice->GetState(&state);
 		if (state.BuffersQueued != 0) {
 			return false;
 		}
@@ -169,27 +220,48 @@ bool XAudio2::isPlayingAnySoundEffect() const noexcept
 
 void XAudio2::stopAllSoundEffect()
 {
-	for (auto &pSrcVoice : m_playingSeList) {
-		pSrcVoice.reset();
+	// release SrcVoice, then decrement refcnt of wave buf
+	for (auto &entry : m_playingSeList) {
+		SeResourcePtr &entryBuf = std::get<0>(entry);
+		SourceVoicePtr &entryVoice = std::get<1>(entry);
+		entryVoice.reset();
+		entryBuf.reset();
 	}
 }
 
-XAudio2::SourceVoicePtr *XAudio2::findFreeSeEntry() noexcept
+XAudio2::PyaingSeElem *XAudio2::findFreeSeEntry() noexcept
 {
-	for (auto &p : m_playingSeList) {
-		if (p == nullptr) {
-			return &p;
-		}
-		// check if playing is end
-		XAUDIO2_VOICE_STATE state = { 0 };
-		p->GetState(&state);
-		if (state.BuffersQueued == 0) {
-			// DestroyVoice(), set nullptr, return
-			p.reset();
-			return &p;
+	for (auto &entry : m_playingSeList) {
+		SeResourcePtr &entryBuf = std::get<0>(entry);
+		SourceVoicePtr &entryVoice = std::get<1>(entry);
+		if (entryBuf == nullptr) {
+			ASSERT(entryVoice == nullptr);
+			return &entry;
 		}
 	}
 	return nullptr;
+}
+
+void XAudio2::checkSePlayEnd() noexcept
+{
+	for (auto &entry : m_playingSeList) {
+		SeResourcePtr &entryBuf = std::get<0>(entry);
+		SourceVoicePtr &entryVoice = std::get<1>(entry);
+
+		if (entryBuf == nullptr) {
+			ASSERT(entryVoice == nullptr);
+			continue;
+		}
+		// get playing state
+		XAUDIO2_VOICE_STATE state = { 0 };
+		entryVoice->GetState(&state);
+		if (state.BuffersQueued == 0) {
+			// DestroyVoice(), set nullptr
+			entryVoice.reset();
+			// Release reference to raw wave buffer
+			entryBuf.reset();
+		}
+	}
 }
 
 
@@ -246,50 +318,6 @@ void XAudio2::stopBgm() noexcept
 	m_pBgmFile.reset();
 
 	debug::writeLine(L"stopBgm OK");
-}
-
-void XAudio2::processFrame()
-{
-	HRESULT hr = S_OK;
-	if (m_pBgmVoice == nullptr) {
-		return;
-	}
-	XAUDIO2_VOICE_STATE state = { 0 };
-	m_pBgmVoice->GetState(&state);
-	if (state.BuffersQueued >= BgmBufferCount) {
-		//debug::writeLine(L"not yet!");
-		return;
-	}
-
-	uint32_t readSum = 0;
-	uint32_t base = m_writePos * BgmBufferSize;
-	while (BgmBufferSize - readSum >= BgmOvReadSize) {
-		long size = ::ov_read(m_pBgmFile.get(),
-			&m_pBgmBuffer[base + readSum],
-			BgmOvReadSize, 0, 2, 1, nullptr);
-		if (size < 0) {
-			throw OggVorbisError("ov_read() failed", size);
-		}
-		readSum += size;
-		if (size == 0) {
-			// stream end; seek to loop point
-			// TODO: loop point
-			int ret = ::ov_time_seek(m_pBgmFile.get(), 0.0);
-			if (ret < 0) {
-				throw OggVorbisError("ov_time_seek() failed", ret);
-			}
-		}
-	}
-
-	// submit source buffer
-	XAUDIO2_BUFFER buffer = { 0 };
-	buffer.AudioBytes = static_cast<UINT32>(readSum);
-	buffer.pAudioData = reinterpret_cast<BYTE *>(&m_pBgmBuffer[base]);
-	hr = m_pBgmVoice->SubmitSourceBuffer(&buffer);
-	checkDXResult<XAudioError>(hr, "IXAudio2SourceVoice::SubmitSourceBuffer() failed");
-	//debug::writeLine(L"push back!");
-
-	m_writePos = (m_writePos + 1) % BgmBufferCount;
 }
 
 size_t XAudio2::read(void *ptr, size_t size, size_t nmemb, void *datasource)
