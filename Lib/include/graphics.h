@@ -11,19 +11,19 @@ namespace yappy {
 namespace graphics {
 
 struct Texture : private util::noncopyable {
-	using RvPtr = util::IUnknownPtr<ID3D11ShaderResourceView>;
+	using RvPtr = util::ComPtr<ID3D11ShaderResourceView>;
 	RvPtr pRV;
 	uint32_t w, h;
 
-	Texture(RvPtr::pointer pRV_, RvPtr::deleter_type dRV_, uint32_t w_, uint32_t h_) :
-		pRV(pRV_, dRV_), w(w_), h(h_)
+	Texture(RvPtr::pointer pRV_, uint32_t w_, uint32_t h_) :
+		pRV(pRV_), w(w_), h(h_)
 	{}
 	~Texture() = default;
 };
 
 struct FontTexture : private util::noncopyable {
-	using TexPtr = util::IUnknownPtr<ID3D11Texture2D>;
-	using RvPtr = util::IUnknownPtr<ID3D11ShaderResourceView>;
+	using TexPtr = util::ComPtr<ID3D11Texture2D>;
+	using RvPtr = util::ComPtr<ID3D11ShaderResourceView>;
 	std::vector<TexPtr> pTexList;
 	std::vector<RvPtr> pRVList;
 	uint32_t w, h;
@@ -143,18 +143,18 @@ private:
 	const wchar_t * const PS_FileName = L"@PixelShader.cso";
 
 	GraphicsParam m_param;
-	util::IUnknownPtr<ID3D11Device>				m_pDevice;
-	util::IUnknownPtr<ID3D11DeviceContext>		m_pContext;
-	util::IUnknownPtr<IDXGISwapChain>			m_pSwapChain;
-	util::IUnknownPtr<ID3D11RenderTargetView>	m_pRenderTargetView;
-	util::IUnknownPtr<ID3D11VertexShader>		m_pVertexShader;
-	util::IUnknownPtr<ID3D11PixelShader>		m_pPixelShader;
-	util::IUnknownPtr<ID3D11InputLayout>		m_pInputLayout;
-	util::IUnknownPtr<ID3D11Buffer>				m_pVertexBuffer;
-	util::IUnknownPtr<ID3D11Buffer>				m_pCBNeverChanges, m_pCBChanges;
-	util::IUnknownPtr<ID3D11RasterizerState>	m_pRasterizerState;
-	util::IUnknownPtr<ID3D11SamplerState>		m_pSamplerState;
-	util::IUnknownPtr<ID3D11BlendState>			m_pBlendState;
+	util::ComPtr<ID3D11Device>				m_pDevice;
+	util::ComPtr<ID3D11DeviceContext>		m_pContext;
+	util::ComPtr<IDXGISwapChain>			m_pSwapChain;
+	util::ComPtr<ID3D11RenderTargetView>	m_pRenderTargetView;
+	util::ComPtr<ID3D11VertexShader>		m_pVertexShader;
+	util::ComPtr<ID3D11PixelShader>		m_pPixelShader;
+	util::ComPtr<ID3D11InputLayout>		m_pInputLayout;
+	util::ComPtr<ID3D11Buffer>				m_pVertexBuffer;
+	util::ComPtr<ID3D11Buffer>				m_pCBNeverChanges, m_pCBChanges;
+	util::ComPtr<ID3D11RasterizerState>	m_pRasterizerState;
+	util::ComPtr<ID3D11SamplerState>		m_pSamplerState;
+	util::ComPtr<ID3D11BlendState>			m_pBlendState;
 
 	std::vector<DrawTask> m_drawTaskList;
 

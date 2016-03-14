@@ -13,8 +13,8 @@ using error::checkDXResult;
 using error::DIError;
 
 DInput::DInput(HINSTANCE hInst, HWND hWnd, bool foreground, bool exclusive) :
-	m_pDi(nullptr, util::iunknownDeleter),
-	m_pKeyDevice(nullptr, util::iunknownDeleter)
+	m_pDi(nullptr),
+	m_pKeyDevice(nullptr)
 {
 	debug::writeLine(L"Initializing DirectInput...");
 
@@ -102,7 +102,7 @@ void DInput::updateControllers(HWND hwnd, bool foreground, bool exclusive)
 		IDirectInputDevice8 *ptmpDevice;
 		hr = m_pDi->CreateDevice(padInst.guidInstance, &ptmpDevice, nullptr);
 		checkDXResult<DIError>(hr, "IDirectInput8::CreateDevice() failed");
-		util::IUnknownPtr<IDirectInputDevice8> pDevice(ptmpDevice, util::iunknownDeleter);
+		util::ComPtr<IDirectInputDevice8> pDevice(ptmpDevice);
 
 		hr = pDevice->SetDataFormat(&c_dfDIJoystick);
 		checkDXResult<DIError>(hr, "IDirectInputDevice8::SetDataFormat() failed");

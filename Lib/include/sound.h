@@ -69,7 +69,7 @@ public:
 	void stopBgm() noexcept;
 
 private:
-	using IXAudio2Ptr		= util::IUnknownPtr<IXAudio2>;
+	using IXAudio2Ptr		= util::ComPtr<IXAudio2>;
 	using SourceVoicePtr	= std::unique_ptr<IXAudio2SourceVoice, voiceDeleter>;
 	using MasterVoicePtr	= std::unique_ptr<IXAudio2MasteringVoice, voiceDeleter>;
 	using OggFilePtr		= std::unique_ptr<OggVorbis_File, oggFileDeleter>;

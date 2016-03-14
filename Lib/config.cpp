@@ -37,7 +37,7 @@ void ConfigFile::load()
 			throw std::runtime_error("Load config file failed");
 		}
 	}
-	util::FilePtr fp(tmpfp, util::fileDeleter);
+	util::FilePtr fp(tmpfp);
 
 	char line[LineCharMax];
 	while (::fgets(line, LineCharMax, fp.get()) != nullptr) {
@@ -75,7 +75,7 @@ void ConfigFile::save()
 	if (::_wfopen_s(&tmpfp, m_fileName, L"w") != 0) {
 		throw std::runtime_error("Save config file failed");
 	}
-	util::FilePtr fp(tmpfp, util::fileDeleter);
+	util::FilePtr fp(tmpfp);
 
 	for (const auto &pair : m_defaults) {
 		const std::string &key = pair.first;
