@@ -23,11 +23,14 @@ private:
 class Lua : private util::noncopyable {
 public:
 	/** @brief Create new lua_State and open standard libs.
+	 * @param[in]	maxHeapSize		Max memory usage
+	 *								(only virtual address range will be reserved at first)
+	 * @param[in]	initHeapSize	Initial commit size (physical memory mapped)
 	 */
-	Lua();
+	explicit Lua(size_t maxHeapSize, size_t initHeapSize = 1024 * 1024);
 	/** @brief Destruct lua_State.
 	 */
-	~Lua() = default;
+	~Lua();
 
 	/** @brief Returns lua_State which this object has.
 	 * @return lua_State
@@ -87,11 +90,16 @@ public:
 	}
 
 private:
+	static const DWORD HeapOption = HEAP_NO_SERIALIZE;
+
 	struct LuaDeleter {
 		void operator()(lua_State *L);
 	};
+
+	util::HeapPtr m_heap;
 	std::unique_ptr<lua_State, LuaDeleter> m_lua;
 
+	static void *luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize);
 	static int pcallWithLimit(lua_State *L,
 		int narg, int nret, int msgh, int instLimit);
 };

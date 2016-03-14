@@ -62,6 +62,19 @@ struct HandleDeleter {
 /// unique_ptr of HANDLE with HandleDeleter.
 using HandlePtr = std::unique_ptr<HANDLE, HandleDeleter>;
 
+/// Deleter: auto HeapDestroy().
+struct heapDeleter {
+	using pointer = HANDLE;
+	void operator()(HANDLE h)
+	{
+		if (h != INVALID_HANDLE_VALUE) {
+			::HeapDestroy(h);
+		}
+	}
+};
+/// unique_ptr of HANDLE with heapDeleter.
+using HeapPtr = std::unique_ptr<HANDLE, heapDeleter>;
+
 /// Deleter: auto IUnknown::Release().
 struct ComDeleter {
 	void operator()(IUnknown *p)

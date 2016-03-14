@@ -61,6 +61,9 @@ protected:
 	void loadOnSubThread(std::atomic_bool &cancel) override;
 
 private:
+	// 4MiB
+	static const size_t LuaHeapSize = 4 * 1024 * 1024;
+
 	MyApp *m_app;
 	bool m_loading = false;
 	lua::Lua m_lua;

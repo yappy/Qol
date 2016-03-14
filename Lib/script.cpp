@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "include/script.h"
+#include "include/exceptions.h"
 #include "include/debug.h"
 #include "include/file.h"
 
@@ -86,20 +87,62 @@ void Lua::LuaDeleter::operator()(lua_State *lua)
 	::lua_close(lua);
 }
 
-Lua::Lua()
+void *Lua::luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
 {
-	lua_State *tmpLua = ::luaL_newstate();
+	auto *lua = reinterpret_cast<Lua *>(ud);
+	if (nsize == 0) {
+		// free(ptr);
+		//debug::writef(L"luaAlloc(free)    %p, %08zx, %08zx", ptr, osize, nsize);
+		if (ptr != nullptr) {
+			BOOL ret = ::HeapFree(lua->m_heap.get(), 0, ptr);
+			if (!ret) {
+				debug::writeLine(L"[warning] HeapFree() failed");
+			}
+		}
+		return nullptr;
+	}
+	else {
+		// realloc(ptr, nsize);
+		if (nsize >= 0x7FFF8) {
+			debug::writef(L"[warning] Attempt to allocate %zu bytes", nsize);
+		}
+		if (ptr == nullptr) {
+			//debug::writef(L"luaAlloc(alloc)   %p, %08zx, %08zx", ptr, osize, nsize);
+			return ::HeapAlloc(lua->m_heap.get(), 0, nsize);
+		}
+		else {
+			//debug::writef(L"luaAlloc(realloc) %p, %08zx, %08zx", ptr, osize, nsize);
+			return ::HeapReAlloc(lua->m_heap.get(), 0, ptr, nsize);
+		}
+	}
+}
+
+Lua::Lua(size_t maxHeapSize, size_t initHeapSize)
+{
+	debug::writeLine("Initializing lua...");
+	HANDLE tmpHeap = ::HeapCreate(HeapOption, initHeapSize, maxHeapSize);
+	error::checkWin32Result(tmpHeap != nullptr, "HeapCreate() failed");
+	m_heap.reset(tmpHeap);
+
+	lua_State *tmpLua = lua_newstate(luaAlloc, this);
 	if (tmpLua == nullptr) {
 		throw std::bad_alloc();
 	}
 	m_lua.reset(tmpLua);
+	debug::writeLine("Initializing lua OK");
 
 	::lua_atpanic(m_lua.get(), atpanic);
 	my_luaL_openlibs(m_lua.get());
 }
 
-lua_State *Lua::getLuaState() const {
+lua_State *Lua::getLuaState() const
+{
 	return m_lua.get();
+}
+
+Lua::~Lua()
+{
+	debug::writeLine("Finalize lua");
 }
 
 void Lua::loadTraceLib()
