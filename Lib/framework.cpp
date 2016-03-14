@@ -134,21 +134,69 @@ const typename Resource<T>::PtrType getResource(
 }
 
 const graphics::DGraphics::TextureResourcePtr ResourceManager::getTexture(
-	size_t setId, const char *resId)
+	size_t setId, const char *resId) const
 {
 	return getResource(m_texMapVec, setId, resId);
 }
 
 const graphics::DGraphics::FontResourcePtr ResourceManager::getFont(
-	size_t setId, const char *resId)
+	size_t setId, const char *resId) const
 {
 	return getResource(m_fontMapVec, setId, resId);
 }
 
 const sound::XAudio2::SeResourcePtr ResourceManager::getSoundEffect(
-	size_t setId, const char *resId)
+	size_t setId, const char *resId) const
 {
 	return getResource(m_seMapVec, setId, resId);
+}
+
+#pragma endregion
+
+///////////////////////////////////////////////////////////////////////////////
+// class AsyncLoadScene impl
+///////////////////////////////////////////////////////////////////////////////
+#pragma region AsyncLoadScene
+
+AsyncLoadScene::~AsyncLoadScene()
+{
+	// set cancel flag
+	m_cancel.store(true);
+	// m_future destructor will wait for sub thread
+}
+
+void AsyncLoadScene::startLoadThread()
+{
+	// move assign
+	m_future = std::async(std::launch::async, [this]() {
+		// can throw an exception
+		loadOnSubThread(m_cancel);
+	});
+}
+
+void AsyncLoadScene::updateLoadStatus()
+{
+	if (m_future.valid()) {
+		auto status = m_future.wait_for(std::chrono::seconds(0));
+		switch (status) {
+		case std::future_status::ready:
+			// complete or exception
+			// make m_future invalid
+			// if an exception is thrown in sub thread, throw it
+			m_future.get();
+			break;
+		case std::future_status::timeout:
+			// not yet
+			break;
+		default:
+			ASSERT(false);
+		}
+	}
+}
+
+bool AsyncLoadScene::isLoadCompleted() const
+{
+	return !m_future.valid();
 }
 
 #pragma endregion
@@ -185,7 +233,7 @@ FrameControl::FrameControl(uint32_t fps, uint32_t skipCount) :
 	m_counterPerFrame = m_freq / fps;
 }
 
-bool FrameControl::shouldSkipFrame()
+bool FrameControl::shouldSkipFrame() const
 {
 	return m_frameCount != 0;
 }
@@ -233,7 +281,7 @@ void FrameControl::endFrame()
 	}
 }
 
-double FrameControl::getFramePerSec()
+double FrameControl::getFramePerSec() const
 {
 	return m_fps;
 }
@@ -451,17 +499,20 @@ void Application::unloadResourceSet(size_t setId)
 	m_resMgr.unloadResourceSet(setId);
 }
 
-const graphics::DGraphics::TextureResourcePtr Application::getTexture(size_t setId, const char *resId)
+const graphics::DGraphics::TextureResourcePtr Application::getTexture(
+	size_t setId, const char *resId) const
 {
 	return m_resMgr.getTexture(setId, resId);
 }
 
-const graphics::DGraphics::FontResourcePtr Application::getFont(size_t setId, const char *resId)
+const graphics::DGraphics::FontResourcePtr Application::getFont(
+	size_t setId, const char *resId) const
 {
 	return m_resMgr.getFont(setId, resId);
 }
 
-const sound::XAudio2::SeResourcePtr Application::getSoundEffect(size_t setId, const char *resId)
+const sound::XAudio2::SeResourcePtr Application::getSoundEffect(
+	size_t setId, const char *resId) const
 {
 	return m_resMgr.getSoundEffect(setId, resId);
 }
