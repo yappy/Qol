@@ -22,9 +22,9 @@ public:
 	~DInput();
 	void updateControllers(HWND hwnd, bool foreground = true, bool exclusive = false);
 	void processFrame();
-	KeyData getKeys() const noexcept;
-	int getPadCount() const noexcept;
-	void getPadState(DIJOYSTATE *out, int index) const noexcept;
+	KeyData getKeys() const;
+	int getPadCount() const;
+	void getPadState(DIJOYSTATE *out, int index) const;
 
 private:
 	util::ComPtr<IDirectInput8> m_pDi;

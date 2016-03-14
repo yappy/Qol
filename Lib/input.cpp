@@ -12,10 +12,10 @@ namespace input {
 using error::checkDXResult;
 using error::DIError;
 
-DInput::DInput(HINSTANCE hInst, HWND hWnd, bool foreground, bool exclusive) :
-	m_pDi(nullptr),
-	m_pKeyDevice(nullptr)
+DInput::DInput(HINSTANCE hInst, HWND hWnd, bool foreground, bool exclusive)
 {
+	m_key.fill(false);
+
 	debug::writeLine(L"Initializing DirectInput...");
 
 	HRESULT hr = S_OK;
@@ -174,18 +174,18 @@ void DInput::processFrame()
 	}
 }
 
-DInput::KeyData DInput::getKeys() const noexcept
+DInput::KeyData DInput::getKeys() const
 {
 	return m_key;
 }
 
-int DInput::getPadCount() const noexcept
+int DInput::getPadCount() const
 {
 	ASSERT(m_pad.size() == m_pPadDevs.size());
 	return static_cast<int>(m_pPadDevs.size());
 }
 
-void DInput::getPadState(DIJOYSTATE *out, int index) const noexcept
+void DInput::getPadState(DIJOYSTATE *out, int index) const
 {
 	*out = m_pad.at(index);
 }
