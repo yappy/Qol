@@ -78,23 +78,10 @@ inline void createCBFromTask(CBChanges *out, const DrawTask &task)
 	out->Alpha = task.alpha;
 }
 
-}
+}	// namespace
 
 DGraphics::DGraphics(const GraphicsParam &param) :
-	m_param(param),
-	m_pDevice(nullptr),
-	m_pContext(nullptr),
-	m_pSwapChain(nullptr),
-	m_pRenderTargetView(nullptr),
-	m_pVertexShader(nullptr),
-	m_pPixelShader(nullptr),
-	m_pInputLayout(nullptr),
-	m_pVertexBuffer(nullptr),
-	m_pCBNeverChanges(nullptr),
-	m_pCBChanges(nullptr),
-	m_pRasterizerState(nullptr),
-	m_pSamplerState(nullptr),
-	m_pBlendState(nullptr)
+	m_param(param)
 {
 	m_drawTaskList.reserve(DrawListMax);
 
@@ -479,7 +466,8 @@ void DGraphics::render()
 		createCBFromTask(&cbChanges, task);
 		m_pContext->UpdateSubresource(m_pCBChanges.get(), 0, nullptr, &cbChanges, 0, 0);
 
-		m_pContext->PSSetShaderResources(0, 1, &task.pRV);
+		ID3D11ShaderResourceView *pView = task.pRV.get();
+		m_pContext->PSSetShaderResources(0, 1, &pView);
 
 		m_pContext->Draw(4, 0);
 	}
@@ -520,7 +508,7 @@ void DGraphics::drawTexture(const TextureResourcePtr &texture,
 {
 	sw = (sw == SrcSizeDefault) ? texture->w : sw;
 	sh = (sh == SrcSizeDefault) ? texture->h : sh;
-	m_drawTaskList.emplace_back(texture->pRV.get(), texture->w, texture->h,
+	m_drawTaskList.emplace_back(texture->pRV, texture->w, texture->h,
 		dx, dy, lrInv, udInv, sx, sy, sw, sh,
 		cx, cy, scaleX, scaleY, angle, 0x00000000, alpha);
 }
@@ -638,7 +626,7 @@ void DGraphics::drawChar(const FontResourcePtr &font, wchar_t c, int dx, int dy,
 	if (!::iswspace(c)) {
 		// Set alpha 0xff
 		color |= 0xff000000;
-		auto *pRV = font->pRVList.at(c - font->startChar).get();
+		auto &pRV = font->pRVList.at(c - font->startChar);
 		m_drawTaskList.emplace_back(pRV, font->w, font->h,
 			dx, dy, false, false, 0, 0, font->w, font->h,
 			0, 0, scaleX, scaleY, 0.0f, color, alpha);

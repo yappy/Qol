@@ -36,7 +36,8 @@ struct FontTexture : private util::noncopyable {
 };
 
 struct DrawTask {
-	ID3D11ShaderResourceView *pRV;
+	using RvPtr = Texture::RvPtr;
+	const RvPtr &pRV;
 	uint32_t texW, texH;
 	int dx, dy;
 	bool lrInv, udInv;
@@ -47,7 +48,7 @@ struct DrawTask {
 	uint32_t fontColor;		// ARGB
 	float alpha;
 
-	DrawTask(ID3D11ShaderResourceView *pRV_,
+	DrawTask(const RvPtr &pRV_,
 		uint32_t texW_, uint32_t texH_,
 		int dx_, int dy_, bool lrInv_, bool udInv_,
 		int sx_, int sy_, int sw_, int sh_,
@@ -121,8 +122,8 @@ public:
 		int cx = 0, int cy = 0, float angle = 0.0f,
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f);
 
-	FontResourcePtr loadFont(const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
-		uint32_t w, uint32_t h);
+	FontResourcePtr loadFont(const wchar_t *fontName,
+		uint32_t startChar, uint32_t endChar, uint32_t w, uint32_t h);
 
 	void drawChar(const FontResourcePtr &font, wchar_t c, int dx, int dy,
 		uint32_t color = 0x000000,
@@ -148,11 +149,11 @@ private:
 	util::ComPtr<IDXGISwapChain>			m_pSwapChain;
 	util::ComPtr<ID3D11RenderTargetView>	m_pRenderTargetView;
 	util::ComPtr<ID3D11VertexShader>		m_pVertexShader;
-	util::ComPtr<ID3D11PixelShader>		m_pPixelShader;
-	util::ComPtr<ID3D11InputLayout>		m_pInputLayout;
+	util::ComPtr<ID3D11PixelShader>			m_pPixelShader;
+	util::ComPtr<ID3D11InputLayout>			m_pInputLayout;
 	util::ComPtr<ID3D11Buffer>				m_pVertexBuffer;
 	util::ComPtr<ID3D11Buffer>				m_pCBNeverChanges, m_pCBChanges;
-	util::ComPtr<ID3D11RasterizerState>	m_pRasterizerState;
+	util::ComPtr<ID3D11RasterizerState>		m_pRasterizerState;
 	util::ComPtr<ID3D11SamplerState>		m_pSamplerState;
 	util::ComPtr<ID3D11BlendState>			m_pBlendState;
 
