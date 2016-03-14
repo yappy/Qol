@@ -61,12 +61,12 @@ public:
 	// Sound Effect
 	SeResourcePtr loadSoundEffect(const wchar_t *path);
 	void playSoundEffect(const SeResourcePtr &se);
-	bool isPlayingAnySoundEffect() const noexcept;
+	bool isPlayingAnySoundEffect() const;
 	void stopAllSoundEffect();
 
 	// BGM
 	void playBgm(const wchar_t *path);
-	void stopBgm() noexcept;
+	void stopBgm();
 
 private:
 	using IXAudio2Ptr		= util::ComPtr<IXAudio2>;
@@ -81,19 +81,23 @@ private:
 	// Sound Effect
 	using PyaingSeElem = std::tuple<SeResourcePtr, SourceVoicePtr>;
 	std::array<PyaingSeElem, SoundEffectPlayMax> m_playingSeList;
-
-	PyaingSeElem *findFreeSeEntry() noexcept;
-	void checkSePlayEnd() noexcept;
-
 	// BGM
 	// raw wave buffer, which must be deleted after m_pBgmVoice destruction
 	std::unique_ptr<char[]> m_pBgmBuffer;
 	// play m_pBgmBuffer at another thread
 	SourceVoicePtr m_pBgmVoice;
-	OggFilePtr m_pBgmFile;
+	// ogg binary
 	file::Bytes m_ovFileBin;
+	// ogg memory file
+	OggFilePtr m_pBgmFile;
 	uint32_t m_readPos;
 	uint32_t m_writePos;
+
+	// Sound Effect
+	PyaingSeElem *findFreeSeEntry();
+	void checkSePlayEnd();
+
+	// BGM
 	// for ogg file callback (datasource == this)
 	static size_t read(void *ptr, size_t size, size_t nmemb, void *datasource);
 	static int seek(void *datasource, int64_t offset, int whence);
