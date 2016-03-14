@@ -74,7 +74,7 @@ private:
 	using MasterVoicePtr	= std::unique_ptr<IXAudio2MasteringVoice, voiceDeleter>;
 	using OggFilePtr		= std::unique_ptr<OggVorbis_File, oggFileDeleter>;
 
-	util::Com m_com;
+	util::CoInitialize m_coInit;
 	IXAudio2Ptr m_pIXAudio;
 	MasterVoicePtr m_pMasterVoice;
 

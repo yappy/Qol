@@ -110,12 +110,12 @@ inline std::unique_ptr<wchar_t[]> utf82wc(const char *in)
 
 /** @brief Auto CoInitializeEx() and CoUninitialize() class.
 */
-class Com : private noncopyable {
+class CoInitialize : private noncopyable {
 public:
 	/// CoInitializeEx(nullptr, COINIT_MULTITHREADED)
-	Com() { ::CoInitializeEx(nullptr, COINIT_MULTITHREADED); }
+	CoInitialize() { ::CoInitializeEx(nullptr, COINIT_MULTITHREADED); }
 	/// CoUninitialize()
-	~Com() { ::CoUninitialize(); }
+	~CoInitialize() { ::CoUninitialize(); }
 };
 
 }	// namespace util

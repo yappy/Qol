@@ -80,11 +80,9 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 }	// namespace
 
 XAudio2::XAudio2() :
-	m_pIXAudio(nullptr),
-	m_pMasterVoice(nullptr),
 	m_pBgmBuffer(new char[BgmBufferSize * BgmBufferCount]),
-	m_pBgmVoice(nullptr),
-	m_pBgmFile(nullptr)
+	m_readPos(0),
+	m_writePos(0)
 {
 	debug::writeLine(L"Initializing XAudio2...");
 
