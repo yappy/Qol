@@ -92,7 +92,7 @@ void ConfigFile::setString(const std::string &key, const std::string &value)
 	m_map[key] = value;
 }
 
-const std::string &ConfigFile::getString(const std::string &key)
+const std::string &ConfigFile::getString(const std::string &key) const
 {
 	auto res = m_map.find(key);
 	if (res == m_map.end()) {

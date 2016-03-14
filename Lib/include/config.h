@@ -7,7 +7,7 @@
 namespace yappy {
 namespace config {
 
-class ConfigFile : util::noncopyable
+class ConfigFile : private util::noncopyable
 {
 public:
 	using MapType = std::map<std::string, std::string>;
@@ -21,7 +21,7 @@ public:
 	~ConfigFile();
 
 	void setString(const std::string &key, const std::string &value);
-	const std::string &getString(const std::string &key);
+	const std::string &getString(const std::string &key) const;
 	bool getBool(const std::string &key);
 	int getInt(const std::string &key);
 
