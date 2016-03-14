@@ -78,23 +78,10 @@ inline void createCBFromTask(CBChanges *out, const DrawTask &task)
 	out->Alpha = task.alpha;
 }
 
-}
+}	// namespace
 
 DGraphics::DGraphics(const GraphicsParam &param) :
-	m_param(param),
-	m_pDevice(nullptr, util::iunknownDeleter),
-	m_pContext(nullptr, util::iunknownDeleter),
-	m_pSwapChain(nullptr, util::iunknownDeleter),
-	m_pRenderTargetView(nullptr, util::iunknownDeleter),
-	m_pVertexShader(nullptr, util::iunknownDeleter),
-	m_pPixelShader(nullptr, util::iunknownDeleter),
-	m_pInputLayout(nullptr, util::iunknownDeleter),
-	m_pVertexBuffer(nullptr, util::iunknownDeleter),
-	m_pCBNeverChanges(nullptr, util::iunknownDeleter),
-	m_pCBChanges(nullptr, util::iunknownDeleter),
-	m_pRasterizerState(nullptr, util::iunknownDeleter),
-	m_pSamplerState(nullptr, util::iunknownDeleter),
-	m_pBlendState(nullptr, util::iunknownDeleter)
+	m_param(param)
 {
 	m_drawTaskList.reserve(DrawListMax);
 
@@ -178,7 +165,7 @@ void DGraphics::initializeD3D()
 		IDXGIDevice1 *ptmpDXGIDevice = nullptr;
 		hr = m_pDevice->QueryInterface(__uuidof(IDXGIDevice1), (void **)&ptmpDXGIDevice);
 		checkDXResult<D3DError>(hr, "QueryInterface(IDXGIDevice1) failed");
-		util::IUnknownPtr<IDXGIDevice1> pDXGIDevice(ptmpDXGIDevice, util::iunknownDeleter);
+		util::ComPtr<IDXGIDevice1> pDXGIDevice(ptmpDXGIDevice);
 		hr = pDXGIDevice->SetMaximumFrameLatency(1);
 		checkDXResult<D3DError>(hr, "IDXGIDevice1::SetMaximumFrameLatency() failed");
 
@@ -353,7 +340,7 @@ void DGraphics::initializeD3D()
 		ID3D10Multithread *ptmpMt = nullptr;
 		hr = m_pDevice->QueryInterface(__uuidof(ID3D10Multithread), (void **)&ptmpMt);
 		checkDXResult<D3DError>(hr, "QueryInterface(IDXGIDevice1) failed");
-		util::IUnknownPtr<ID3D10Multithread> pMt(ptmpMt, util::iunknownDeleter);
+		util::ComPtr<ID3D10Multithread> pMt(ptmpMt);
 		pMt->SetMultithreadProtected(TRUE);
 
 		debug::writeLine(L"Set multithreading OK");
@@ -396,7 +383,7 @@ void DGraphics::initBackBuffer()
 		hr = m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void **)&ptmpBackBuffer);
 		checkDXResult<D3DError>(hr, "IDXGISwapChain::GetBuffer() failed");
 		// Release() at scope end
-		util::IUnknownPtr<ID3D11Texture2D> pBackBuffer(ptmpBackBuffer, util::iunknownDeleter);
+		util::ComPtr<ID3D11Texture2D> pBackBuffer(ptmpBackBuffer);
 
 		ID3D11RenderTargetView *ptmpRenderTargetView = nullptr;
 		hr = m_pDevice->CreateRenderTargetView(
@@ -479,7 +466,8 @@ void DGraphics::render()
 		createCBFromTask(&cbChanges, task);
 		m_pContext->UpdateSubresource(m_pCBChanges.get(), 0, nullptr, &cbChanges, 0, 0);
 
-		m_pContext->PSSetShaderResources(0, 1, &task.pRV);
+		ID3D11ShaderResourceView *pView = task.pRV.get();
+		m_pContext->PSSetShaderResources(0, 1, &pView);
 
 		m_pContext->Draw(4, 0);
 	}
@@ -509,7 +497,7 @@ DGraphics::TextureResourcePtr DGraphics::loadTexture(const wchar_t *path)
 	checkDXResult<D3DError>(hr, "D3DX11CreateShaderResourceViewFromMemory() failed");
 
 	return std::make_shared<Texture>(
-		ptmpRV, util::iunknownDeleter, imageInfo.Width, imageInfo.Height);
+		ptmpRV, imageInfo.Width, imageInfo.Height);
 }
 
 void DGraphics::drawTexture(const TextureResourcePtr &texture,
@@ -520,7 +508,7 @@ void DGraphics::drawTexture(const TextureResourcePtr &texture,
 {
 	sw = (sw == SrcSizeDefault) ? texture->w : sw;
 	sh = (sh == SrcSizeDefault) ? texture->h : sh;
-	m_drawTaskList.emplace_back(texture->pRV.get(), texture->w, texture->h,
+	m_drawTaskList.emplace_back(texture->pRV, texture->w, texture->h,
 		dx, dy, lrInv, udInv, sx, sy, sw, sh,
 		cx, cy, scaleX, scaleY, angle, 0x00000000, alpha);
 }
@@ -590,7 +578,7 @@ DGraphics::FontResourcePtr DGraphics::loadFont(const wchar_t *fontName,
 		hr = m_pDevice->CreateTexture2D(&desc, nullptr, &ptmpTex);
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreateTexture2D() failed");
 		// make unique_ptr and push
-		texList.emplace_back(ptmpTex, util::iunknownDeleter);
+		texList.emplace_back(ptmpTex);
 
 		// Write
 		D3D11_MAPPED_SUBRESOURCE mapped;
@@ -619,7 +607,7 @@ DGraphics::FontResourcePtr DGraphics::loadFont(const wchar_t *fontName,
 		hr = m_pDevice->CreateShaderResourceView(ptmpTex, nullptr, &ptmpRV);
 		checkDXResult<D3DError>(hr, "ID3D11Device::CreateShaderResourceView() failed");
 		// make unique_ptr and push
-		rvList.emplace_back(ptmpRV, util::iunknownDeleter);
+		rvList.emplace_back(ptmpRV);
 	}
 
 	// add (id, FontTexture(...))
@@ -638,7 +626,7 @@ void DGraphics::drawChar(const FontResourcePtr &font, wchar_t c, int dx, int dy,
 	if (!::iswspace(c)) {
 		// Set alpha 0xff
 		color |= 0xff000000;
-		auto *pRV = font->pRVList.at(c - font->startChar).get();
+		auto &pRV = font->pRVList.at(c - font->startChar);
 		m_drawTaskList.emplace_back(pRV, font->w, font->h,
 			dx, dy, false, false, 0, 0, font->w, font->h,
 			0, 0, scaleX, scaleY, 0.0f, color, alpha);

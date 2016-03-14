@@ -7,8 +7,8 @@
 namespace yappy {
 namespace error {
 
-Win32Error::Win32Error(const std::string &msg, DWORD code) noexcept
-	: runtime_error("")
+Win32Error::Win32Error(const std::string &msg, DWORD code) :
+	runtime_error("")
 {
 	char *lpMsgBuf = NULL;
 	DWORD ret = ::FormatMessageA(
@@ -34,8 +34,8 @@ const char *Win32Error::what() const
 	return m_what.c_str();
 }
 
-MmioError::MmioError(const std::string &msg, UINT code) noexcept
-	: runtime_error("")
+MmioError::MmioError(const std::string &msg, UINT code) :
+	runtime_error("")
 {
 	std::stringstream ss;
 	ss << msg << " (" << code << ")";
@@ -47,8 +47,8 @@ const char *MmioError::what() const
 	return m_what.c_str();
 }
 
-OggVorbisError::OggVorbisError(const std::string &msg, int code) noexcept
-	: runtime_error("")
+OggVorbisError::OggVorbisError(const std::string &msg, int code) :
+	runtime_error("")
 {
 	// signed decimal
 	std::stringstream ss;
@@ -61,8 +61,8 @@ const char *OggVorbisError::what() const
 	return m_what.c_str();
 }
 
-DXError::DXError(const std::string &msg, HRESULT hr) noexcept
-	: runtime_error("")
+DXError::DXError(const std::string &msg, HRESULT hr) :
+	runtime_error("")
 {
 	// "msg (0x????????)"
 	std::stringstream ss;

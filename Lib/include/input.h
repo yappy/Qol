@@ -22,15 +22,15 @@ public:
 	~DInput();
 	void updateControllers(HWND hwnd, bool foreground = true, bool exclusive = false);
 	void processFrame();
-	KeyData getKeys() const noexcept;
-	int getPadCount() const noexcept;
-	void getPadState(DIJOYSTATE *out, int index) const noexcept;
+	KeyData getKeys() const;
+	int getPadCount() const;
+	void getPadState(DIJOYSTATE *out, int index) const;
 
 private:
-	util::IUnknownPtr<IDirectInput8> m_pDi;
-	util::IUnknownPtr<IDirectInputDevice8> m_pKeyDevice;
+	util::ComPtr<IDirectInput8> m_pDi;
+	util::ComPtr<IDirectInputDevice8> m_pKeyDevice;
 	std::vector<DIDEVICEINSTANCE> m_padInstList;
-	std::vector<util::IUnknownPtr<IDirectInputDevice8>> m_pPadDevs;
+	std::vector<util::ComPtr<IDirectInputDevice8>> m_pPadDevs;
 	KeyData m_key;
 	std::vector<DIJOYSTATE> m_pad;
 };

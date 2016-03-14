@@ -103,11 +103,11 @@ public:
 	void unloadResourceSet(size_t setId);
 
 	const graphics::DGraphics::TextureResourcePtr getTexture(
-		size_t setId, const char *resId);
+		size_t setId, const char *resId) const;
 	const graphics::DGraphics::FontResourcePtr getFont(
-		size_t setId, const char *resId);
+		size_t setId, const char *resId) const;
 	const sound::XAudio2::SeResourcePtr getSoundEffect(
-		size_t setId, const char *resId);
+		size_t setId, const char *resId) const;
 
 private:
 	// int setId -> char[16] resId -> Resource<T>
@@ -132,47 +132,14 @@ public:
 class AsyncLoadScene : public SceneBase {
 public:
 	AsyncLoadScene() = default;
-	virtual ~AsyncLoadScene() override
-	{
-		// set cancel flag
-		m_cancel.store(true);
-		// m_future destructor will wait for sub thread
-	}
+	virtual ~AsyncLoadScene() override;
 
 protected:
 	virtual void loadOnSubThread(std::atomic_bool &cancel) = 0;
 
-	void startLoadThread()
-	{
-		// move assign
-		m_future = std::async(std::launch::async, [this]() {
-			// can throw an exception
-			loadOnSubThread(m_cancel);
-		});
-	}
-	void updateLoadStatus()
-	{
-		if (m_future.valid()) {
-			auto status = m_future.wait_for(std::chrono::seconds(0));
-			switch (status) {
-			case std::future_status::ready:
-				// complete or exception
-				// make m_future invalid
-				// if an exception is thrown in sub thread, throw it
-				m_future.get();
-				break;
-			case std::future_status::timeout:
-				// not yet
-				break;
-			default:
-				ASSERT(false);
-			}
-		}
-	}
-	bool isLoadCompleted()
-	{
-		return !m_future.valid();
-	}
+	void startLoadThread();
+	void updateLoadStatus();
+	bool isLoadCompleted() const;
 
 private:
 	std::atomic_bool m_cancel = false;
@@ -192,9 +159,9 @@ class FrameControl : private util::noncopyable {
 public:
 	FrameControl(uint32_t fps, uint32_t skipCount);
 	~FrameControl() = default;
-	bool shouldSkipFrame();
+	bool shouldSkipFrame() const;
 	void endFrame();
-	double getFramePerSec();
+	double getFramePerSec() const;
 
 private:
 	int64_t m_freq;
@@ -305,19 +272,19 @@ public:
 	 * @param[in] resId	%Resource ID.
 	 */
 	const graphics::DGraphics::TextureResourcePtr getTexture(
-		size_t setId, const char *resId);
+		size_t setId, const char *resId) const;
 	/** @brief Get texture resource pointer.
 	 * @param[in] setId	%Resource set ID.
 	 * @param[in] resId	%Resource ID.
 	 */
 	const graphics::DGraphics::FontResourcePtr getFont(
-		size_t setId, const char *resId);
+		size_t setId, const char *resId) const;
 	/** @brief Get texture resource pointer.
 	 * @param[in] setId	%Resource set ID.
 	 * @param[in] resId	%Resource ID.
 	 */
 	const sound::XAudio2::SeResourcePtr getSoundEffect(
-		size_t setId, const char *resId);
+		size_t setId, const char *resId) const;
 
 protected:
 	/** @brief User initialization code.

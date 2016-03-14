@@ -80,11 +80,9 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 }	// namespace
 
 XAudio2::XAudio2() :
-	m_pIXAudio(nullptr, util::iunknownDeleter),
-	m_pMasterVoice(nullptr),
 	m_pBgmBuffer(new char[BgmBufferSize * BgmBufferCount]),
-	m_pBgmVoice(nullptr),
-	m_pBgmFile(nullptr)
+	m_readPos(0),
+	m_writePos(0)
 {
 	debug::writeLine(L"Initializing XAudio2...");
 
@@ -205,7 +203,7 @@ void XAudio2::playSoundEffect(const SeResourcePtr &se)
 	entryVoice = std::move(pSrcVoice);
 }
 
-bool XAudio2::isPlayingAnySoundEffect() const noexcept
+bool XAudio2::isPlayingAnySoundEffect() const
 {
 	for (const auto &entry : m_playingSeList) {
 		const SeResourcePtr &entryBuf = std::get<0>(entry);
@@ -235,7 +233,7 @@ void XAudio2::stopAllSoundEffect()
 	}
 }
 
-XAudio2::PyaingSeElem *XAudio2::findFreeSeEntry() noexcept
+XAudio2::PyaingSeElem *XAudio2::findFreeSeEntry()
 {
 	for (auto &entry : m_playingSeList) {
 		SeResourcePtr &entryBuf = std::get<0>(entry);
@@ -248,7 +246,7 @@ XAudio2::PyaingSeElem *XAudio2::findFreeSeEntry() noexcept
 	return nullptr;
 }
 
-void XAudio2::checkSePlayEnd() noexcept
+void XAudio2::checkSePlayEnd()
 {
 	for (auto &entry : m_playingSeList) {
 		SeResourcePtr &entryBuf = std::get<0>(entry);
@@ -317,7 +315,7 @@ void XAudio2::playBgm(const wchar_t *path)
 	debug::writeLine(L"playBgm OK");
 }
 
-void XAudio2::stopBgm() noexcept
+void XAudio2::stopBgm()
 {
 	// DestroyVoice(), set nullptr
 	m_pBgmVoice.reset();

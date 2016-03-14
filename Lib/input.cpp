@@ -12,10 +12,10 @@ namespace input {
 using error::checkDXResult;
 using error::DIError;
 
-DInput::DInput(HINSTANCE hInst, HWND hWnd, bool foreground, bool exclusive) :
-	m_pDi(nullptr, util::iunknownDeleter),
-	m_pKeyDevice(nullptr, util::iunknownDeleter)
+DInput::DInput(HINSTANCE hInst, HWND hWnd, bool foreground, bool exclusive)
 {
+	m_key.fill(false);
+
 	debug::writeLine(L"Initializing DirectInput...");
 
 	HRESULT hr = S_OK;
@@ -102,7 +102,7 @@ void DInput::updateControllers(HWND hwnd, bool foreground, bool exclusive)
 		IDirectInputDevice8 *ptmpDevice;
 		hr = m_pDi->CreateDevice(padInst.guidInstance, &ptmpDevice, nullptr);
 		checkDXResult<DIError>(hr, "IDirectInput8::CreateDevice() failed");
-		util::IUnknownPtr<IDirectInputDevice8> pDevice(ptmpDevice, util::iunknownDeleter);
+		util::ComPtr<IDirectInputDevice8> pDevice(ptmpDevice);
 
 		hr = pDevice->SetDataFormat(&c_dfDIJoystick);
 		checkDXResult<DIError>(hr, "IDirectInputDevice8::SetDataFormat() failed");
@@ -174,18 +174,18 @@ void DInput::processFrame()
 	}
 }
 
-DInput::KeyData DInput::getKeys() const noexcept
+DInput::KeyData DInput::getKeys() const
 {
 	return m_key;
 }
 
-int DInput::getPadCount() const noexcept
+int DInput::getPadCount() const
 {
 	ASSERT(m_pad.size() == m_pPadDevs.size());
 	return static_cast<int>(m_pPadDevs.size());
 }
 
-void DInput::getPadState(DIJOYSTATE *out, int index) const noexcept
+void DInput::getPadState(DIJOYSTATE *out, int index) const
 {
 	*out = m_pad.at(index);
 }

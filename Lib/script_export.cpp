@@ -5,7 +5,7 @@
 
 namespace yappy {
 namespace lua {
-namespace lua_export {
+namespace export {
 
 namespace {
 
@@ -53,7 +53,7 @@ inline bool getBooleanWithDefault(lua_State *L, int idx, bool def)
 	}
 }
 
-}
+}	// namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 // "trace" table
@@ -64,8 +64,12 @@ int trace::write(lua_State *L)
 	int argc = lua_gettop(L);
 	for (int i = 1; i <= argc; i++) {
 		const char *str = ::lua_tostring(L, i);
-		str = (str == nullptr) ? "<?>" : str;
-		debug::writeLine(str);
+		if (str != nullptr) {
+			debug::writeLine(str);
+		}
+		else {
+			debug::writef("<%s>", luaL_typename(L, i));
+		}
 	}
 	return 0;
 }

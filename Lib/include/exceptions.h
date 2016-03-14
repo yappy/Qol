@@ -9,7 +9,7 @@ namespace error {
 
 class Win32Error : public std::runtime_error {
 public:
-	explicit Win32Error(const std::string &msg, DWORD code) noexcept;
+	Win32Error(const std::string &msg, DWORD code);
 	const char *what() const override;
 private:
 	std::string m_what;
@@ -24,14 +24,15 @@ inline void checkWin32Result(bool cond, const std::string &msg)
 
 class WinSockError : public Win32Error {
 public:
-	explicit WinSockError(const std::string &msg, int code) noexcept
-		: Win32Error(msg, static_cast<DWORD>(code)) {}
+	WinSockError(const std::string &msg, int code) :
+		Win32Error(msg, static_cast<DWORD>(code))
+	{}
 };
 
 
 class MmioError : public std::runtime_error {
 public:
-	explicit MmioError(const std::string &msg, UINT code) noexcept;
+	MmioError(const std::string &msg, UINT code);
 	const char *what() const override;
 private:
 	std::string m_what;
@@ -39,7 +40,7 @@ private:
 
 class OggVorbisError : public std::runtime_error {
 public:
-	explicit OggVorbisError(const std::string &msg, int code) noexcept;
+	OggVorbisError(const std::string &msg, int code);
 	const char *what() const override;
 private:
 	std::string m_what;
@@ -57,7 +58,7 @@ inline void checkDXResult(HRESULT hr, const std::string &msg)
 
 class DXError : public std::runtime_error {
 public:
-	explicit DXError(const std::string &msg, HRESULT hr) noexcept;
+	DXError(const std::string &msg, HRESULT hr);
 	const char *what() const override;
 private:
 	std::string m_what;
@@ -65,26 +66,30 @@ private:
 
 class D3DError : public DXError {
 public:
-	explicit D3DError(const std::string &msg, HRESULT hr) noexcept
-		: DXError(msg, hr) {}
+	D3DError(const std::string &msg, HRESULT hr) :
+		DXError(msg, hr)
+	{}
 };
 
 class DIError : public DXError {
 public:
-	explicit DIError(const std::string &msg, HRESULT hr) noexcept
-		: DXError(msg, hr) {}
+	DIError(const std::string &msg, HRESULT hr) :
+		DXError(msg, hr)
+	{}
 };
 
 class DSError : public DXError {
 public:
-	explicit DSError(const std::string &msg, HRESULT hr) noexcept
-		: DXError(msg, hr) {}
+	DSError(const std::string &msg, HRESULT hr) :
+		DXError(msg, hr)
+	{}
 };
 
 class XAudioError : public DXError {
 public:
-	explicit XAudioError(const std::string &msg, HRESULT hr) noexcept
-		: DXError(msg, hr) {}
+	XAudioError(const std::string &msg, HRESULT hr) :
+		DXError(msg, hr)
+	{}
 };
 
 }
