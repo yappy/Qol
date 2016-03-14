@@ -6,7 +6,7 @@
 namespace yappy {
 namespace lua {
 
-LuaError::LuaError(const std::string &msg, lua_State *L) noexcept :
+LuaError::LuaError(const std::string &msg, lua_State *L) :
 	runtime_error("")
 {
 	const char *str = lua_tostring(L, -1);
@@ -98,10 +98,14 @@ Lua::Lua()
 	my_luaL_openlibs(m_lua.get());
 }
 
+lua_State *Lua::getLuaState() const {
+	return m_lua.get();
+}
+
 void Lua::loadTraceLib()
 {
 	lua_State *L = m_lua.get();
-	luaL_newlib(L, lua_export::trace_RegList);
+	luaL_newlib(L, export::trace_RegList);
 	lua_setglobal(L, "trace");
 }
 
@@ -112,8 +116,8 @@ void Lua::callWithResourceLib(const char *funcName, framework::Application *app,
 		[app](lua_State *L) {
 			// args
 			// stack[1]: resource function table
-			luaL_newlib(L, lua_export::resource_RegList);
-			lua_pushstring(L, lua_export::resource_RawFieldName);
+			luaL_newlib(L, export::resource_RegList);
+			lua_pushstring(L, export::resource_RawFieldName);
 			lua_pushlightuserdata(L, app);
 			lua_settable(L, -3);
 		}, 1,
@@ -123,8 +127,8 @@ void Lua::callWithResourceLib(const char *funcName, framework::Application *app,
 void Lua::loadGraphLib(framework::Application *app)
 {
 	lua_State *L = m_lua.get();
-	luaL_newlib(L, lua_export::graph_RegList);
-	lua_pushstring(L, lua_export::graph_RawFieldName);
+	luaL_newlib(L, export::graph_RegList);
+	lua_pushstring(L, export::graph_RawFieldName);
 	lua_pushlightuserdata(L, app);
 	lua_settable(L, -3);
 	lua_setglobal(L, "graph");
@@ -133,8 +137,8 @@ void Lua::loadGraphLib(framework::Application *app)
 void Lua::loadSoundLib(framework::Application *app)
 {
 	lua_State *L = m_lua.get();
-	luaL_newlib(L, lua_export::sound_RegList);
-	lua_pushstring(L, lua_export::sound_RawFieldName);
+	luaL_newlib(L, export::sound_RegList);
+	lua_pushstring(L, export::sound_RawFieldName);
 	lua_pushlightuserdata(L, app);
 	lua_settable(L, -3);
 	lua_setglobal(L, "sound");
@@ -171,52 +175,6 @@ int Lua::pcallWithLimit(lua_State *L,
 		throw LuaError("Call global function failed", L);
 	}
 	return ret;
-}
-
-void Lua::dumpStack()
-{
-	lua_State *L = m_lua.get();
-
-	debug::writeLine("[Stack]----------------------");
-	const int num = lua_gettop(L);
-	if (num == 0) {
-		debug::writeLine("No stack.");
-		return;
-	}
-	for (int i = num; i >= 1; i--) {
-		debug::writef(L"%03d(%04d): ", i, -num + i - 1);
-		int type = lua_type(L, i);
-		switch (type) {
-		case LUA_TNIL:
-			debug::writeLine(L"NIL");
-			break;
-		case LUA_TBOOLEAN:
-			debug::writef(L"BOOLEAN %s", lua_toboolean(L, i) ? L"true" : L"false");
-			break;
-		case LUA_TLIGHTUSERDATA:
-			debug::writeLine(L"LIGHTUSERDATA");
-			break;
-		case LUA_TNUMBER:
-			debug::writef(L"NUMBER %f", lua_tonumber(L, i));
-			break;
-		case LUA_TSTRING:
-			debug::writef("STRING %s", lua_tostring(L, i));
-			break;
-		case LUA_TTABLE:
-			debug::writeLine(L"TABLE");
-			break;
-		case LUA_TFUNCTION:
-			debug::writeLine(L"FUNCTION");
-			break;
-		case LUA_TUSERDATA:
-			debug::writeLine(L"USERDATA");
-			break;
-		case LUA_TTHREAD:
-			debug::writeLine(L"THREAD");
-			break;
-		}
-	}
-	debug::writeLine(L"-----------------------------");
 }
 
 }

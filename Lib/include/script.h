@@ -10,7 +10,7 @@ namespace lua {
 
 class LuaError : public std::runtime_error {
 public:
-	LuaError(const std::string &msg, lua_State *L) noexcept;
+	LuaError(const std::string &msg, lua_State *L);
 	const char *what() const override
 	{ return m_what.c_str(); }
 private:
@@ -32,7 +32,7 @@ public:
 	/** @brief Returns lua_State which this object has.
 	 * @return lua_State
 	 */
-	lua_State *getLuaState() { return m_lua.get(); }
+	lua_State *getLuaState() const;
 
 	void loadTraceLib();
 	void callWithResourceLib(const char *funcName, framework::Application *app,
@@ -86,10 +86,6 @@ public:
 		getRetFunc(L);
 	}
 
-	/** @brief Dump Lua stack for debug.
-	 */
-	void dumpStack(void);
-
 private:
 	struct LuaDeleter {
 		void operator()(lua_State *L);
@@ -104,7 +100,7 @@ private:
 // Export Functions (implemented in script_export.cpp)
 // Put into class for documentation
 ///////////////////////////////////////////////////////////////////////////////
-namespace lua_export {
+namespace export {
 
 struct trace {
 	static int write(lua_State *L);
@@ -154,7 +150,7 @@ const luaL_Reg sound_RegList[] = {
 };
 const char *const sound_RawFieldName = "_rawptr";
 
-}	// lua_export
+}	// export
 
 }
 }
