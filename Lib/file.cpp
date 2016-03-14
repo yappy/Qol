@@ -16,7 +16,7 @@ namespace {
 class FileLoader : private util::noncopyable {
 public:
 	FileLoader() = default;
-	virtual ~FileLoader() {}
+	virtual ~FileLoader() = default;
 	virtual std::vector<uint8_t> loadFile(const wchar_t *fileName) = 0;
 };
 
