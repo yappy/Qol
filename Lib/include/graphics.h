@@ -100,21 +100,21 @@ public:
 	TextureResourcePtr loadTexture(const wchar_t *path);
 
 	/** @brief Draw texture.
-	 * @param[in] texture texture resource
-	 * @param[in] dx destination X (center pos)
-	 * @param[in] dy destination Y (center pos)
-	 * @param[in] lrInv left-right invert
-	 * @param[in] udInv up-down invert
-	 * @param[in] sx source X
-	 * @param[in] sy source Y
-	 * @param[in] sw source width (texture size if SRC_SIZE_DEFAULT)
-	 * @param[in] sh source height (texture size if SRC_SIZE_DEFAULT)
-	 * @param[in] cx center X from (sx, sy)
-	 * @param[in] cy center Y from (sx, sy)
-	 * @param[in] angle rotation angle [rad] (using center pos)
-	 * @param[in] scaleX size scaling factor X
-	 * @param[in] scaleY size scaling factor Y
-	 * @param[in] alpha alpha value
+	 * @param[in] texture	texture resource
+	 * @param[in] dx		destination X (center pos)
+	 * @param[in] dy		destination Y (center pos)
+	 * @param[in] lrInv		left-right invert
+	 * @param[in] udInv		up-down invert
+	 * @param[in] sx		source X
+	 * @param[in] sy		source Y
+	 * @param[in] sw		source width (texture size if SRC_SIZE_DEFAULT)
+	 * @param[in] sh		source height (texture size if SRC_SIZE_DEFAULT)
+	 * @param[in] cx		center X from (sx, sy)
+	 * @param[in] cy		center Y from (sx, sy)
+	 * @param[in] angl		rotation angle [rad] (using center pos)
+	 * @param[in] scaleX	size scaling factor X
+	 * @param[in] scaleY	size scaling factor Y
+	 * @param[in] alpha		alpha value
 	 */
 	void drawTexture(const TextureResourcePtr &texture,
 		int dx, int dy, bool lrInv = false, bool udInv = false,
@@ -130,6 +130,19 @@ public:
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f,
 		int *nextx = nullptr, int *nexty = nullptr);
 
+	/** @brief Draw string.
+	 * @param[in] font		font resource
+	 * @param[in] str		text to be drawn
+	 * @param[in] dx		destination X (center pos)
+	 * @param[in] dy		destination Y (center pos)
+	 * @param[in] color		text color (0xRRGGBB)
+	 * @param[in] ajustX	ajust char-to-char space
+	 * @param[in] scaleX	scaling factor X
+	 * @param[in] scaleY	scaling factor Y
+	 * @param[in] alpha		alpha value
+	 * @param[in] nextx		X of next column
+	 * @param[in] nexty		Y of next row
+	 */
 	void drawString(const FontResourcePtr &font, const wchar_t *str, int dx, int dy,
 		uint32_t color = 0x000000, int ajustX = 0,
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f,
