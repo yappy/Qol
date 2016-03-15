@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "include/script.h"
 #include "include/debug.h"
 #include <lua.hpp>
@@ -59,6 +59,16 @@ inline bool getBooleanWithDefault(lua_State *L, int idx, bool def)
 // "trace" table
 ///////////////////////////////////////////////////////////////////////////////
 
+/** @brief デバッグ出力する。
+ * @details
+ * @code
+ * function trace.write(...)
+ * end
+ * @endcode
+ *
+ * @param[in]	...	任意の型および数の出力する値
+ * @return			なし
+ */
 int trace::write(lua_State *L)
 {
 	int argc = lua_gettop(L);
@@ -78,9 +88,18 @@ int trace::write(lua_State *L)
 // "resource" table
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
-* (self, int setId, string resId, string path)
-*/
+/** @brief テクスチャリソースを登録する。
+ * @details
+ * @code
+ * function resource:addTexture(int setId, str resId, str path)
+ * end
+ * @endcode
+ *
+ * @param[in]	setId	リソースセットID(整数値)
+ * @param[in]	resId	リソースID(文字列)
+ * @param[in]	path	ファイルパス
+ * @return				なし
+ */
 int resource::addTexture(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
@@ -93,9 +112,18 @@ int resource::addTexture(lua_State *L)
 	return 0;
 }
 
-/**
-* (self, int setId, string resId, string path)
-*/
+/** @brief フォントリソースを登録する。
+ * @details
+ * @code
+ * function resource:addFont(int setId, str resId, str path)
+ * end
+ * @endcode
+ *
+ * @param[in]	setId	リソースセットID(整数値)
+ * @param[in]	resId	リソースID(文字列)
+ * @param[in]	path	ファイルパス
+ * @return				なし
+ */
 int resource::addFont(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
@@ -116,9 +144,18 @@ int resource::addFont(lua_State *L)
 	return 0;
 }
 
-/**
-* (self, int setId, string resId, string path)
-*/
+/** @brief 効果音リソースを登録する。
+ * @details
+ * @code
+ * function resource:addSe(int setId, str resId, str path)
+ * end
+ * @endcode
+ *
+ * @param[in]	setId	リソースセットID(整数値)
+ * @param[in]	resId	リソースID(文字列)
+ * @param[in]	path	ファイルパス
+ * @return				なし
+ */
 int resource::addSe(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
@@ -135,8 +172,18 @@ int resource::addSe(lua_State *L)
 // "graph" table
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * (self, int setId, string resId)
+/** @brief テクスチャのサイズを得る。
+ * @details
+ * @code
+ * function graph:getTextureSize(int setId, str resId)
+ * 	return w, h;
+ * end
+ * @endcode
+ *
+ * @param[in]	setId	リソースセットID(整数値)
+ * @param[in]	resId	リソースID(文字列)
+ * @retval		1		横の長さ
+ * @retval		2		縦の長さ
  */
 int graph::getTextureSize(lua_State *L)
 {
@@ -152,11 +199,38 @@ int graph::getTextureSize(lua_State *L)
 	return 2;
 }
 
-/**
- * (string id, int dx, int dy, bool lrInv = false, bool udInv = false,
- * int sx = 0, int sy = 0, int sw = -1, int sh = -1,
- * int cx = 0, int cy = 0, float angle = 0.0f,
- * float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f);
+/** @brief テクスチャを描画する。
+ * @details
+ * @code
+ * function graph:drawTexture(int setId, str resId,
+ * 	int dx, int dy, bool lrInv = false, bool udInv = false,
+ * 	int sx = 0, int sy = 0, int sw = -1, int sh = -1,
+ * 	int cx = 0, int cy = 0, float angle = 0.0f,
+ * 	float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f)
+ * end
+ * @endcode
+ * スクリーン座標 (dx, dy) に (cx, cy) が一致するように描画されます。
+ *
+ * @param[in]	setId	リソースセットID(整数値)
+ * @param[in]	resId	リソースID(文字列)
+ * @param[in]	dx		描画先中心座標X
+ * @param[in]	dy		描画先中心座標Y
+ * @param[in]	lrInv	左右反転フラグ
+ * @param[in]	udInv	上下反転フラグ
+ * @param[in]	sx		テクスチャから切り出す際の左上座標X
+ * @param[in]	sy		テクスチャから切り出す際の左上座標Y
+ * @param[in]	sw		切り出しサイズX(-1でテクスチャサイズ)
+ * @param[in]	sh		切り出しサイズY(-1でテクスチャサイズ)
+ * @param[in]	cx		(sx, sy)基準の描画元中心座標X
+ * @param[in]	cy		(sx, sy)基準の描画元中心座標Y
+ * @param[in]	angle	回転角(rad)
+ * @param[in]	scaleX	拡大率X
+ * @param[in]	scaleY	拡大率Y
+ * @param[in]	alpha	透明度(0.0 - 1.0)
+ * @return				なし
+ *
+ * @sa graphics::DGraphics::drawTexture()
+ * @bug sw, sh のデフォルトが0になっている。
  */
 int graph::drawTexture(lua_State *L)
 {
@@ -186,6 +260,30 @@ int graph::drawTexture(lua_State *L)
 	return 0;
 }
 
+/** @brief 文字列を描画する。
+ * @details
+ * @code
+ * function graph:drawString(int setId, str resId, str str, int dx, int dy,
+ * 	int color = 0x000000, int ajustX = 0, 
+ * 	float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f)
+ * end
+ * @endcode
+ * スクリーン座標 (dx, dy) に (cx, cy) が一致するように描画されます。
+ *
+ * @param[in]	setId	リソースセットID(整数値)
+ * @param[in]	resId	リソースID(文字列)
+ * @param[in]	str		描画する文字列
+ * @param[in]	dx		描画先座標X
+ * @param[in]	dy		描画先座標Y
+ * @param[in]	color	文字色 (0xRRGGBB)
+ * @param[in]	ajustX	文字間隔調整用X移動量
+ * @param[in]	scaleX	拡大率X
+ * @param[in]	scaleY	拡大率Y
+ * @param[in]	alpha	透明度(0.0 - 1.0)
+ * @return				なし
+ *
+ * @sa graphics::DGraphics::drawString()
+ */
 int graph::drawString(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
@@ -212,6 +310,18 @@ int graph::drawString(lua_State *L)
 // "sound" table
 ///////////////////////////////////////////////////////////////////////////////
 
+/** @brief BGM 再生を開始する。
+ * @details
+ * @code
+ * function sound:playBgm(str path)
+ * end
+ * @endcode
+ *
+ * @param[in]	path	BGM oggファイルのパス
+ * @return				なし
+ *
+ * @todo 多分リソースベースのインタフェースに変えます。
+ */
 int sound::playBgm(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
@@ -222,6 +332,15 @@ int sound::playBgm(lua_State *L)
 	return 0;
 }
 
+/** @brief BGM 再生を停止する。
+ * @details
+ * @code
+ * function sound:stopBgm()
+ * end
+ * @endcode
+ *
+ * @return				なし
+ */
 int sound::stopBgm(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
