@@ -8,6 +8,8 @@ Text Editor -> All Languages -> General
 
 Text Editor -> C/C++ -> Formatting -> Indentation
 	- Indent namespace contents
+	
+編集 -> 詳細 -> スペースの表示
 
 
 ***********************************
@@ -33,7 +35,7 @@ http://www.ouma.jp/ootake/delay-win7vista-j.html (there is mistake)
 ***********************************
 * Drawing texture
 ***********************************
-void drawTexture(const char *id,
+void drawTexture(id,
 	int dx, int dy, bool lrInv, bool udInv,
 	int sx, int sy, int sw, int sh,
 	int cx, int cy, float angle, float scaleX, float scaleY,
@@ -74,40 +76,3 @@ void drawTexture(const char *id,
 	// input=1: output = offset + size
 	// になるように
 === END ===
-
-
-*** TODO list ***
-- debug
--- print
--- assert
--- exception
-
-- file
--- real fs
--- archive
-
-- threading
--- cancel
-
-- graphics
--- initialize
--- wait by timer for not vsync-ed situation (e.g. window minimized)
--- fps
--- frame skip mechanism
--- texture (transform, alpha)
-
-- input
--- keyboard
--- pad
--- config
--- delayed layer (for network)
-
-- sound
--- se
--- bgm
-
-- network
--- UDP?
-
-- scripting
--- lua
