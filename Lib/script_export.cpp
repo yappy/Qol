@@ -23,34 +23,59 @@ inline T *getPtrFromSelf(lua_State *L, const char *fieldName)
 	return result;
 }
 
-inline int getIntWithDefault(lua_State *L, int idx, int def)
+template <class T>
+using lim = std::numeric_limits<T>;
+
+static_assert(lim<lua_Integer>::min() <= lim<int>::min(),	"Lua type check");
+static_assert(lim<lua_Integer>::max() >= lim<int>::max(),	"Lua type check");
+static_assert(lim<lua_Number>::max() >= lim<float>::max(),	"Lua type check");
+
+inline int luaintToInt(lua_State *L, int arg,
+	lua_Integer val, int min, int max)
 {
-	if (!lua_isnone(L, idx)) {
-		return static_cast<int>(luaL_checkinteger(L, idx));
-	}
-	else {
-		return def;
-	}
+	luaL_argcheck(L, val >= min, arg, "number too small");
+	luaL_argcheck(L, val <= max, arg, "number too large");
+	return static_cast<int>(val);
 }
 
-inline float getFloatWithDefault(lua_State *L, int idx, float def)
+inline int getInt(lua_State *L, int arg,
+	int min = std::numeric_limits<int>::min(),
+	int max = std::numeric_limits<int>::max())
 {
-	if (!lua_isnone(L, idx)) {
-		return static_cast<float>(luaL_checknumber(L, idx));
-	}
-	else {
-		return def;
-	}
+	lua_Integer val = luaL_checkinteger(L, arg);
+	return luaintToInt(L, arg, val, min, max);
 }
 
-inline bool getBooleanWithDefault(lua_State *L, int idx, bool def)
+inline int getOptInt(lua_State *L, int arg, int def,
+	int min = std::numeric_limits<int>::min(),
+	int max = std::numeric_limits<int>::max())
 {
-	if (!lua_isnone(L, idx)) {
-		return lua_toboolean(L, idx) != 0;
-	}
-	else {
-		return def;
-	}
+	lua_Integer val = luaL_optinteger(L, arg, def);
+	return luaintToInt(L, arg, val, min, max);
+}
+
+inline float luanumToFloat(lua_State *L, int arg,
+	lua_Number val, float min, float max)
+{
+	luaL_argcheck(L, val >= min, arg, "number too small or NaN");
+	luaL_argcheck(L, val <= max, arg, "number too large or NaN");
+	return static_cast<float>(val);
+}
+
+inline float getFloat(lua_State *L, int arg,
+	float min = std::numeric_limits<float>::lowest(),
+	float max = std::numeric_limits<float>::max())
+{
+	lua_Number val = luaL_checknumber(L, arg);
+	return luanumToFloat(L, arg, val, min, max);
+}
+
+inline float getOptFloat(lua_State *L, int arg, float def,
+	float min = std::numeric_limits<float>::lowest(),
+	float max = std::numeric_limits<float>::max())
+{
+	lua_Number val = luaL_optnumber(L, arg, def);
+	return luanumToFloat(L, arg, val, min, max);
 }
 
 }	// namespace
@@ -103,7 +128,7 @@ int trace::write(lua_State *L)
 int resource::addTexture(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
-	int setId = static_cast<int>(luaL_checkinteger(L, 2));
+	int setId = getInt(L, 2, 0);
 	const char *resId = luaL_checkstring(L, 3);
 	const char *path = luaL_checkstring(L, 4);
 
@@ -127,13 +152,15 @@ int resource::addTexture(lua_State *L)
 int resource::addFont(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
-	int setId = static_cast<int>(luaL_checkinteger(L, 2));
+	int setId = getInt(L, 2, 0);
 	const char *resId = luaL_checkstring(L, 3);
 	const char *fontName = luaL_checkstring(L, 4);
 	const char *startCharStr = luaL_checkstring(L, 5);
+	luaL_argcheck(L, *startCharStr != '\0', 5, "empty string is NG");
 	const char *endCharStr = luaL_checkstring(L, 6);
-	int w = static_cast<int>(luaL_checkinteger(L, 7));
-	int h = static_cast<int>(luaL_checkinteger(L, 8));
+	luaL_argcheck(L, *endCharStr != '\0', 6, "empty string is NG");
+	int w = getInt(L, 7, 0);
+	int h = getInt(L, 8, 0);
 
 	wchar_t startChar = util::utf82wc(startCharStr)[0];
 	wchar_t endChar = util::utf82wc(endCharStr)[0];
@@ -159,7 +186,7 @@ int resource::addFont(lua_State *L)
 int resource::addSe(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
-	int setId = static_cast<int>(luaL_checkinteger(L, 2));
+	int setId = getInt(L, 2, 0);
 	const char *resId = luaL_checkstring(L, 3);
 	const char *path = luaL_checkstring(L, 4);
 
@@ -188,7 +215,7 @@ int resource::addSe(lua_State *L)
 int graph::getTextureSize(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
-	int setId = static_cast<int>(luaL_checkinteger(L, 2));
+	int setId = getInt(L, 2, 0);
 	const char *resId = luaL_checkstring(L, 3);
 
 	const auto &pTex = app->getTexture(setId, resId);
@@ -235,23 +262,23 @@ int graph::getTextureSize(lua_State *L)
 int graph::drawTexture(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
-	int setId = static_cast<int>(luaL_checkinteger(L, 2));
+	int setId = getInt(L, 2, 0);
 	const char *resId = luaL_checkstring(L, 3);
-	int dx = static_cast<int>(luaL_checkinteger(L, 4));
-	int dy = static_cast<int>(luaL_checkinteger(L, 5));
+	int dx = getInt(L, 4);
+	int dy = getInt(L, 5);
 
-	bool lrInv = getBooleanWithDefault(L, 6, false);
-	bool udInv = getBooleanWithDefault(L, 7, false);
-	int sx = getIntWithDefault(L, 8, 0);
-	int sy = getIntWithDefault(L, 9, 0);
-	int sw = getIntWithDefault(L, 10, 0);
-	int sh = getIntWithDefault(L, 11, 0);
-	int cx = getIntWithDefault(L, 12, 0);
-	int cy = getIntWithDefault(L, 13, 0);
-	float angle = getFloatWithDefault(L, 14, 0.0f);
-	float scaleX = getFloatWithDefault(L, 15, 1.0f);
-	float scaleY = getFloatWithDefault(L, 16, 1.0f);
-	float alpha = getFloatWithDefault(L, 17, 1.0f);
+	bool lrInv = lua_toboolean(L, 6) != 0;
+	bool udInv = lua_toboolean(L, 7) != 0;
+	int sx = getOptInt(L, 8, 0);
+	int sy = getOptInt(L, 9, 0);
+	int sw = getOptInt(L, 10, 0);
+	int sh = getOptInt(L, 11, 0);
+	int cx = getOptInt(L, 12, 0);
+	int cy = getOptInt(L, 13, 0);
+	float angle = getOptFloat(L, 14, 0.0f);
+	float scaleX = getOptFloat(L, 15, 1.0f);
+	float scaleY = getOptFloat(L, 16, 1.0f);
+	float alpha = getOptFloat(L, 17, 1.0f);
 
 	const auto &pTex = app->getTexture(setId, resId);
 	app->graph().drawTexture(pTex, dx, dy, lrInv, udInv, sx, sy, sw, sh, cx, cy,
@@ -287,17 +314,17 @@ int graph::drawTexture(lua_State *L)
 int graph::drawString(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
-	int setId = static_cast<int>(luaL_checkinteger(L, 2));
+	int setId = getInt(L, 2, 0);
 	const char *resId = luaL_checkstring(L, 3);
 	const char *str = luaL_checkstring(L, 4);
-	int dx = static_cast<int>(luaL_checkinteger(L, 5));
-	int dy = static_cast<int>(luaL_checkinteger(L, 6));
+	int dx = getInt(L, 5);
+	int dy = getInt(L, 6);
 
-	int color = getIntWithDefault(L, 7, 0x000000);
-	int ajustX = getIntWithDefault(L, 8, 0);
-	float scaleX = getFloatWithDefault(L, 9, 1.0f);
-	float scaleY = getFloatWithDefault(L, 10, 1.0f);
-	float alpha = getFloatWithDefault(L, 11, 1.0f);
+	int color = getOptInt(L, 7, 0x000000);
+	int ajustX = getOptInt(L, 8, 0);
+	float scaleX = getOptFloat(L, 9, 1.0f);
+	float scaleY = getOptFloat(L, 10, 1.0f);
+	float alpha = getOptFloat(L, 11, 1.0f);
 
 	const auto &pFont = app->getFont(setId, resId);
 	app->graph().drawString(pFont, util::utf82wc(str).get(), dx, dy,
