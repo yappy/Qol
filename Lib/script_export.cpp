@@ -339,6 +339,29 @@ int graph::drawString(lua_State *L)
 /** @brief BGM 再生を開始する。
  * @details
  * @code
+ * function sound:playSe(int setId, str resId)
+ * end
+ * @endcode
+ *
+ * @param[in]	setId	リソースセットID(整数値)
+ * @param[in]	resId	リソースID(文字列)
+ * @return				なし
+ */
+int sound::playSe(lua_State *L)
+{
+	auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
+	int setId = getInt(L, 2, 0);
+	const char *resId = luaL_checkstring(L, 3);
+
+	const auto &pSoundEffect = app->getSoundEffect(setId, resId);
+	app->sound().playSoundEffect(pSoundEffect);
+
+	return 0;
+}
+
+/** @brief BGM 再生を開始する。
+ * @details
+ * @code
  * function sound:playBgm(str path)
  * end
  * @endcode
