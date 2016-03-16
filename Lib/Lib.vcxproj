@@ -177,6 +177,7 @@
     <ClInclude Include="include\input.h" />
     <ClInclude Include="include\network.h" />
     <ClInclude Include="include\script.h" />
+    <ClInclude Include="include\script_export.h" />
     <ClInclude Include="include\sound.h" />
     <ClInclude Include="include\util.h" />
     <ClInclude Include="stdafx.h" />
