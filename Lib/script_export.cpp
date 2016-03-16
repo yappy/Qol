@@ -294,7 +294,6 @@ int graph::drawTexture(lua_State *L)
  * 	float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f)
  * end
  * @endcode
- * スクリーン座標 (dx, dy) に (cx, cy) が一致するように描画されます。
  *
  * @param[in]	setId	リソースセットID(整数値)
  * @param[in]	resId	リソースID(文字列)
