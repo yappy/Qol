@@ -257,7 +257,6 @@ int graph::getTextureSize(lua_State *L)
  * @return				なし
  *
  * @sa graphics::DGraphics::drawTexture()
- * @bug sw, sh のデフォルトが0になっている。
  */
 int graph::drawTexture(lua_State *L)
 {
@@ -271,8 +270,8 @@ int graph::drawTexture(lua_State *L)
 	bool udInv = lua_toboolean(L, 7) != 0;
 	int sx = getOptInt(L, 8, 0);
 	int sy = getOptInt(L, 9, 0);
-	int sw = getOptInt(L, 10, 0);
-	int sh = getOptInt(L, 11, 0);
+	int sw = getOptInt(L, 10, -1);
+	int sh = getOptInt(L, 11, -1);
 	int cx = getOptInt(L, 12, 0);
 	int cy = getOptInt(L, 13, 0);
 	float angle = getOptFloat(L, 14, 0.0f);
