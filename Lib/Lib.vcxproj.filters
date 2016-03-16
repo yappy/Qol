@@ -65,6 +65,9 @@
     <ClInclude Include="include\framework.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
+    <ClInclude Include="include\script_export.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
