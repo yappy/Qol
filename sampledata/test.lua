@@ -20,6 +20,12 @@ local unyopos = {
 	x = 500,
 	y = 350
 };
+-- coroutine (wrap function) list
+local colist = {};
+
+local function addCo(f)
+	table.insert(colist, coroutine.wrap(f));
+end
 
 function load(resource)
 	resource:addTexture(1, "unyo", "../sampledata/test_400_300.png");
@@ -29,6 +35,8 @@ end
 function start()
 	w, h = graph:getTextureSize(1, "unyo");
 	trace.write("w=" .. w, "h=" .. h);
+
+	colist = {};
 
 	sound:playBgm("../sampledata/Epoq-Lepidoptera.ogg");
 end
@@ -51,9 +59,31 @@ function update(keyinput)
 	end
 
 	for k, v in pairs(keyinput) do
-		if v then
+		if v and not (k == "UP" or k == "DOWN" or k == "LEFT" or k == "RIGHT") then
 			trace.write("Key input in lua: " .. k);
+			addCo(function()
+					local delay = 30;
+					for i = 1, delay do
+						coroutine.yield(true);
+					end
+					sound:playSe(0, "testse");
+					return false;
+				end);
 		end
+	end
+
+	-- process coroutine
+	local ci = 1;
+	while ci <= #colist do
+		local ret = colist[ci]();
+		if not ret then
+			table.remove(colist, ci);
+		else
+			ci = ci + 1;
+		end
+	end
+	if #colist ~= 0 then
+		trace.write("Active coroutine: " .. #colist);
 	end
 end
 
@@ -66,7 +96,8 @@ function draw()
 
 	graph:drawString(0, "j", "ほ", 100, 200, 0x0000ff);
 	graph:drawString(0, "j", "ほわいと", 100, 500, 0x000000, -32);
-	graph:drawString(0, "j", "やじるしでうごくよ", 500, 640, 0x000000, -80, 0.5, 0.5);
+	graph:drawString(0, "j", "やじるしでうごくよ", 300, 640, 0x000000, -80, 0.5, 0.5);
+	graph:drawString(0, "j", "ほかのきいででぃれいさうんど", 300, 680, 0x000000, -80, 0.5, 0.5);
 	graph:drawString(0, "e", "SPACE key: goto C++ impl scene", 0, 0);
 end
 
