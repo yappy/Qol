@@ -30,6 +30,7 @@ void MyApp::init()
 	addFontResource(ResSetId::Common, "e", L"ＭＳ 明朝", 0x00, 0xff, 16, 32);
 	addFontResource(ResSetId::Common, "j", L"メイリオ", L'あ', L'ん', 128, 128);
 	addSeResource(ResSetId::Common, "testse", L"/C:/Windows/Media/chord.wav");
+	addBgmResource(ResSetId::Common, "testbgm", L"../sampledata/Epoq-Lepidoptera.ogg");
 	loadResourceSet(ResSetId::Common, std::atomic_bool());
 
 	m_scenes[static_cast<uint32_t>(SceneId::Main)] = std::make_unique<MainScene>(this);
@@ -41,8 +42,7 @@ void MyApp::init()
 	setScene(SceneId::Main);
 
 	// TODO: tmp test
-	auto bgm = sound().loadBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
-	sound().playBgm(bgm);
+	sound().playBgm(getBgm(ResSetId::Common, "testbgm"));
 }
 
 void MyApp::update()
