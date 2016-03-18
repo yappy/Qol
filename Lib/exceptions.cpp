@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "include/exceptions.h"
 #include "include/util.h"
 #include <sstream>

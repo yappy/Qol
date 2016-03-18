@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "util.h"
 #define DIRECTINPUT_VERSION 0x0800
