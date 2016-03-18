@@ -57,6 +57,7 @@ void MainScene::update()
 
 	if (keys[DIK_SPACE]) {
 		// SPACE to sub scene
+		m_lua.callGlobal("exit");
 		auto *next = m_app->getSceneAs<SubScene>(SceneId::Sub);
 		next->setup();
 		next->update();

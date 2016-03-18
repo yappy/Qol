@@ -30,6 +30,7 @@ end
 function load(resource)
 	resource:addTexture(1, "unyo", "../sampledata/test_400_300.png");
 	resource:addTexture(1, "ball", "../sampledata/circle.png");
+	resource:addBgm(1, "testbgm", "../sampledata/Epoq-Lepidoptera.ogg");
 end
 
 function start()
@@ -38,7 +39,11 @@ function start()
 
 	colist = {};
 
-	sound:playBgm("../sampledata/Epoq-Lepidoptera.ogg");
+	sound:playBgm(1, "testbgm");
+end
+
+function exit()
+	sound:stopBgm();
 end
 
 function update(keyinput)

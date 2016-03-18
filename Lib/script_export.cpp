@@ -195,6 +195,30 @@ int resource::addSe(lua_State *L)
 	return 0;
 }
 
+/** @brief BGMリソースを登録する。
+ * @details
+ * @code
+ * function resource:addBgm(int setId, str resId, str path)
+ * end
+ * @endcode
+ *
+ * @param[in]	setId	リソースセットID(整数値)
+ * @param[in]	resId	リソースID(文字列)
+ * @param[in]	path	ファイルパス
+ * @return				なし
+ */
+int resource::addBgm(lua_State *L)
+{
+	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
+	int setId = getInt(L, 2, 0);
+	const char *resId = luaL_checkstring(L, 3);
+	const char *path = luaL_checkstring(L, 4);
+
+	app->addBgmResource(setId, resId, util::utf82wc(path).get());
+
+	return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // "graph" table
 ///////////////////////////////////////////////////////////////////////////////
@@ -335,7 +359,7 @@ int graph::drawString(lua_State *L)
 // "sound" table
 ///////////////////////////////////////////////////////////////////////////////
 
-/** @brief BGM 再生を開始する。
+/** @brief 効果音再生を開始する。
  * @details
  * @code
  * function sound:playSe(int setId, str resId)
@@ -361,21 +385,22 @@ int sound::playSe(lua_State *L)
 /** @brief BGM 再生を開始する。
  * @details
  * @code
- * function sound:playBgm(str path)
+ * function sound:playBgm(int setId, str resId)
  * end
  * @endcode
  *
- * @param[in]	path	BGM oggファイルのパス
+ * @param[in]	setId	リソースセットID(整数値)
+ * @param[in]	resId	リソースID(文字列)
  * @return				なし
- *
- * @todo 多分リソースベースのインタフェースに変えます。
  */
 int sound::playBgm(lua_State *L)
 {
 	auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
-	const char *path = luaL_checkstring(L, 2);
+	int setId = getInt(L, 2, 0);
+	const char *resId = luaL_checkstring(L, 3);
 
-	app->sound().playBgm(util::utf82wc(path).get());
+	auto &pBgm = app->getBgm(setId, resId);
+	app->sound().playBgm(pBgm);
 
 	return 0;
 }
