@@ -35,7 +35,10 @@ std::vector<std::wstring> parseCommandLine()
 #pragma region ResourceManager
 
 ResourceManager::ResourceManager(size_t resSetCount) :
-	m_texMapVec(resSetCount), m_fontMapVec(resSetCount), m_seMapVec(resSetCount)
+	m_texMapVec(resSetCount),
+	m_fontMapVec(resSetCount),
+	m_seMapVec(resSetCount),
+	m_bgmMapVec(resSetCount)
 {}
 
 namespace {
@@ -78,6 +81,12 @@ void ResourceManager::addSoundEffect(size_t setId, const char *resId,
 	addResource(&m_seMapVec, setId, resId, loadFunc);
 }
 
+void ResourceManager::addBgm(size_t setId, const char *resId,
+	std::function<sound::XAudio2::BgmResourcePtr()> loadFunc)
+{
+	addResource(&m_bgmMapVec, setId, resId, loadFunc);
+}
+
 namespace {
 
 template <class T>
@@ -106,6 +115,7 @@ void ResourceManager::loadResourceSet(size_t setId, std::atomic_bool &cancel)
 	loadAll(&m_texMapVec, setId, cancel);
 	loadAll(&m_fontMapVec, setId, cancel);
 	loadAll(&m_seMapVec, setId, cancel);
+	loadAll(&m_bgmMapVec, setId, cancel);
 }
 
 void ResourceManager::unloadResourceSet(size_t setId)
@@ -113,6 +123,7 @@ void ResourceManager::unloadResourceSet(size_t setId)
 	unloadAll(&m_texMapVec, setId);
 	unloadAll(&m_fontMapVec, setId);
 	unloadAll(&m_seMapVec, setId);
+	unloadAll(&m_bgmMapVec, setId);
 }
 
 namespace {
@@ -149,6 +160,12 @@ const sound::XAudio2::SeResourcePtr ResourceManager::getSoundEffect(
 	size_t setId, const char *resId) const
 {
 	return getResource(m_seMapVec, setId, resId);
+}
+
+const sound::XAudio2::BgmResourcePtr ResourceManager::getBgm(
+	size_t setId, const char *resId) const
+{
+	return getResource(m_bgmMapVec, setId, resId);
 }
 
 #pragma endregion
@@ -490,6 +507,15 @@ void Application::addSeResource(size_t setId, const char *resId, const wchar_t *
 	});
 }
 
+void Application::addBgmResource(size_t setId, const char *resId, const wchar_t *path)
+{
+	std::wstring pathCopy(path);
+	m_resMgr.addBgm(setId, resId, [this, pathCopy]() {
+		yappy::debug::writef(L"LoadBgm: %s", pathCopy.c_str());
+		return m_ds->loadBgm(pathCopy.c_str());
+	});
+}
+
 void Application::loadResourceSet(size_t setId, std::atomic_bool &cancel)
 {
 	m_resMgr.loadResourceSet(setId, cancel);
@@ -515,6 +541,12 @@ const sound::XAudio2::SeResourcePtr Application::getSoundEffect(
 	size_t setId, const char *resId) const
 {
 	return m_resMgr.getSoundEffect(setId, resId);
+}
+
+const sound::XAudio2::BgmResourcePtr Application::getBgm(
+	size_t setId, const char *resId) const
+{
+	return m_resMgr.getBgm(setId, resId);
 }
 
 #pragma endregion

@@ -98,6 +98,8 @@ public:
 		std::function<graphics::DGraphics::FontResourcePtr()> loadFunc);
 	void addSoundEffect(size_t setId, const char *resId,
 		std::function<sound::XAudio2::SeResourcePtr()> loadFunc);
+	void addBgm(size_t setId, const char *resId,
+		std::function<sound::XAudio2::BgmResourcePtr()> loadFunc);
 
 	void loadResourceSet(size_t setId, std::atomic_bool &cancel);
 	void unloadResourceSet(size_t setId);
@@ -108,15 +110,18 @@ public:
 		size_t setId, const char *resId) const;
 	const sound::XAudio2::SeResourcePtr getSoundEffect(
 		size_t setId, const char *resId) const;
+	const sound::XAudio2::BgmResourcePtr getBgm(
+		size_t setId, const char *resId) const;
 
 private:
 	// int setId -> char[16] resId -> Resource<T>
 	template <class T>
 	using ResMapVec = std::vector<std::unordered_map<IdString, Resource<T>>>;
 
-	ResMapVec<graphics::DGraphics::TextureResource> m_texMapVec;
-	ResMapVec<graphics::DGraphics::FontResource>    m_fontMapVec;
-	ResMapVec<sound::XAudio2::SeResource>           m_seMapVec;
+	ResMapVec<graphics::DGraphics::TextureResource>	m_texMapVec;
+	ResMapVec<graphics::DGraphics::FontResource>	m_fontMapVec;
+	ResMapVec<sound::XAudio2::SeResource>			m_seMapVec;
+	ResMapVec<sound::XAudio2::BgmResource>			m_bgmMapVec;
 };
 
 
@@ -257,6 +262,12 @@ public:
 	 * @param[in] path	File path.
 	 */
 	void addSeResource(size_t setId, const char *resId, const wchar_t *path);
+	/** @brief Register BGM resource.
+	 * @param[in] setId	%Resource set ID.
+	 * @param[in] resId	%Resource ID.
+	 * @param[in] path	File path.
+	 */
+	void addBgmResource(size_t setId, const char *resId, const wchar_t *path);
 
 	/** @brief Load resources by resource set ID.
 	 * @param[in] setId	%Resource set ID.
@@ -273,18 +284,25 @@ public:
 	 */
 	const graphics::DGraphics::TextureResourcePtr getTexture(
 		size_t setId, const char *resId) const;
-	/** @brief Get texture resource pointer.
+	/** @brief Get font resource pointer.
 	 * @param[in] setId	%Resource set ID.
 	 * @param[in] resId	%Resource ID.
 	 */
 	const graphics::DGraphics::FontResourcePtr getFont(
 		size_t setId, const char *resId) const;
-	/** @brief Get texture resource pointer.
+	/** @brief Get sound effect resource pointer.
 	 * @param[in] setId	%Resource set ID.
 	 * @param[in] resId	%Resource ID.
 	 */
 	const sound::XAudio2::SeResourcePtr getSoundEffect(
 		size_t setId, const char *resId) const;
+	/** @brief Get BGM resource pointer.
+	 * @param[in] setId	%Resource set ID.
+	 * @param[in] resId	%Resource ID.
+	 */
+	const sound::XAudio2::BgmResourcePtr getBgm(
+		size_t setId, const char *resId) const;
+
 
 protected:
 	/** @brief User initialization code.
