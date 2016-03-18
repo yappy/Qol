@@ -42,6 +42,10 @@ function start()
 	sound:playBgm(1, "testbgm");
 end
 
+function exit()
+	sound:stopBgm();
+end
+
 function update(keyinput)
 	frame = frame + 1;
 
