@@ -17,14 +17,14 @@ namespace lua {
 namespace export {
 
 	/** @brief デバッグ出力関数。<b>trace</b>グローバルテーブルに提供。
-	* @details
-	* @code
-	* trace = {};
-	* @endcode
-	* デバッグ出力を本体側のロギングシステムに転送します。
-	*
-	* @sa debug
-	*/
+	 * @details
+	 * @code
+	 * trace = {};
+	 * @endcode
+	 * デバッグ出力を本体側のロギングシステムに転送します。
+	 *
+	 * @sa debug
+	 */
 	struct trace {
 		static int write(lua_State *L);
 		trace() = delete;
@@ -35,40 +35,42 @@ namespace export {
 	};
 
 	/** @brief 使用リソース登録関数。
-	* @details
-	* 各関数は最初の引数に self オブジェクトが必要です。
-	* リソースはリソースセットID(整数)とリソースID(文字列)で識別されます。
-	* 何らかの初期化関数の引数としてテーブルが渡されます(今のところ)。
-	* その中でリソースを登録した後、C++側で
-	* framework::Application::loadResourceSet()
-	* を呼ぶとリソースが使用可能になります。
-	* @sa framework::Application
-	* @sa framework::ResourceManager
-	*/
+	 * @details
+	 * 各関数は最初の引数に self オブジェクトが必要です。
+	 * リソースはリソースセットID(整数)とリソースID(文字列)で識別されます。
+	 * 何らかの初期化関数の引数としてテーブルが渡されます(今のところ)。
+	 * その中でリソースを登録した後、C++側で
+	 * framework::Application::loadResourceSet()
+	 * を呼ぶとリソースが使用可能になります。
+	 * @sa framework::Application
+	 * @sa framework::ResourceManager
+	 */
 	struct resource {
 		static int addTexture(lua_State *L);
 		static int addFont(lua_State *L);
 		static int addSe(lua_State *L);
+		static int addBgm(lua_State *L);
 	};
 	const luaL_Reg resource_RegList[] = {
 		{ "addTexture",	resource::addTexture	},
 		{ "addFont",	resource::addFont		},
 		{ "addSe",		resource::addSe			},
+		{ "addBgm",		resource::addBgm		},
 		{ nullptr, nullptr }
 	};
 	const char *const resource_RawFieldName = "_rawptr";
 
 	/** @brief グラフィックス描画関連関数。<b>graph</b>グローバルテーブルに提供。
-	* @details
-	* @code
-	* graph = {};
-	* @endcode
-	* 各関数は最初の引数に self オブジェクトが必要です。
-	* 描画するテクスチャリソースはリソースセットID(整数)とリソースID(文字列)で
-	* 指定します。
-	* @sa lua::export::resource
-	* @sa graphics::DGraphics
-	*/
+	 * @details
+	 * @code
+	 * graph = {};
+	 * @endcode
+	 * 各関数は最初の引数に self オブジェクトが必要です。
+	 * 描画するテクスチャリソースはリソースセットID(整数)とリソースID(文字列)で
+	 * 指定します。
+	 * @sa lua::export::resource
+	 * @sa graphics::DGraphics
+	 */
 	struct graph {
 		static int getTextureSize(lua_State *L);
 		static int drawTexture(lua_State *L);
@@ -84,14 +86,14 @@ namespace export {
 	const char *const graph_RawFieldName = "_rawptr";
 
 	/** @brief 音声再生関連関数。<b>sound</b>グローバルテーブルに提供。
-	* @details
-	* @code
-	* sound = {};
-	* @endcode
-	* 各関数は最初の引数に self オブジェクトが必要です。
-	* @sa lua::export::resource
-	* @sa sound::XAudio2
-	*/
+	 * @details
+	 * @code
+	 * sound = {};
+	 * @endcode
+	 * 各関数は最初の引数に self オブジェクトが必要です。
+	 * @sa lua::export::resource
+	 * @sa sound::XAudio2
+	 */
 	struct sound {
 		static int playSe(lua_State *L);
 		static int playBgm(lua_State *L);

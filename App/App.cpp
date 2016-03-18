@@ -40,9 +40,6 @@ void MyApp::init()
 	auto mainScene = getSceneAs<MainScene>(SceneId::Main);
 	mainScene->setup();
 	setScene(SceneId::Main);
-
-	// TODO: tmp test
-	sound().playBgm(getBgm(ResSetId::Common, "testbgm"));
 }
 
 void MyApp::update()
