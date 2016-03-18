@@ -375,7 +375,8 @@ int sound::playBgm(lua_State *L)
 	auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
 	const char *path = luaL_checkstring(L, 2);
 
-	app->sound().playBgm(util::utf82wc(path).get());
+	//TODO
+	//app->sound().playBgm(util::utf82wc(path).get());
 
 	return 0;
 }

@@ -39,6 +39,10 @@ void MyApp::init()
 	auto mainScene = getSceneAs<MainScene>(SceneId::Main);
 	mainScene->setup();
 	setScene(SceneId::Main);
+
+	// TODO: tmp test
+	auto bgm = sound().loadBgm(L"../sampledata/Epoq-Lepidoptera.ogg");
+	sound().playBgm(bgm);
 }
 
 void MyApp::update()
