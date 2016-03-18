@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "include/config.h"
 #include "include/debug.h"
 #include <cstdio>

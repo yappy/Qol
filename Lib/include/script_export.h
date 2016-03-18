@@ -1,27 +1,27 @@
-#pragma once
+﻿#pragma once
 
 /** @file
- * @brief Lua�փG�N�X�|�[�g����֐��Q�B
+ * @brief Luaへエクスポートする関数群。
  * @details
- * �h�L�������g��ǂ݂₷�����邽�߂ɃN���X�̒��Ɋe�֐������Ă��܂��B
- * ��{�I��C++�N���X����Lua�O���[�o���e�[�u���ϐ����ɑΉ������Ă��܂��B
+ * ドキュメントを読みやすくするためにクラスの中に各関数を入れています。
+ * 基本的にC++クラス名をLuaグローバルテーブル変数名に対応させています。
  */
 
  // Each function is documented in script_export.cpp
 
 namespace yappy {
 namespace lua {
-/** @brief C++ ���� Lua �֌��J����֐��B(Lua�֐��d�l)
+/** @brief C++ から Lua へ公開する関数。(Lua関数仕様)
 * @sa lua::Lua
 */
 namespace export {
 
-	/** @brief �f�o�b�O�o�͊֐��B<b>trace</b>�O���[�o���e�[�u���ɒ񋟁B
+	/** @brief デバッグ出力関数。<b>trace</b>グローバルテーブルに提供。
 	 * @details
 	 * @code
 	 * trace = {};
 	 * @endcode
-	 * �f�o�b�O�o�͂�{�̑��̃��M���O�V�X�e���ɓ]�����܂��B
+	 * デバッグ出力を本体側のロギングシステムに転送します。
 	 *
 	 * @sa debug
 	 */
@@ -34,14 +34,14 @@ namespace export {
 		{ nullptr, nullptr			}
 	};
 
-	/** @brief �g�p���\�[�X�o�^�֐��B
+	/** @brief 使用リソース登録関数。
 	 * @details
-	 * �e�֐��͍ŏ��̈����� self �I�u�W�F�N�g���K�v�ł��B
-	 * ���\�[�X�̓��\�[�X�Z�b�gID(����)�ƃ��\�[�XID(������)�Ŏ��ʂ���܂��B
-	 * ���炩�̏������֐��̈����Ƃ��ăe�[�u�����n����܂�(���̂Ƃ���)�B
-	 * ���̒��Ń��\�[�X��o�^������AC++����
+	 * 各関数は最初の引数に self オブジェクトが必要です。
+	 * リソースはリソースセットID(整数)とリソースID(文字列)で識別されます。
+	 * 何らかの初期化関数の引数としてテーブルが渡されます(今のところ)。
+	 * その中でリソースを登録した後、C++側で
 	 * framework::Application::loadResourceSet()
-	 * ���ĂԂƃ��\�[�X���g�p�\�ɂȂ�܂��B
+	 * を呼ぶとリソースが使用可能になります。
 	 * @sa framework::Application
 	 * @sa framework::ResourceManager
 	 */
@@ -60,14 +60,14 @@ namespace export {
 	};
 	const char *const resource_RawFieldName = "_rawptr";
 
-	/** @brief �O���t�B�b�N�X�`��֘A�֐��B<b>graph</b>�O���[�o���e�[�u���ɒ񋟁B
+	/** @brief グラフィックス描画関連関数。<b>graph</b>グローバルテーブルに提供。
 	 * @details
 	 * @code
 	 * graph = {};
 	 * @endcode
-	 * �e�֐��͍ŏ��̈����� self �I�u�W�F�N�g���K�v�ł��B
-	 * �`�悷��e�N�X�`�����\�[�X�̓��\�[�X�Z�b�gID(����)�ƃ��\�[�XID(������)��
-	 * �w�肵�܂��B
+	 * 各関数は最初の引数に self オブジェクトが必要です。
+	 * 描画するテクスチャリソースはリソースセットID(整数)とリソースID(文字列)で
+	 * 指定します。
 	 * @sa lua::export::resource
 	 * @sa graphics::DGraphics
 	 */
@@ -85,12 +85,12 @@ namespace export {
 	};
 	const char *const graph_RawFieldName = "_rawptr";
 
-	/** @brief �����Đ��֘A�֐��B<b>sound</b>�O���[�o���e�[�u���ɒ񋟁B
+	/** @brief 音声再生関連関数。<b>sound</b>グローバルテーブルに提供。
 	 * @details
 	 * @code
 	 * sound = {};
 	 * @endcode
-	 * �e�֐��͍ŏ��̈����� self �I�u�W�F�N�g���K�v�ł��B
+	 * 各関数は最初の引数に self オブジェクトが必要です。
 	 * @sa lua::export::resource
 	 * @sa sound::XAudio2
 	 */

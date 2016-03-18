@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "include/graphics.h"
 #include "include/debug.h"
 #include "include/exceptions.h"
