@@ -2,6 +2,7 @@
 #include "include/script_debugger.h"
 #include "include/script.h"
 #include "include/debug.h"
+#include "include/exceptions.h"
 
 namespace yappy {
 namespace lua {
@@ -48,6 +49,8 @@ void LuaDebugger::pcall(int narg, int nret, int instLimit)
 		LUA_MASKCOUNT;
 	{
 		LuaHook hook(this, hookRaw, mask, instLimit);
+		// TODO: break at first
+		m_debugState = DebugState::INIT_BREAK;
 		int base = lua_gettop(L) - narg;	// function index
 		lua_pushcfunction(L, msghandler);	// push message handler
 		lua_insert(L, base);				// put it under function and args
@@ -110,6 +113,10 @@ void LuaDebugger::hookNonDebug(lua_Debug *ar)
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Debugger
+///////////////////////////////////////////////////////////////////////////////
+
 // debug mode hook main
 void LuaDebugger::hookDebug(lua_Debug *ar)
 {
@@ -119,11 +126,11 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 	case LUA_HOOKCALL:
 	case LUA_HOOKTAILCALL:
 		// break at entry point
-		/*if (s_state == DbgState::INIT_BREAK) {
+		if (m_debugState == DebugState::INIT_BREAK) {
 			brk = true;
-			s_state = DbgState::CONT;
+			m_debugState = DebugState::CONT;
 			break;
-		}*/
+		}
 		break;
 	case LUA_HOOKRET:
 		break;
@@ -149,8 +156,54 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 	}
 	if (brk) {
 		debug::writeLine(L"*** break ***");
-		//summary(L, ar);
-		//cmd_loop(L, ar);
+		//summary(ar);
+		cmdLoop(ar);
+	}
+}
+
+namespace {
+
+std::vector<std::wstring> readLine()
+{
+	HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
+	error::checkWin32Result(hStdIn != INVALID_HANDLE_VALUE, "Cannot get stdin");
+
+	wchar_t buf[1024];
+	DWORD readSize = 0;
+	BOOL ret = ::ReadConsole(hStdIn, buf, sizeof(buf), &readSize, nullptr);
+	error::checkWin32Result(ret, "ReadConsole() failed");
+	std::wstring line(buf, readSize);
+
+	// split the line
+	// "[not "]*" or [not space]+
+	std::wregex re(L"(?:\"([^\"]*)\")|(\\S+)");
+	std::wsregex_iterator iter(line.cbegin(), line.cend(), re);
+	std::wsregex_iterator end;
+	std::vector<std::wstring> result;
+	for (; iter != end; ++iter)
+	{
+		if (iter->str(1) != L"") {
+			result.emplace_back(iter->str(1));
+		}
+		else {
+			result.emplace_back(iter->str(2));
+		}
+	}
+	return result;
+}
+
+}	// namespace
+
+void LuaDebugger::cmdLoop(lua_Debug *ar)
+{
+	try {
+		std::vector<std::wstring> argv;
+		argv = readLine();
+	}
+	catch (error::Win32Error &ex) {
+		// not AllocConsole()-ed?
+		debug::writeLine(L"Lua Debugger cannot read from stdin.");
+		debug::writeLine(L"");
 	}
 }
 

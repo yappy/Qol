@@ -25,8 +25,18 @@ public:
 	void pcall(int narg, int nret, int instLimit);
 
 private:
+	enum class DebugState {
+		CONT,			// only bp or error
+		INIT_BREAK,		// line event (once)
+		STEP_IN,		// line or call event
+		STEP_OUT,		// ret event
+		STEP_OVER,		// line event, if call-ret count == 0
+	};
+
 	lua_State *m_L;
 	bool m_debugEnable;
+
+	DebugState m_debugState = DebugState::CONT;
 	std::unordered_map<std::string, ChunkDebugInfo> m_debugInfo;
 
 	void hook(lua_Debug *ar);
@@ -35,6 +45,8 @@ private:
 
 	static int msghandler(lua_State *L);
 	static void hookRaw(lua_State *L, lua_Debug *ar);
+
+	void cmdLoop(lua_Debug *ar);
 };
 
 }
