@@ -44,6 +44,7 @@ void LuaDebugger::pcall(int narg, int nret, int instLimit, bool debug)
 	int mask = debug ?
 		(LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT) : 
 		LUA_MASKCOUNT;
+	lua_Hook hook = debug ? hookDebug : hookNonDebug;
 	{
 		LuaHook hook(this, hook, mask, instLimit);
 		int base = lua_gettop(m_lua) - narg;	// function index
@@ -76,7 +77,7 @@ int LuaDebugger::msghandler(lua_State *L)
 	return 1;  /* return the traceback */
 }
 
-void LuaDebugger::hook(lua_State *L, lua_Debug *ar)
+void LuaDebugger::hookDebug(lua_State *L, lua_Debug *ar)
 {
 	bool brk = false;
 	switch (ar->event) {
@@ -108,11 +109,24 @@ void LuaDebugger::hook(lua_State *L, lua_Debug *ar)
 	case LUA_HOOKCOUNT:
 		luaL_error(L, "Instruction count exceeded");
 		break;
+	default:
+		ASSERT(false);
 	}
 	if (brk) {
 		debug::writeLine(L"*** break ***");
 		//summary(L, ar);
 		//cmd_loop(L, ar);
+	}
+}
+
+void LuaDebugger::hookNonDebug(lua_State *L, lua_Debug *ar)
+{
+	switch (ar->event) {
+	case LUA_HOOKCOUNT:
+		luaL_error(L, "Instruction count exceeded");
+		break;
+	default:
+		ASSERT(false);
 	}
 }
 
