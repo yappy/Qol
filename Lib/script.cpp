@@ -181,6 +181,9 @@ void Lua::loadFile(const wchar_t *fileName, int instLimit)
 	if (ret != LUA_OK) {
 		throw LuaError("Load script failed", L);
 	}
+	// prepare debug info
+	m_dbg->loadDebugInfo(cvtName.get(),
+		reinterpret_cast<const char *>(buf.data()), buf.size());
 	// call it
 	pcallInternal(0, LUA_MULTRET, instLimit);
 }

@@ -41,6 +41,27 @@ lua_State *LuaDebugger::getLuaState() const
 	return m_L;
 }
 
+void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
+{
+	ChunkDebugInfo info;
+	info.chunkName = name;
+
+	// split src to lines
+	std::string srcStr(src, size);
+	std::regex re("([^\\r\\n]*)\\r?\\n?");
+	std::smatch m;
+	std::sregex_iterator iter(srcStr.cbegin(), srcStr.cend(), re);
+	std::sregex_iterator end;
+	for (; iter != end; ++iter) {
+		// 0: all, 1: ([^\r\n]*)
+		info.srcLines.emplace_back(iter->str(1));
+	}
+
+	// TODO: get valid lines
+
+	m_debugInfo.emplace_back(std::move(info));
+}
+
 void LuaDebugger::pcall(int narg, int nret, int instLimit)
 {
 	lua_State *L = m_L;
@@ -285,6 +306,35 @@ void LuaDebugger::cmdLoop(lua_Debug *ar)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Helpers
+///////////////////////////////////////////////////////////////////////////////
+
+void LuaDebugger::printSrcLines(const char *name, int line, int range)
+{
+	// find info.chunkName == name
+	const auto &info = std::find_if(m_debugInfo.cbegin(), m_debugInfo.cend(),
+		[name](const ChunkDebugInfo &cdi) { return (cdi.chunkName == name); });
+
+	if (info != m_debugInfo.cend()) {
+		line--;
+		int uh = (range - 1) / 2;
+		int dh = range - uh - 1;
+		int beg = line - uh;
+		beg = (beg < 0) ? 0 : beg;
+		int end = line + dh;
+		int ssize = static_cast<int>(info->srcLines.size());
+		end = (end >= ssize) ? ssize - 1 : end;
+		for (int i = beg; i <= end; i++) {
+			char mark = (i == line) ? '>' : ' ';
+			debug::writef("%c%6d: %s", mark, i + 1, info->srcLines.at(i).c_str());
+		}
+	}
+	else {
+		debug::writef("Debug info not found: %s", name);
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Commands
 ///////////////////////////////////////////////////////////////////////////////
 bool LuaDebugger::help(const wchar_t *usage, const std::vector<std::wstring> &argv)
@@ -324,7 +374,7 @@ bool LuaDebugger::bt(const wchar_t *usage, const std::vector<std::wstring> &argv
 		debug::writef("what=%s", ar.what);
 		debug::writef("source=%s", ar.source);
 		debug::writef("curentline=%d", ar.currentline);
-		//print_src(ar.currentline, 21);
+		printSrcLines(ar.source, ar.currentline, 21);
 		//print_locals(L, &ar);
 		lv++;
 	}

@@ -9,6 +9,8 @@ namespace debugger {
 
 // TODO
 struct ChunkDebugInfo {
+	// must be unique
+	std::string chunkName;
 	// source code lines array
 	std::vector<std::string> srcLines;
 	// each line is valid? (can put breakpoint?)
@@ -23,6 +25,8 @@ public:
 	// TODO
 	void loadDebugInfo(const char *name, const char *src, size_t size);
 	void pcall(int narg, int nret, int instLimit);
+
+	void printSrcLines(const char *name, int line, int range);
 
 	bool help(const wchar_t *usage, const std::vector<std::wstring> &argv);
 	bool bt(const wchar_t *usage, const std::vector<std::wstring> &argv);
@@ -41,7 +45,7 @@ private:
 	bool m_debugEnable;
 
 	DebugState m_debugState = DebugState::CONT;
-	std::unordered_map<std::string, ChunkDebugInfo> m_debugInfo;
+	std::vector<ChunkDebugInfo> m_debugInfo;
 
 	void hook(lua_Debug *ar);
 	void hookNonDebug(lua_Debug *ar);
