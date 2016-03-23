@@ -114,8 +114,110 @@ void LuaDebugger::hookNonDebug(lua_Debug *ar)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Debugger
 ///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+namespace {
+
+// Commands
+namespace cmd {
+bool help(const wchar_t *usage, const std::vector<std::wstring> &argv);
+bool bt(const wchar_t *usage, const std::vector<std::wstring> &argv);
+bool cont(const wchar_t *usage, const std::vector<std::wstring> &argv);
+}	// cmd
+
+struct CmdEntry {
+	const wchar_t *cmd;
+	bool (*exec)(const wchar_t *usage, const std::vector<std::wstring> &argv);
+	const wchar_t *usage;
+	const wchar_t *brief;
+	const wchar_t *description;
+};
+
+const CmdEntry CmdList[] = {
+	{
+		L"help", cmd::help,
+		L"help [<cmd>]", L"Show command list or show specific command help",
+		L"コマンド一覧を表示します。引数にコマンド名を指定すると詳細な説明を表示します。"
+	},
+	{
+		L"bt", cmd::bt,
+		L"bt", L"Show backtrace (call stack)",
+		L"バックトレース(関数呼び出し履歴)を表示します。"
+	},
+	{
+		L"fr", nullptr,
+		L"fr [<frame_no>]", L"Show detailed info of specific frame on call stack",
+		L""
+	},
+	{
+		L"src", nullptr,
+		L"src [<file> <line>]", L"Show source file list or show specific file",
+		L""
+	},
+	{
+		L"cont", cmd::cont,
+		L"cont", L"Continue the program",
+		L"実行を続行します。"
+	},
+	{
+		L"si", nullptr,
+		L"si", L"Step in",
+		L"TODO"
+	},
+	{
+		L"sout", nullptr,
+		L"sout", L"Step out",
+		L"TODO"
+	},
+	{
+		L"bp", nullptr,
+		L"bp [line]", L"Set/Show breakpoint",
+		L"TODO"
+	},
+};
+
+const CmdEntry *searchCommandList(const std::wstring &cmd)
+{
+	for (const auto &entry : CmdList) {
+		if (cmd == entry.cmd) {
+			return &entry;
+		}
+	}
+	return nullptr;
+}
+
+std::vector<std::wstring> readLine()
+{
+	HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
+	error::checkWin32Result(hStdIn != INVALID_HANDLE_VALUE, "GetStdHandle() failed");
+
+	wchar_t buf[1024];
+	DWORD readSize = 0;
+	BOOL ret = ::ReadConsole(hStdIn, buf, sizeof(buf), &readSize, nullptr);
+	error::checkWin32Result(ret != 0, "ReadConsole() failed");
+	std::wstring line(buf, readSize);
+
+	// split the line
+	// "[not "]*" or [not space]+
+	std::wregex re(L"(?:\"([^\"]*)\")|(\\S+)");
+	std::wsregex_iterator iter(line.cbegin(), line.cend(), re);
+	std::wsregex_iterator end;
+	std::vector<std::wstring> result;
+	for (; iter != end; ++iter)
+	{
+		if (iter->str(1) != L"") {
+			result.emplace_back(iter->str(1));
+		}
+		else {
+			result.emplace_back(iter->str(2));
+		}
+	}
+	return result;
+}
+
+}	// namespace
 
 // debug mode hook main
 void LuaDebugger::hookDebug(lua_Debug *ar)
@@ -155,56 +257,73 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 		ASSERT(false);
 	}
 	if (brk) {
-		debug::writeLine(L"*** break ***");
+		debug::writeLine(L"[LuaDbg] ***** break *****");
+		debug::writeLine(L"[LuaDbg] \"help\" command for usage");
 		//summary(ar);
 		cmdLoop(ar);
 	}
 }
 
-namespace {
-
-std::vector<std::wstring> readLine()
-{
-	HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
-	error::checkWin32Result(hStdIn != INVALID_HANDLE_VALUE, "Cannot get stdin");
-
-	wchar_t buf[1024];
-	DWORD readSize = 0;
-	BOOL ret = ::ReadConsole(hStdIn, buf, sizeof(buf), &readSize, nullptr);
-	error::checkWin32Result(ret, "ReadConsole() failed");
-	std::wstring line(buf, readSize);
-
-	// split the line
-	// "[not "]*" or [not space]+
-	std::wregex re(L"(?:\"([^\"]*)\")|(\\S+)");
-	std::wsregex_iterator iter(line.cbegin(), line.cend(), re);
-	std::wsregex_iterator end;
-	std::vector<std::wstring> result;
-	for (; iter != end; ++iter)
-	{
-		if (iter->str(1) != L"") {
-			result.emplace_back(iter->str(1));
-		}
-		else {
-			result.emplace_back(iter->str(2));
-		}
-	}
-	return result;
-}
-
-}	// namespace
-
 void LuaDebugger::cmdLoop(lua_Debug *ar)
 {
 	try {
-		std::vector<std::wstring> argv;
-		argv = readLine();
+		while (1) {
+			debug::write(L"[LuaDbg] > ");
+			std::vector<std::wstring> argv = readLine();
+			if (argv.empty()) {
+				continue;
+			}
+			const CmdEntry *entry = searchCommandList(argv[0]);
+			if (entry == nullptr) {
+				wprintf(L"[LuaDbg] Command not found: %s\n", argv[0].c_str());
+				continue;
+			}
+			if (entry->exec(entry->usage, argv)) {
+				break;
+			}
+			debug::writeLine();
+		}
 	}
-	catch (error::Win32Error &ex) {
+	catch (error::Win32Error &) {
 		// not AllocConsole()-ed?
 		debug::writeLine(L"Lua Debugger cannot read from stdin.");
-		debug::writeLine(L"");
+		debug::writeLine(L"continue...");
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Commands
+///////////////////////////////////////////////////////////////////////////////
+bool cmd::help(const wchar_t *usage, const std::vector<std::wstring> &argv)
+{
+	if (argv.size() == 1) {
+		for (const auto &entry : CmdList) {
+			debug::writef(L"%s\n\t%s", entry.usage, entry.brief);
+		}
+	}
+	else {
+		const CmdEntry *entry = searchCommandList(argv[1]);
+		if (entry == nullptr) {
+			debug::writef(L"[LuaDbg] Command not found: %s", argv[1].c_str());
+			return false;
+		}
+		debug::writef(L"%s\nUsage: %s\n\n%s",
+			entry->brief, entry->usage, entry->description);
+	}
+	return false;
+}
+
+bool cmd::cont(const wchar_t *usage, const std::vector<std::wstring> &argv)
+{
+	debug::writeLine(L"[LuaDbg] continue...");
+	return true;
+}
+
+bool cmd::bt(const wchar_t *usage, const std::vector<std::wstring> &argv)
+{
+	// TODO
+	debug::writeLine(L"Not implemented...");
+	return false;
 }
 
 }
