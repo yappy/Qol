@@ -29,22 +29,6 @@ public:
 	}
 };
 
-// copied from lua.c
-int msghandler(lua_State *L)
-{
-	const char *msg = lua_tostring(L, 1);
-	if (msg == NULL) {  /* is error object not a string? */
-		if (luaL_callmeta(L, 1, "__tostring") &&  /* does it have a metamethod */
-			lua_type(L, -1) == LUA_TSTRING)  /* that produces a string? */
-			return 1;  /* that is the message */
-		else
-			msg = lua_pushfstring(L, "(error object is a %s value)",
-				luaL_typename(L, 1));
-	}
-	luaL_traceback(L, L, msg, 1);  /* append a standard traceback */
-	return 1;  /* return the traceback */
-}
-
 }	// namespace
 
 LuaDebugger::LuaDebugger(lua_State *L) : m_lua(L)
@@ -58,18 +42,37 @@ lua_State *LuaDebugger::getLuaState() const
 void LuaDebugger::pcall(int narg, int nret, int instLimit, bool debug)
 {
 	int mask = debug ?
-		LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT : 0;
+		(LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT) : 
+		LUA_MASKCOUNT;
 	{
 		LuaHook hook(this, hook, mask, instLimit);
-		int base = lua_gettop(m_lua) - narg;  /* function index */
-		lua_pushcfunction(m_lua, msghandler);  /* push message handler */
-		lua_insert(m_lua, base);  /* put it under function and args */
-		int ret = lua_pcall(m_lua, narg, nret, 0);
-		lua_remove(m_lua, base);  /* remove message handler from the stack */
+		int base = lua_gettop(m_lua) - narg;	// function index
+		lua_pushcfunction(m_lua, msghandler);	// push message handler
+		lua_insert(m_lua, base);				// put it under function and args
+		int ret = lua_pcall(m_lua, narg, nret, base);
+		lua_remove(m_lua, base);				// remove message handler
 		if (ret != LUA_OK) {
 			throw LuaError("Call global function failed", m_lua);
 		}
 	} // unhook
+}
+
+// will be called when lua_error occurred
+// (* Lua call stack is not unwinded yet *)
+// copied from lua.c
+int LuaDebugger::msghandler(lua_State *L)
+{
+	const char *msg = lua_tostring(L, 1);
+	if (msg == NULL) {  /* is error object not a string? */
+		if (luaL_callmeta(L, 1, "__tostring") &&  /* does it have a metamethod */
+			lua_type(L, -1) == LUA_TSTRING)  /* that produces a string? */
+			return 1;  /* that is the message */
+		else
+			msg = lua_pushfstring(L, "(error object is a %s value)",
+				luaL_typename(L, 1));
+	}
+	luaL_traceback(L, L, msg, 1);  /* append a standard traceback */
+	return 1;  /* return the traceback */
 }
 
 void LuaDebugger::hook(lua_State *L, lua_Debug *ar)
@@ -102,7 +105,7 @@ void LuaDebugger::hook(lua_State *L, lua_Debug *ar)
 		}*/
 		break;
 	case LUA_HOOKCOUNT:
-		// check instruction limit
+		luaL_error(L, "Instruction count exceeded");
 		break;
 	}
 	if (brk) {

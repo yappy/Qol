@@ -17,6 +17,7 @@ public:
 private:
 	lua_State *m_lua;
 
+	static int msghandler(lua_State *L);
 	static void hook(lua_State *L, lua_Debug *ar);
 	static void hookNonDebug(lua_State *L, lua_Debug *ar);
 };
