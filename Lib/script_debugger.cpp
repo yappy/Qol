@@ -103,7 +103,6 @@ void LuaDebugger::hook(lua_State *L, lua_Debug *ar)
 		break;
 	case LUA_HOOKCOUNT:
 		// check instruction limit
-		// check interrupt from another thread
 		break;
 	}
 	if (brk) {

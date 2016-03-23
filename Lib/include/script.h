@@ -3,6 +3,7 @@
 #include "util.h"
 #include "framework.h"
 #include <lua.hpp>
+#include "script_debugger.h"
 #include "script_export.h"
 
 namespace yappy {
@@ -24,11 +25,12 @@ private:
 class Lua : private util::noncopyable {
 public:
 	/** @brief Create new lua_State and open standard libs.
+	 * @param[in]	debugEnable		Enable debug feature
 	 * @param[in]	maxHeapSize		Max memory usage
 	 *								(only virtual address range will be reserved at first)
 	 * @param[in]	initHeapSize	Initial commit size (physical memory mapped)
 	 */
-	explicit Lua(size_t maxHeapSize, size_t initHeapSize = 1024 * 1024);
+	Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize = 1024 * 1024);
 	/** @brief Destruct lua_State.
 	 */
 	~Lua();
@@ -84,8 +86,8 @@ public:
 		lua_getglobal(L, funcName);
 		// push args
 		pushArgFunc(L);
-		// call
-		pcallWithLimit(L, narg, nret, 0, instLimit);
+		// pcall
+		pcallInternal(narg, nret, instLimit);
 		// get results
 		getRetFunc(L);
 	}
@@ -97,12 +99,15 @@ private:
 		void operator()(lua_State *L);
 	};
 
+	bool m_debugEnable;
 	util::HeapPtr m_heap;
 	std::unique_ptr<lua_State, LuaDeleter> m_lua;
+	std::unique_ptr<debugger::LuaDebugger> m_dbg;
 
+	// custom allocator
 	static void *luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize);
-	static int pcallWithLimit(lua_State *L,
-		int narg, int nret, int msgh, int instLimit);
+
+	void pcallInternal(int narg, int nret, int instLimit);
 };
 
 }

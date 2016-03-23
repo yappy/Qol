@@ -29,28 +29,6 @@ int atpanic(lua_State *L)
 	// Don't return
 }
 
-// lua_Hook which always raises an error
-void alwaysErrorHook(lua_State *L, lua_Debug *ar)
-{
-	luaL_error(L, "Execute instructions count exceeded");
-}
-
-class LuaHook : private util::noncopyable {
-public:
-	explicit LuaHook(lua_State *L, lua_Hook hook, int count) : m_lua(L)
-	{
-		if (count != 0) {
-			lua_sethook(m_lua, hook, LUA_MASKCOUNT, count);
-		}
-	}
-	~LuaHook()
-	{
-		lua_sethook(m_lua, nullptr, 0, 0);
-	}
-private:
-	lua_State *m_lua;
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // Copied from linit.c
 ///////////////////////////////////////////////////////////////////////////////
@@ -117,7 +95,8 @@ void *Lua::luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
 	}
 }
 
-Lua::Lua(size_t maxHeapSize, size_t initHeapSize)
+Lua::Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize) :
+	m_debugEnable(debugEnable)
 {
 	debug::writeLine("Initializing lua...");
 	HANDLE tmpHeap = ::HeapCreate(HeapOption, initHeapSize, maxHeapSize);
@@ -129,6 +108,7 @@ Lua::Lua(size_t maxHeapSize, size_t initHeapSize)
 		throw std::bad_alloc();
 	}
 	m_lua.reset(tmpLua);
+	m_dbg = std::make_unique<debugger::LuaDebugger>(m_lua.get());
 	debug::writeLine("Initializing lua OK");
 
 	::lua_atpanic(m_lua.get(), atpanic);
@@ -209,15 +189,9 @@ void Lua::loadFile(const wchar_t *fileName, const char *name)
 	}
 }
 
-int Lua::pcallWithLimit(lua_State *L,
-	int narg, int nret, int msgh, int instLimit)
+void Lua::pcallInternal(int narg, int nret, int instLimit)
 {
-	LuaHook hook(L, alwaysErrorHook, instLimit);
-	int ret = lua_pcall(L, narg, nret, 0);
-	if (ret != LUA_OK) {
-		throw LuaError("Call global function failed", L);
-	}
-	return ret;
+	m_dbg->pcall(narg, nret, instLimit, m_debugEnable);
 }
 
 }
