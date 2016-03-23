@@ -24,6 +24,10 @@ public:
 	void loadDebugInfo(const char *name, const char *src, size_t size);
 	void pcall(int narg, int nret, int instLimit);
 
+	bool help(const wchar_t *usage, const std::vector<std::wstring> &argv);
+	bool bt(const wchar_t *usage, const std::vector<std::wstring> &argv);
+	bool cont(const wchar_t *usage, const std::vector<std::wstring> &argv);
+
 private:
 	enum class DebugState {
 		CONT,			// only bp or error

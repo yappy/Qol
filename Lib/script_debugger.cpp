@@ -120,16 +120,9 @@ void LuaDebugger::hookNonDebug(lua_Debug *ar)
 ///////////////////////////////////////////////////////////////////////////////
 namespace {
 
-// Commands
-namespace cmd {
-bool help(const wchar_t *usage, const std::vector<std::wstring> &argv);
-bool bt(const wchar_t *usage, const std::vector<std::wstring> &argv);
-bool cont(const wchar_t *usage, const std::vector<std::wstring> &argv);
-}	// cmd
-
 struct CmdEntry {
 	const wchar_t *cmd;
-	bool (*exec)(const wchar_t *usage, const std::vector<std::wstring> &argv);
+	bool (LuaDebugger::*exec)(const wchar_t *usage, const std::vector<std::wstring> &argv);
 	const wchar_t *usage;
 	const wchar_t *brief;
 	const wchar_t *description;
@@ -137,12 +130,12 @@ struct CmdEntry {
 
 const CmdEntry CmdList[] = {
 	{
-		L"help", cmd::help,
+		L"help", &LuaDebugger::help,
 		L"help [<cmd>]", L"Show command list or show specific command help",
 		L"コマンド一覧を表示します。引数にコマンド名を指定すると詳細な説明を表示します。"
 	},
 	{
-		L"bt", cmd::bt,
+		L"bt", &LuaDebugger::bt,
 		L"bt", L"Show backtrace (call stack)",
 		L"バックトレース(関数呼び出し履歴)を表示します。"
 	},
@@ -157,7 +150,7 @@ const CmdEntry CmdList[] = {
 		L""
 	},
 	{
-		L"cont", cmd::cont,
+		L"cont", &LuaDebugger::cont,
 		L"cont", L"Continue the program",
 		L"実行を続行します。"
 	},
@@ -278,7 +271,7 @@ void LuaDebugger::cmdLoop(lua_Debug *ar)
 				wprintf(L"[LuaDbg] Command not found: %s\n", argv[0].c_str());
 				continue;
 			}
-			if (entry->exec(entry->usage, argv)) {
+			if ((this->*(entry->exec))(entry->usage, argv)) {
 				break;
 			}
 			debug::writeLine();
@@ -294,7 +287,7 @@ void LuaDebugger::cmdLoop(lua_Debug *ar)
 ///////////////////////////////////////////////////////////////////////////////
 // Commands
 ///////////////////////////////////////////////////////////////////////////////
-bool cmd::help(const wchar_t *usage, const std::vector<std::wstring> &argv)
+bool LuaDebugger::help(const wchar_t *usage, const std::vector<std::wstring> &argv)
 {
 	if (argv.size() == 1) {
 		for (const auto &entry : CmdList) {
@@ -313,16 +306,28 @@ bool cmd::help(const wchar_t *usage, const std::vector<std::wstring> &argv)
 	return false;
 }
 
-bool cmd::cont(const wchar_t *usage, const std::vector<std::wstring> &argv)
+bool LuaDebugger::cont(const wchar_t *usage, const std::vector<std::wstring> &argv)
 {
 	debug::writeLine(L"[LuaDbg] continue...");
 	return true;
 }
 
-bool cmd::bt(const wchar_t *usage, const std::vector<std::wstring> &argv)
+bool LuaDebugger::bt(const wchar_t *usage, const std::vector<std::wstring> &argv)
 {
-	// TODO
-	debug::writeLine(L"Not implemented...");
+	lua_State *L = m_L;
+	int lv = 0;
+	lua_Debug ar = { 0 };
+	while (lua_getstack(L, lv, &ar)) {
+		debug::writef("[frame #%d]", lv);
+		lua_getinfo(L, "nSltu", &ar);
+		debug::writef("name=%s", ar.name);
+		debug::writef("what=%s", ar.what);
+		debug::writef("source=%s", ar.source);
+		debug::writef("curentline=%d", ar.currentline);
+		//print_src(ar.currentline, 21);
+		//print_locals(L, &ar);
+		lv++;
+	}
 	return false;
 }
 
