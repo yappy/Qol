@@ -7,7 +7,7 @@ MainScene::MainScene(MyApp *app) : m_app(app), m_lua(true, LuaHeapSize)
 	m_lua.loadGraphLib(m_app);
 	m_lua.loadSoundLib(m_app);
 
-	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
+	m_lua.loadFile(L"../sampledata/test.lua", LuaInstLimit);
 
 	m_lua.callWithResourceLib("load", m_app);
 }
@@ -34,7 +34,7 @@ void MainScene::update()
 		updateLoadStatus();
 		if (isLoadCompleted()) {
 			m_loading = false;
-			m_lua.callGlobal("start");
+			m_lua.callGlobal("start", LuaInstLimit);
 		}
 		else {
 			return;
@@ -43,7 +43,7 @@ void MainScene::update()
 
 	auto keys = m_app->input().getKeys();
 
-	m_lua.callGlobal("update", 0, [&keys](lua_State *L) {
+	m_lua.callGlobal("update", LuaInstLimit, [&keys](lua_State *L) {
 		// arg1: key input table str->bool
 		const int Count = static_cast<int>(keys.size());
 		lua_createtable(L, 0, Count);
@@ -71,5 +71,5 @@ void MainScene::render()
 		// Loading screen
 		return;
 	}
-	m_lua.callGlobal("draw");
+	m_lua.callGlobal("draw", LuaInstLimit);
 }

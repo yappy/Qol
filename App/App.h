@@ -63,6 +63,8 @@ protected:
 private:
 	// 4MiB
 	static const size_t LuaHeapSize = 4 * 1024 * 1024;
+	// instruction execution limit
+	static const int LuaInstLimit = 100000;
 
 	MyApp *m_app;
 	bool m_loading = false;

@@ -57,8 +57,9 @@ void LuaDebugger::pcall(int narg, int nret, int instLimit, bool debug)
 	} // unhook
 }
 
-// will be called when lua_error occurred
+// called when lua_error occurred
 // (* Lua call stack is not unwinded yet *)
+// return errmsg + backtrace
 // copied from lua.c
 int LuaDebugger::msghandler(lua_State *L)
 {

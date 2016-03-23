@@ -167,26 +167,22 @@ void Lua::loadSoundLib(framework::Application *app)
 	lua_setglobal(L, "sound");
 }
 
-void Lua::loadFile(const wchar_t *fileName, const char *name)
+void Lua::loadFile(const wchar_t *fileName, int instLimit)
 {
 	lua_State *L = m_lua.get();
 
 	file::Bytes buf = file::loadFile(fileName);
 
-	// Use fileName if name is nullptr
+	// push chunk function
 	auto cvtName = util::wc2utf8(fileName);
-	name = (name == nullptr) ? cvtName.get() : name;
 	int ret = ::luaL_loadbufferx(L,
 		reinterpret_cast<const char *>(buf.data()), buf.size(),
-		name, "t");
+		cvtName.get(), "t");
 	if (ret != LUA_OK) {
 		throw LuaError("Load script failed", L);
 	}
-
-	ret = ::lua_pcall(L, 0, LUA_MULTRET, 0);
-	if (ret != LUA_OK) {
-		throw LuaError("Execute chunk failed", L);
-	}
+	// call it
+	pcallInternal(0, LUA_MULTRET, instLimit);
 }
 
 void Lua::pcallInternal(int narg, int nret, int instLimit)

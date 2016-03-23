@@ -48,10 +48,9 @@ public:
 
 	/** @brief Load script file and eval it.
 	 * @param[in] fileName	Script file name.
-	 * @param[in] name		Chunk name. It will be used by Lua runtime for debug message.
-	 *						If null, fileName is used.
+	 * @param[in] instLimit		Instruction count limit for prevent inf loop. (no limit if 0)
 	 */
-	void loadFile(const wchar_t *fileName, const char *name = nullptr);
+	void loadFile(const wchar_t *fileName, int instLimit = 0);
 
 	struct doNothing {
 		void operator ()(lua_State *L) {}
