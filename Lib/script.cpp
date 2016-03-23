@@ -108,7 +108,7 @@ Lua::Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize) :
 		throw std::bad_alloc();
 	}
 	m_lua.reset(tmpLua);
-	m_dbg = std::make_unique<debugger::LuaDebugger>(m_lua.get());
+	m_dbg = std::make_unique<debugger::LuaDebugger>(m_lua.get(), debugEnable);
 	debug::writeLine("Initializing lua OK");
 
 	::lua_atpanic(m_lua.get(), atpanic);
@@ -187,7 +187,7 @@ void Lua::loadFile(const wchar_t *fileName, int instLimit)
 
 void Lua::pcallInternal(int narg, int nret, int instLimit)
 {
-	m_dbg->pcall(narg, nret, instLimit, m_debugEnable);
+	m_dbg->pcall(narg, nret, instLimit);
 }
 
 }

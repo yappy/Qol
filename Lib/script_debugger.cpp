@@ -31,29 +31,30 @@ public:
 
 }	// namespace
 
-LuaDebugger::LuaDebugger(lua_State *L) : m_lua(L)
+LuaDebugger::LuaDebugger(lua_State *L, bool debugEnable) :
+	m_L(L), m_debugEnable(debugEnable)
 {}
 
 lua_State *LuaDebugger::getLuaState() const
 {
-	return m_lua;
+	return m_L;
 }
 
-void LuaDebugger::pcall(int narg, int nret, int instLimit, bool debug)
+void LuaDebugger::pcall(int narg, int nret, int instLimit)
 {
-	int mask = debug ?
+	lua_State *L = m_L;
+	int mask = m_debugEnable ?
 		(LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT) : 
 		LUA_MASKCOUNT;
-	lua_Hook hook = debug ? hookDebug : hookNonDebug;
 	{
-		LuaHook hook(this, hook, mask, instLimit);
-		int base = lua_gettop(m_lua) - narg;	// function index
-		lua_pushcfunction(m_lua, msghandler);	// push message handler
-		lua_insert(m_lua, base);				// put it under function and args
-		int ret = lua_pcall(m_lua, narg, nret, base);
-		lua_remove(m_lua, base);				// remove message handler
+		LuaHook hook(this, hookRaw, mask, instLimit);
+		int base = lua_gettop(L) - narg;	// function index
+		lua_pushcfunction(L, msghandler);	// push message handler
+		lua_insert(L, base);				// put it under function and args
+		int ret = lua_pcall(L, narg, nret, base);
+		lua_remove(L, base);				// remove message handler
 		if (ret != LUA_OK) {
-			throw LuaError("Call global function failed", m_lua);
+			throw LuaError("Call global function failed", L);
 		}
 	} // unhook
 }
@@ -77,8 +78,42 @@ int LuaDebugger::msghandler(lua_State *L)
 	return 1;  /* return the traceback */
 }
 
-void LuaDebugger::hookDebug(lua_State *L, lua_Debug *ar)
+// static raw callback => non-static hook()
+void LuaDebugger::hookRaw(lua_State *L, lua_Debug *ar)
 {
+	ASSERT(s_dbg != nullptr);
+	ASSERT(s_dbg->m_L == L);
+	s_dbg->hook(ar);
+}
+
+// switch to hookDebug() or hookNonDebug()
+void LuaDebugger::hook(lua_Debug *ar)
+{
+	if (m_debugEnable) {
+		hookDebug(ar);
+	}
+	else {
+		hookNonDebug(ar);
+	}
+}
+
+// non-debug mode main
+void LuaDebugger::hookNonDebug(lua_Debug *ar)
+{
+	lua_State *L = m_L;
+	switch (ar->event) {
+	case LUA_HOOKCOUNT:
+		luaL_error(L, "Instruction count exceeded");
+		break;
+	default:
+		ASSERT(false);
+	}
+}
+
+// debug mode hook main
+void LuaDebugger::hookDebug(lua_Debug *ar)
+{
+	lua_State *L = m_L;
 	bool brk = false;
 	switch (ar->event) {
 	case LUA_HOOKCALL:
@@ -116,17 +151,6 @@ void LuaDebugger::hookDebug(lua_State *L, lua_Debug *ar)
 		debug::writeLine(L"*** break ***");
 		//summary(L, ar);
 		//cmd_loop(L, ar);
-	}
-}
-
-void LuaDebugger::hookNonDebug(lua_State *L, lua_Debug *ar)
-{
-	switch (ar->event) {
-	case LUA_HOOKCOUNT:
-		luaL_error(L, "Instruction count exceeded");
-		break;
-	default:
-		ASSERT(false);
 	}
 }
 
