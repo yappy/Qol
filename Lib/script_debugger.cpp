@@ -10,31 +10,47 @@ namespace debugger {
 
 namespace {
 
-// for callbacks
-LuaDebugger *s_dbg = nullptr;
+struct ExtraSpace {
+	LuaDebugger *dbg;
+};
+static_assert(sizeof(ExtraSpace) <= LUA_EXTRASPACE,
+	"lua extra space is not enough");
+
+inline ExtraSpace &extra(lua_State *L)
+{
+	void *extra = lua_getextraspace(L);
+	return *reinterpret_cast<ExtraSpace *>(extra);
+}
 
 // safe unset hook
 class LuaHook : private util::noncopyable {
 public:
-	explicit LuaHook(LuaDebugger *dbg, lua_Hook hook, int mask, int count)
+	explicit LuaHook(LuaDebugger *dbg, lua_Hook hook, int mask, int count) :
+		m_dbg(dbg)
 	{
-		ASSERT(s_dbg == nullptr);
-		s_dbg = dbg;
-		lua_sethook(dbg->getLuaState(), hook, mask, count);
+		lua_State *L = m_dbg->getLuaState();
+		ASSERT(extra(L).dbg == nullptr);
+		extra(L).dbg = dbg;
+		lua_sethook(L, hook, mask, count);
 	}
 	~LuaHook()
 	{
-		ASSERT(s_dbg != nullptr);
-		lua_sethook(s_dbg->getLuaState(), nullptr, 0, 0);
-		s_dbg = nullptr;
+		lua_State *L = m_dbg->getLuaState();
+		ASSERT(extra(L).dbg == m_dbg);
+		lua_sethook(L, nullptr, 0, 0);
+		extra(L).dbg = nullptr;
 	}
+private:
+	LuaDebugger *m_dbg;
 };
 
 }	// namespace
 
 LuaDebugger::LuaDebugger(lua_State *L, bool debugEnable) :
 	m_L(L), m_debugEnable(debugEnable)
-{}
+{
+	extra(L).dbg = nullptr;
+}
 
 lua_State *LuaDebugger::getLuaState() const
 {
@@ -105,9 +121,7 @@ int LuaDebugger::msghandler(lua_State *L)
 // static raw callback => non-static hook()
 void LuaDebugger::hookRaw(lua_State *L, lua_Debug *ar)
 {
-	ASSERT(s_dbg != nullptr);
-	ASSERT(s_dbg->m_L == L);
-	s_dbg->hook(ar);
+	extra(L).dbg->hook(ar);
 }
 
 // switch to hookDebug() or hookNonDebug()
