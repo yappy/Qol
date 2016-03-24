@@ -58,6 +58,7 @@ private:
 	static void hookRaw(lua_State *L, lua_Debug *ar);
 
 	void cmdLoop(lua_Debug *ar);
+	void summaryOnBreak(lua_Debug *ar);
 	void printSrcLines(const char *name, int line, int range);
 	void print_locals(lua_Debug *ar, int maxDepth, bool skipNoName);
 };

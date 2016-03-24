@@ -294,9 +294,10 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 		ASSERT(false);
 	}
 	if (brk) {
+		debug::writeLine();
 		debug::writeLine(L"[LuaDbg] ***** break *****");
+		summaryOnBreak(ar);
 		debug::writeLine(L"[LuaDbg] \"help\" command for usage");
-		//summary(ar);
 		cmdLoop(ar);
 	}
 }
@@ -331,6 +332,16 @@ void LuaDebugger::cmdLoop(lua_Debug *ar)
 ///////////////////////////////////////////////////////////////////////////////
 // Helpers
 ///////////////////////////////////////////////////////////////////////////////
+
+void LuaDebugger::summaryOnBreak(lua_Debug *ar)
+{
+	lua_State *L = m_L;
+	lua_getinfo(L, "nSltu", ar);
+	const char *name = (ar->name == nullptr) ? "?" : ar->name;
+	debug::writef("%s (%s) %s:%d",
+		name, ar->what, ar->source, ar->currentline);
+	printSrcLines(ar->source, ar->currentline, DefSrcLines);
+}
 
 void LuaDebugger::printSrcLines(const char *name, int line, int range)
 {
