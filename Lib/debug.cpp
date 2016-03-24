@@ -29,6 +29,12 @@ bool enableConsoleOutput() noexcept
 	}
 	BOOL ret = ::AllocConsole();
 	if (ret) {
+		HANDLE hOut = ::GetStdHandle(STD_OUTPUT_HANDLE);
+		COORD maxSize = GetLargestConsoleWindowSize(hOut);
+		COORD bufSize = { 80, maxSize.Y };
+		SMALL_RECT rect = { 0, 0, bufSize.X - 1, maxSize.Y * 3 / 4 };
+		SetConsoleScreenBufferSize(hOut, bufSize);
+		SetConsoleWindowInfo(hOut, TRUE, &rect);
 		s_consoleOut = true;
 	}
 	return s_consoleOut;
