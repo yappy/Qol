@@ -26,12 +26,10 @@ public:
 	void loadDebugInfo(const char *name, const char *src, size_t size);
 	void pcall(int narg, int nret, int instLimit);
 
-	void printSrcLines(const char *name, int line, int range);
-	void print_locals(lua_Debug *ar, int depth, bool skipNoName);
-
 	bool help(const wchar_t *usage, const std::vector<std::wstring> &argv);
 	bool bt(const wchar_t *usage, const std::vector<std::wstring> &argv);
 	bool cont(const wchar_t *usage, const std::vector<std::wstring> &argv);
+	bool si(const wchar_t *usage, const std::vector<std::wstring> &argv);
 
 private:
 	enum class DebugState {
@@ -58,6 +56,8 @@ private:
 	static void hookRaw(lua_State *L, lua_Debug *ar);
 
 	void cmdLoop(lua_Debug *ar);
+	void printSrcLines(const char *name, int line, int range);
+	void print_locals(lua_Debug *ar, int depth, bool skipNoName);
 };
 
 }

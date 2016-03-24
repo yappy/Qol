@@ -190,9 +190,9 @@ const CmdEntry CmdList[] = {
 		L"実行を続行します。"
 	},
 	{
-		L"si", nullptr,
+		L"si", &LuaDebugger::si,
 		L"si", L"Step in",
-		L"TODO"
+		L"新たな行に到達するまで実行します。関数呼び出しがあった場合、その中に入ります。"
 	},
 	{
 		L"sout", nullptr,
@@ -254,25 +254,24 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 	bool brk = false;
 	switch (ar->event) {
 	case LUA_HOOKCALL:
+		break;
 	case LUA_HOOKTAILCALL:
-		// break at entry point
-		if (m_debugState == DebugState::INIT_BREAK) {
-			brk = true;
-			m_debugState = DebugState::CONT;
-			break;
-		}
 		break;
 	case LUA_HOOKRET:
 		break;
 	case LUA_HOOKLINE:
-		// step in
-		/*if (s_state == DbgState::STEP_IN) {
+		// break at entry point
+		if (m_debugState == DebugState::INIT_BREAK) {
 			brk = true;
-			s_state = DbgState::CONT;
+			break;
+		}
+		// step in
+		if (m_debugState == DebugState::STEP_IN) {
+			brk = true;
 			break;
 		}
 		// search breakpoints
-		lua_getinfo(L, "l", ar);
+		/*lua_getinfo(L, "l", ar);
 		if (s_bp.find(ar->currentline) != s_bp.end()) {
 			brk = true;
 			break;
@@ -386,12 +385,6 @@ bool LuaDebugger::help(const wchar_t *usage, const std::vector<std::wstring> &ar
 	return false;
 }
 
-bool LuaDebugger::cont(const wchar_t *usage, const std::vector<std::wstring> &argv)
-{
-	debug::writeLine(L"[LuaDbg] continue...");
-	return true;
-}
-
 bool LuaDebugger::bt(const wchar_t *usage, const std::vector<std::wstring> &argv)
 {
 	lua_State *L = m_L;
@@ -409,6 +402,20 @@ bool LuaDebugger::bt(const wchar_t *usage, const std::vector<std::wstring> &argv
 		lv++;
 	}
 	return false;
+}
+
+bool LuaDebugger::cont(const wchar_t *usage, const std::vector<std::wstring> &argv)
+{
+	debug::writeLine(L"[LuaDbg] continue...");
+	m_debugState = DebugState::CONT;
+	return true;
+}
+
+bool LuaDebugger::si(const wchar_t *usage, const std::vector<std::wstring> &argv)
+{
+	debug::writeLine(L"[LuaDbg] step in...");
+	m_debugState = DebugState::STEP_IN;
+	return true;
 }
 
 }
