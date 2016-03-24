@@ -193,5 +193,51 @@ void Lua::pcallInternal(int narg, int nret, int instLimit)
 	m_dbg->pcall(narg, nret, instLimit);
 }
 
+std::string luaValueToStr(lua_State *L, int ind, int maxDepth, int depth)
+{
+	std::string result;
+
+	int tind = lua_absindex(L, ind);
+
+	int type = lua_type(L, ind);
+	if (type == LUA_TNONE) {
+		throw std::logic_error("invalid index: " + std::to_string(ind));
+	}
+	const char *typestr = lua_typename(L, type);
+	// copy and tostring it
+	lua_pushvalue(L, ind);
+	const char *valstr = lua_tostring(L, -1);
+	valstr = (valstr == NULL) ? "" : valstr;
+	// pop copy
+	lua_pop(L, 1);
+	// boolean cannot be tostring
+	if (type == LUA_TBOOLEAN) {
+		valstr = lua_toboolean(L, ind) ? "true" : "false";
+	}
+
+	result += "(";
+	result += typestr;
+	result += ") ";
+	result += valstr;
+	if (type == LUA_TTABLE && depth < maxDepth) {
+		lua_pushnil(L);
+		while (lua_next(L, tind) != 0) {
+			// key:-2, value:-1
+			std::string key = luaValueToStr(L, -2, maxDepth, depth + 1);
+			std::string val = luaValueToStr(L, -1, maxDepth, depth + 1);
+			result += "\n";
+			for (int i = 0; i < depth + 1; i++) {
+				result += "    ";
+			}
+			result += key;
+			result += " = ";
+			result += val;
+			// pop value, keep key
+			lua_pop(L, 1);
+		}
+	}
+	return result;
+}
+
 }
 }

@@ -334,6 +334,22 @@ void LuaDebugger::printSrcLines(const char *name, int line, int range)
 	}
 }
 
+void LuaDebugger::print_locals(lua_Debug *ar, int depth, bool skipNoName)
+{
+	lua_State *L = m_L;
+	int n = 1;
+	const char *name = nullptr;
+	while ((name = lua_getlocal(L, ar, n)) != nullptr) {
+		if (name[0] != '(') {
+			debug::writef("[%3d] %s", n, name);
+			debug::writeLine(luaValueToStr(L, -1, 0, depth).c_str());
+		}
+		// pop value
+		lua_pop(L, 1);
+		n++;
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Commands
 ///////////////////////////////////////////////////////////////////////////////

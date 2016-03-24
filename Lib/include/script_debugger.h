@@ -27,6 +27,7 @@ public:
 	void pcall(int narg, int nret, int instLimit);
 
 	void printSrcLines(const char *name, int line, int range);
+	void print_locals(lua_Debug *ar, int depth, bool skipNoName);
 
 	bool help(const wchar_t *usage, const std::vector<std::wstring> &argv);
 	bool bt(const wchar_t *usage, const std::vector<std::wstring> &argv);
@@ -40,6 +41,8 @@ private:
 		STEP_OUT,		// ret event
 		STEP_OVER,		// line event, if call-ret count == 0
 	};
+
+	static const int DefTableDepth = 3;
 
 	lua_State *m_L;
 	bool m_debugEnable;
