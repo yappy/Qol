@@ -28,6 +28,7 @@ public:
 
 	bool help(const wchar_t *usage, const std::vector<std::wstring> &argv);
 	bool bt(const wchar_t *usage, const std::vector<std::wstring> &argv);
+	bool fr(const wchar_t *usage, const std::vector<std::wstring> &argv);
 	bool cont(const wchar_t *usage, const std::vector<std::wstring> &argv);
 	bool si(const wchar_t *usage, const std::vector<std::wstring> &argv);
 
@@ -40,6 +41,7 @@ private:
 		STEP_OVER,		// line event, if call-ret count == 0
 	};
 
+	static const int DefSrcLines = 21;
 	static const int DefTableDepth = 3;
 
 	lua_State *m_L;
@@ -57,7 +59,7 @@ private:
 
 	void cmdLoop(lua_Debug *ar);
 	void printSrcLines(const char *name, int line, int range);
-	void print_locals(lua_Debug *ar, int depth, bool skipNoName);
+	void print_locals(lua_Debug *ar, int maxDepth, bool skipNoName);
 };
 
 }

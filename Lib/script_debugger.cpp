@@ -175,9 +175,9 @@ const CmdEntry CmdList[] = {
 		L"バックトレース(関数呼び出し履歴)を表示します。"
 	},
 	{
-		L"fr", nullptr,
+		L"fr", &LuaDebugger::fr,
 		L"fr [<frame_no>]", L"Show detailed info of specific frame on call stack",
-		L""
+		L"コールスタックのフレーム番号を指定してその詳細を表示します。"
 	},
 	{
 		L"src", nullptr,
@@ -245,6 +245,16 @@ std::vector<std::wstring> readLine()
 	return result;
 }
 
+inline int stoi_s(const std::wstring &str, int base = 10)
+{
+	size_t idx = 0;
+	int ret = std::stoi(str, &idx, base);
+	if (idx != str.size()) {
+		throw std::invalid_argument("invalid stoi argument");
+	}
+	return ret;
+}
+
 }	// namespace
 
 // debug mode hook main
@@ -302,7 +312,7 @@ void LuaDebugger::cmdLoop(lua_Debug *ar)
 			}
 			const CmdEntry *entry = searchCommandList(argv[0]);
 			if (entry == nullptr) {
-				wprintf(L"[LuaDbg] Command not found: %s\n", argv[0].c_str());
+				debug::writef(L"[LuaDbg] Command not found: %s\n", argv[0].c_str());
 				continue;
 			}
 			if ((this->*(entry->exec))(entry->usage, argv)) {
@@ -347,15 +357,16 @@ void LuaDebugger::printSrcLines(const char *name, int line, int range)
 	}
 }
 
-void LuaDebugger::print_locals(lua_Debug *ar, int depth, bool skipNoName)
+void LuaDebugger::print_locals(lua_Debug *ar, int maxDepth, bool skipNoName)
 {
 	lua_State *L = m_L;
 	int n = 1;
 	const char *name = nullptr;
+	debug::writeLine(L"Local variables:");
 	while ((name = lua_getlocal(L, ar, n)) != nullptr) {
-		if (name[0] != '(') {
-			debug::writef("[%3d] %s", n, name);
-			debug::writeLine(luaValueToStr(L, -1, 0, depth).c_str());
+		if (!skipNoName || name[0] != '(') {
+			debug::writef("[%3d] %s = %s", n, name,
+				luaValueToStr(L, -1, maxDepth, 0).c_str());
 		}
 		// pop value
 		lua_pop(L, 1);
@@ -391,15 +402,43 @@ bool LuaDebugger::bt(const wchar_t *usage, const std::vector<std::wstring> &argv
 	int lv = 0;
 	lua_Debug ar = { 0 };
 	while (lua_getstack(L, lv, &ar)) {
-		debug::writef("[frame #%d]", lv);
 		lua_getinfo(L, "nSltu", &ar);
-		debug::writef("name=%s", ar.name);
-		debug::writef("what=%s", ar.what);
-		debug::writef("source=%s", ar.source);
-		debug::writef("curentline=%d", ar.currentline);
-		printSrcLines(ar.source, ar.currentline, 21);
-		//print_locals(L, &ar);
+		const char *name = (ar.name == nullptr) ? "?" : ar.name;
+		debug::writef("[frame #%d] %s (%s) %s:%d", lv,
+			name, ar.what, ar.source, ar.currentline);
 		lv++;
+	}
+	return false;
+}
+
+bool LuaDebugger::fr(const wchar_t *usage, const std::vector<std::wstring> &argv)
+{
+	int lv = 0;
+	try {
+		if (argv.size() == 2) {
+			lv = stoi_s(argv[1], 10);
+		}
+		else if (argv.size() >= 3) {
+			throw std::invalid_argument("invalid argument");
+		}
+	}
+	catch (...) {
+		debug::writeLine(usage);
+		return false;
+	}
+
+	lua_State *L = m_L;
+	lua_Debug ar = { 0 };
+	if (lua_getstack(L, lv, &ar)) {
+		lua_getinfo(L, "nSltu", &ar);
+		const char *name = (ar.name == nullptr) ? "?" : ar.name;
+		debug::writef("[frame #%d] %s (%s) %s:%d", lv,
+			name, ar.what, ar.source, ar.currentline);
+		printSrcLines(ar.source, ar.currentline, DefSrcLines);
+		print_locals(&ar, DefTableDepth, true);
+	}
+	else {
+		debug::writef(L"Invalid frame No: %d", lv);
 	}
 	return false;
 }
