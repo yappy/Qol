@@ -89,6 +89,8 @@ public:
 		pcallInternal(narg, nret, instLimit);
 		// get results
 		getRetFunc(L);
+		// clear stack
+		lua_settop(L, 0);
 	}
 
 private:

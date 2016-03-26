@@ -29,6 +29,7 @@ public:
 	bool help(const wchar_t *usage, const std::vector<std::wstring> &argv);
 	bool bt(const wchar_t *usage, const std::vector<std::wstring> &argv);
 	bool fr(const wchar_t *usage, const std::vector<std::wstring> &argv);
+	bool eval(const wchar_t *usage, const std::vector<std::wstring> &argv);
 	bool cont(const wchar_t *usage, const std::vector<std::wstring> &argv);
 	bool si(const wchar_t *usage, const std::vector<std::wstring> &argv);
 

@@ -59,6 +59,7 @@ lua_State *LuaDebugger::getLuaState() const
 
 void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
 {
+	lua_State *L = m_L;
 	ChunkDebugInfo info;
 	info.chunkName = name;
 
@@ -74,6 +75,9 @@ void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
 	}
 
 	// TODO: get valid lines
+	if (!lua_isfunction(L, -1)) {
+		throw std::logic_error("stack top must be chunk");
+	}
 
 	m_debugInfo.emplace_back(std::move(info));
 }
@@ -180,6 +184,10 @@ const CmdEntry CmdList[] = {
 		L"コールスタックのフレーム番号を指定してその詳細を表示します。"
 	},
 	{
+		L"eval", &LuaDebugger::eval,
+		L"eval <lua script>",
+	},
+	{
 		L"src", nullptr,
 		L"src [<file> <line>]", L"Show source file list or show specific file",
 		L""
@@ -228,19 +236,13 @@ std::vector<std::wstring> readLine()
 	std::wstring line(buf, readSize);
 
 	// split the line
-	// "[not "]*" or [not space]+
-	std::wregex re(L"(?:\"([^\"]*)\")|(\\S+)");
+	std::wregex re(L"\\S+");
 	std::wsregex_iterator iter(line.cbegin(), line.cend(), re);
 	std::wsregex_iterator end;
 	std::vector<std::wstring> result;
 	for (; iter != end; ++iter)
 	{
-		if (iter->str(1) != L"") {
-			result.emplace_back(iter->str(1));
-		}
-		else {
-			result.emplace_back(iter->str(2));
-		}
+		result.emplace_back(iter->str());
 	}
 	return result;
 }
@@ -451,6 +453,56 @@ bool LuaDebugger::fr(const wchar_t *usage, const std::vector<std::wstring> &argv
 	else {
 		debug::writef(L"Invalid frame No: %d", lv);
 	}
+	return false;
+}
+
+bool LuaDebugger::eval(const wchar_t *usage, const std::vector<std::wstring> &argv)
+{
+	if (argv.size() < 2) {
+		debug::writeLine(usage);
+		return false;
+	}
+
+	lua_State *L = m_L;
+
+	// "return" <argv...> ";"
+	std::wstring wsrc(L"return ");
+	for (size_t i = 1; i < argv.size(); i++) {
+		wsrc += argv[i];
+	}
+	wsrc += L";";
+	auto src = util::wc2utf8(wsrc.c_str());
+
+	try {
+		int ret = luaL_loadstring(L, src.get());
+		if (ret != LUA_OK) {
+			throw LuaError("load failed", L);
+		}
+
+		// <func> => <ret...>
+		int retBase = lua_gettop(L);
+		ret = lua_pcall(L, 0, LUA_MULTRET, 0);
+		if (ret != LUA_OK) {
+			throw LuaError("pcall failed", L);
+		}
+
+		int retLast = lua_gettop(L);
+		if (retBase > retLast) {
+			debug::writeLine(L"No return values");
+		}
+		else {
+			for (int i = retBase; i <= retLast; i++) {
+				auto valstr = luaValueToStr(L, i, DefTableDepth);
+				debug::writeLine(valstr.c_str());
+			}
+		}
+		lua_settop(L, retBase);
+	}
+	catch (const LuaError &ex) {
+		debug::writeLine(ex.what());
+		return false;
+	}
+
 	return false;
 }
 

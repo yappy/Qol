@@ -17,6 +17,7 @@ LuaError::LuaError(const std::string &msg, lua_State *L) :
 	else {
 		m_what = msg + ": " + str;
 	}
+	lua_pop(L, 1);
 }
 
 namespace {
@@ -135,6 +136,7 @@ void Lua::loadTraceLib()
 void Lua::callWithResourceLib(const char *funcName, framework::Application *app,
 	int instLimit)
 {
+	lua_State *L = m_lua.get();
 	callGlobal(funcName, instLimit,
 		[app](lua_State *L) {
 			// args
@@ -185,7 +187,7 @@ void Lua::loadFile(const wchar_t *fileName, int instLimit)
 	m_dbg->loadDebugInfo(cvtName.get(),
 		reinterpret_cast<const char *>(buf.data()), buf.size());
 	// call it
-	pcallInternal(0, LUA_MULTRET, instLimit);
+	pcallInternal(0, 0, instLimit);
 }
 
 void Lua::pcallInternal(int narg, int nret, int instLimit)
