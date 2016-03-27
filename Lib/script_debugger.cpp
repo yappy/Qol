@@ -209,9 +209,9 @@ const CmdEntry CmdList[] = {
 		L"TODO"
 	},
 	{
-		L"bp", nullptr,
-		L"bp [line]", L"Set/Show breakpoint",
-		L"TODO"
+		L"bp", &LuaDebugger::bp,
+		L"bp [-f <filename>] [<line>*]", L"Set/Show breakpoint",
+		L"ブレークポイントを設定します。引数を指定しない場合、ブレークポイント一覧を表示します。"
 	},
 };
 
@@ -321,6 +321,7 @@ void LuaDebugger::cmdLoop(lua_Debug *ar)
 				debug::writef(L"[LuaDbg] Command not found: %s\n", argv[0].c_str());
 				continue;
 			}
+			argv.erase(argv.begin());
 			if ((this->*(entry->exec))(entry->usage, argv)) {
 				break;
 			}
@@ -412,6 +413,7 @@ void LuaDebugger::printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoN
 	}
 }
 
+// _ENV proxy meta-method for eval
 namespace {
 int evalIndex(lua_State *L)
 {
@@ -506,26 +508,28 @@ void LuaDebugger::pushLocalEnv(lua_Debug *ar, int frameNo)
 ///////////////////////////////////////////////////////////////////////////////
 // Commands
 ///////////////////////////////////////////////////////////////////////////////
-bool LuaDebugger::help(const wchar_t *usage, const std::vector<std::wstring> &argv)
+bool LuaDebugger::help(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
-	if (argv.size() == 1) {
+	if (args.empty()) {
 		for (const auto &entry : CmdList) {
 			debug::writef(L"%s\n\t%s", entry.usage, entry.brief);
 		}
 	}
 	else {
-		const CmdEntry *entry = searchCommandList(argv[1]);
-		if (entry == nullptr) {
-			debug::writef(L"[LuaDbg] Command not found: %s", argv[1].c_str());
-			return false;
+		for (const auto &cmdstr : args) {
+			const CmdEntry *entry = searchCommandList(cmdstr);
+			if (entry == nullptr) {
+				debug::writef(L"[LuaDbg] Command not found: %s", cmdstr.c_str());
+				return false;
+			}
+			debug::writef(L"%s\nUsage: %s\n\n%s",
+				entry->brief, entry->usage, entry->description);
 		}
-		debug::writef(L"%s\nUsage: %s\n\n%s",
-			entry->brief, entry->usage, entry->description);
 	}
 	return false;
 }
 
-bool LuaDebugger::bt(const wchar_t *usage, const std::vector<std::wstring> &argv)
+bool LuaDebugger::bt(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
 	lua_State *L = m_L;
 	int lv = 0;
@@ -540,14 +544,14 @@ bool LuaDebugger::bt(const wchar_t *usage, const std::vector<std::wstring> &argv
 	return false;
 }
 
-bool LuaDebugger::fr(const wchar_t *usage, const std::vector<std::wstring> &argv)
+bool LuaDebugger::fr(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
 	int lv = m_currentFrame;
 	try {
-		if (argv.size() == 2) {
-			lv = stoi_s(argv[1], 10);
+		if (args.size() == 1) {
+			lv = stoi_s(args[0], 10);
 		}
-		else if (argv.size() >= 3) {
+		else if (args.size() >= 2) {
 			throw std::invalid_argument("invalid argument");
 		}
 	}
@@ -574,19 +578,26 @@ bool LuaDebugger::fr(const wchar_t *usage, const std::vector<std::wstring> &argv
 	return false;
 }
 
-bool LuaDebugger::eval(const wchar_t *usage, const std::vector<std::wstring> &argv)
+bool LuaDebugger::src(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
-	if (argv.size() < 2) {
+	// TODO
+	debug::writeLine(L"Not implemented...");
+	return false;
+}
+
+bool LuaDebugger::eval(const wchar_t *usage, const std::vector<std::wstring> &args)
+{
+	if (args.empty()) {
 		debug::writeLine(usage);
 		return false;
 	}
 
 	lua_State *L = m_L;
 
-	// "return" <argv...> ";"
+	// "return" <args...> ";"
 	std::wstring wsrc(L"return ");
-	for (size_t i = 1; i < argv.size(); i++) {
-		wsrc += argv[i];
+	for (size_t i = 1; i < args.size(); i++) {
+		wsrc += args[i];
 	}
 	wsrc += L";";
 	auto src = util::wc2utf8(wsrc.c_str());
@@ -633,18 +644,31 @@ bool LuaDebugger::eval(const wchar_t *usage, const std::vector<std::wstring> &ar
 	return false;
 }
 
-bool LuaDebugger::cont(const wchar_t *usage, const std::vector<std::wstring> &argv)
+bool LuaDebugger::cont(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
 	debug::writeLine(L"[LuaDbg] continue...");
 	m_debugState = DebugState::CONT;
 	return true;
 }
 
-bool LuaDebugger::si(const wchar_t *usage, const std::vector<std::wstring> &argv)
+bool LuaDebugger::si(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
 	debug::writeLine(L"[LuaDbg] step in...");
 	m_debugState = DebugState::STEP_IN;
 	return true;
+}
+
+bool LuaDebugger::bp(const wchar_t *usage, const std::vector<std::wstring> &args)
+{
+	// TODO
+	debug::writeLine(L"Not implemented...");
+	if (args.empty()) {
+
+	}
+	else {
+
+	}
+	return false;
 }
 
 }

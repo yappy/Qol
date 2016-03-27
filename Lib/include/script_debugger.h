@@ -7,7 +7,6 @@ namespace yappy {
 namespace lua {
 namespace debugger {
 
-// TODO
 struct ChunkDebugInfo {
 	// must be unique
 	std::string chunkName;
@@ -22,16 +21,17 @@ public:
 	LuaDebugger(lua_State *L, bool debugEnable);
 
 	lua_State *getLuaState() const;
-	// TODO
 	void loadDebugInfo(const char *name, const char *src, size_t size);
 	void pcall(int narg, int nret, int instLimit);
 
-	bool help(const wchar_t *usage, const std::vector<std::wstring> &argv);
-	bool bt(const wchar_t *usage, const std::vector<std::wstring> &argv);
-	bool fr(const wchar_t *usage, const std::vector<std::wstring> &argv);
-	bool eval(const wchar_t *usage, const std::vector<std::wstring> &argv);
-	bool cont(const wchar_t *usage, const std::vector<std::wstring> &argv);
-	bool si(const wchar_t *usage, const std::vector<std::wstring> &argv);
+	bool help(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool bt(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool fr(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool src(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool eval(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool cont(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool si(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool bp(const wchar_t *usage, const std::vector<std::wstring> &args);
 
 private:
 	enum class DebugState {
