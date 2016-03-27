@@ -356,7 +356,7 @@ void LuaDebugger::summaryOnBreak(lua_Debug *ar)
 void LuaDebugger::printSrcLines(const char *name, int line, int range)
 {
 	// find info.chunkName == name
-	const auto &info = std::find_if(m_debugInfo.cbegin(), m_debugInfo.cend(),
+	auto info = std::find_if(m_debugInfo.cbegin(), m_debugInfo.cend(),
 		[name](const ChunkDebugInfo &cdi) { return (cdi.chunkName == name); });
 
 	if (info != m_debugInfo.cend()) {
@@ -664,24 +664,63 @@ bool LuaDebugger::si(const wchar_t *usage, const std::vector<std::wstring> &args
 
 bool LuaDebugger::bp(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
-	if (args.empty()) {
-		for (const auto &info : m_debugInfo) {
-			debug::writef("[%s]", info.chunkName.c_str());
-			bool any = false;
-			for (size_t i = 0; i < info.breakPoints.size(); i++) {
-				if (info.breakPoints[i]) {
-					debug::writef(L"%d", i + 1);
-					any = true;
-				}
+	lua_State *L = m_L;
+	std::string fileName;
+	std::vector<int> lines;
+
+	// default is current frame source file
+	lua_Debug ar = { 0 };
+	if (lua_getstack(L, m_currentFrame, &ar)) {
+		lua_getinfo(L, "S", &ar);
+		fileName = ar.source;
+	}
+	try {
+		for (size_t i = 0; i < args.size(); i++) {
+			if (args[i] == L"-f") {
+				i++;
+				fileName = util::wc2utf8(args.at(i).c_str()).get();
 			}
-			if (!any) {
-				debug::writeLine(L"(No breakpoints)");
+			else {
+				lines.push_back(stoi_s(args[i], 10));
 			}
 		}
 	}
-	else {
-
+	catch (...) {
+		debug::writeLine(usage);
+		return false;
 	}
+
+	for (int line : lines) {
+		auto info = std::find_if(m_debugInfo.begin(), m_debugInfo.end(),
+			[fileName](const ChunkDebugInfo &cdi) {
+				return (cdi.chunkName == fileName);
+		});
+		if (info == m_debugInfo.cend()) {
+			debug::writef("Error: Debug info not found: \"%s\"", fileName.c_str());
+			continue;
+		}
+		if (line < 1 || line > info->breakPoints.size()) {
+			debug::writef("Error: %s:%d is out of range", fileName.c_str(), line);
+			continue;
+		}
+		info->breakPoints[line - 1] = 1;
+	}
+
+	debug::writeLine(L"Breakpoints:");
+	for (const auto &info : m_debugInfo) {
+		debug::writef("[%s]", info.chunkName.c_str());
+		bool any = false;
+		for (size_t i = 0; i < info.breakPoints.size(); i++) {
+			if (info.breakPoints[i]) {
+				debug::writef(L"%d", i + 1);
+				any = true;
+			}
+		}
+		if (!any) {
+			debug::writeLine(L"(No breakpoints)");
+		}
+	}
+
 	return false;
 }
 

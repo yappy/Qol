@@ -176,15 +176,16 @@ void Lua::loadFile(const wchar_t *fileName, int instLimit)
 	file::Bytes buf = file::loadFile(fileName);
 
 	// push chunk function
-	auto cvtName = util::wc2utf8(fileName);
+	std::string chunkName("@");
+	chunkName += util::wc2utf8(fileName).get();
 	int ret = ::luaL_loadbufferx(L,
 		reinterpret_cast<const char *>(buf.data()), buf.size(),
-		cvtName.get(), "t");
+		chunkName.c_str(), "t");
 	if (ret != LUA_OK) {
 		throw LuaError("Load script failed", L);
 	}
 	// prepare debug info
-	m_dbg->loadDebugInfo(cvtName.get(),
+	m_dbg->loadDebugInfo(chunkName.c_str(),
 		reinterpret_cast<const char *>(buf.data()), buf.size());
 	// call it
 	pcallInternal(0, 0, instLimit);
