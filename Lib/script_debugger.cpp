@@ -78,6 +78,10 @@ void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
 	if (!lua_isfunction(L, -1)) {
 		throw std::logic_error("stack top must be chunk");
 	}
+	info.validLines.resize(info.srcLines.size(), 0);
+
+	// breakpoints (all false)
+	info.breakPoints.resize(info.srcLines.size(), 0);
 
 	m_debugInfo.emplace_back(std::move(info));
 }
@@ -660,10 +664,20 @@ bool LuaDebugger::si(const wchar_t *usage, const std::vector<std::wstring> &args
 
 bool LuaDebugger::bp(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
-	// TODO
-	debug::writeLine(L"Not implemented...");
 	if (args.empty()) {
-
+		for (const auto &info : m_debugInfo) {
+			debug::writef("[%s]", info.chunkName.c_str());
+			bool any = false;
+			for (size_t i = 0; i < info.breakPoints.size(); i++) {
+				if (info.breakPoints[i]) {
+					debug::writef(L"%d", i + 1);
+					any = true;
+				}
+			}
+			if (!any) {
+				debug::writeLine(L"(No breakpoints)");
+			}
+		}
 	}
 	else {
 

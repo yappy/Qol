@@ -14,6 +14,8 @@ struct ChunkDebugInfo {
 	std::vector<std::string> srcLines;
 	// each line is valid? (can put breakpoint?)
 	std::vector<uint8_t> validLines;
+	// breakpoints
+	std::vector<uint8_t> breakPoints;
 };
 
 class LuaDebugger : private util::noncopyable {
