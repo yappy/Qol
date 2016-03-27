@@ -43,10 +43,11 @@ private:
 	};
 
 	static const int DefSrcLines = 21;
-	static const int DefTableDepth = 3;
+	static const int DefTableDepth = 1;
 
 	lua_State *m_L;
 	bool m_debugEnable;
+	int m_currentFrame = 0;
 
 	DebugState m_debugState = DebugState::CONT;
 	std::vector<ChunkDebugInfo> m_debugInfo;
@@ -61,7 +62,8 @@ private:
 	void cmdLoop(lua_Debug *ar);
 	void summaryOnBreak(lua_Debug *ar);
 	void printSrcLines(const char *name, int line, int range);
-	void print_locals(lua_Debug *ar, int maxDepth, bool skipNoName);
+	void printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoName);
+	void pushLocalEnv(lua_Debug *ar, int frameNo);
 };
 
 }

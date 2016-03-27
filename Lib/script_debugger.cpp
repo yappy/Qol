@@ -180,8 +180,9 @@ const CmdEntry CmdList[] = {
 	},
 	{
 		L"fr", &LuaDebugger::fr,
-		L"fr [<frame_no>]", L"Show detailed info of specific frame on call stack",
-		L"コールスタックのフレーム番号を指定してその詳細を表示します。"
+		L"fr [<frame_no>]", L"Change current frame / Show detailed info of current frame",
+		L"コールスタックのフレーム番号を指定してそのフレームに移動します。"
+		"番号を指定しない場合、現在のフレームの詳細な情報を表示します。"
 	},
 	{
 		L"eval", &LuaDebugger::eval,
@@ -296,6 +297,8 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 		ASSERT(false);
 	}
 	if (brk) {
+		// set call stack top
+		m_currentFrame = 0;
 		debug::writeLine();
 		debug::writeLine(L"[LuaDbg] ***** break *****");
 		summaryOnBreak(ar);
@@ -370,21 +373,134 @@ void LuaDebugger::printSrcLines(const char *name, int line, int range)
 	}
 }
 
-void LuaDebugger::print_locals(lua_Debug *ar, int maxDepth, bool skipNoName)
+void LuaDebugger::printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoName)
 {
 	lua_State *L = m_L;
-	int n = 1;
-	const char *name = nullptr;
-	debug::writeLine(L"Local variables:");
-	while ((name = lua_getlocal(L, ar, n)) != nullptr) {
-		if (!skipNoName || name[0] != '(') {
-			debug::writef("[%3d] %s = %s", n, name,
-				luaValueToStr(L, -1, maxDepth, 0).c_str());
+	{
+		int n = 1;
+		const char *name = nullptr;
+		debug::writeLine(L"Local variables:");
+		while ((name = lua_getlocal(L, ar, n)) != nullptr) {
+			if (!skipNoName || name[0] != '(') {
+				debug::writef("[%3d] %s = %s", n, name,
+					luaValueToStr(L, -1, maxDepth, 0).c_str());
+			}
+			// pop value
+			lua_pop(L, 1);
+			n++;
 		}
-		// pop value
-		lua_pop(L, 1);
-		n++;
 	}
+	{
+		// push current frame function
+		lua_getinfo(L, "f", ar);
+		int n = 1;
+		const char *name = nullptr;
+		debug::writeLine(L"Upvalues:");
+		while ((name = lua_getupvalue(L, -1, n)) != nullptr) {
+			int d = maxDepth;
+			if (std::strcmp(name, "_ENV") == 0) {
+				d = 1;
+			}
+			debug::writef("[%3d] %s = %s", n, name,
+				luaValueToStr(L, -1, d, 0).c_str());
+			// pop value
+			lua_pop(L, 1);
+			n++;
+		}
+		// pop function
+		lua_pop(L, 1);
+	}
+}
+
+namespace {
+int evalIndex(lua_State *L)
+{
+	// param[1] = table, param[2] = key
+	// upvalue[1] = orig _ENV, upvalue[2] = lua_Debug *
+	ASSERT(lua_istable(L, lua_upvalueindex(1)));
+	ASSERT(lua_islightuserdata(L, lua_upvalueindex(2)));
+	auto *ar = static_cast<lua_Debug *>(
+		lua_touserdata(L, lua_upvalueindex(2)));
+	ASSERT(ar != nullptr);
+
+	if (lua_isstring(L, 2)) {
+		const char *key = lua_tostring(L, 2);
+		// (1) local variables
+		{
+			int n = 1;
+			const char *name = nullptr;
+			while ((name = lua_getlocal(L, ar, n)) != nullptr) {
+				if (name[0] != '(' && std::strcmp(key, name) == 0) {
+					// return stack top value
+					return 1;
+				}
+				lua_pop(L, 1);
+				n++;
+			}
+		}
+		// (2) upvalues
+		{
+			// push current frame function
+			lua_getinfo(L, "f", ar);
+			int n = 1;
+			const char *name = nullptr;
+			while ((name = lua_getupvalue(L, -1, n)) != nullptr) {
+				if (std::strcmp(key, name) == 0) {
+					// return stack top value
+					return 1;
+				}
+				lua_pop(L, 1);
+				n++;
+			}
+			// pop function
+			lua_pop(L, 1);
+		}
+	}
+	// (3) return _ENV[key]
+	lua_pushvalue(L, 2);
+	lua_gettable(L, lua_upvalueindex(1));
+	return 1;
+}
+
+int evalNewIndex(lua_State *L)
+{
+	return luaL_error(L, "new index");
+}
+}	// namespace
+
+void LuaDebugger::pushLocalEnv(lua_Debug *ar, int frameNo)
+{
+	lua_State *L = m_L;
+
+	// push another _ENV for eval
+	lua_newtable(L);
+	int tabind = lua_gettop(L);
+
+	// push metatable for another _ENV
+	lua_newtable(L);
+
+	lua_pushliteral(L, "__metatable");
+	lua_pushliteral(L, "read only table");
+	lua_settable(L, -3);
+
+	lua_pushliteral(L, "__index");
+	// upvalue[1] = orig _ENV
+	lua_getglobal(L, "_G");
+	ASSERT(lua_istable(L, -1));
+	// upvalue[2] = lua_Debug
+	lua_pushlightuserdata(L, ar);
+	lua_pushcclosure(L, evalIndex, 2);
+	lua_settable(L, -3);
+
+	lua_pushliteral(L, "__newindex");
+	// upvalue[1] = orig _ENV
+	lua_getglobal(L, "_G");
+	// upvalue[2] = lua_Debug
+	lua_pushlightuserdata(L, ar);
+	lua_pushcclosure(L, evalIndex, 2);
+	lua_settable(L, -3);
+
+	lua_setmetatable(L, -2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -426,7 +542,7 @@ bool LuaDebugger::bt(const wchar_t *usage, const std::vector<std::wstring> &argv
 
 bool LuaDebugger::fr(const wchar_t *usage, const std::vector<std::wstring> &argv)
 {
-	int lv = 0;
+	int lv = m_currentFrame;
 	try {
 		if (argv.size() == 2) {
 			lv = stoi_s(argv[1], 10);
@@ -448,7 +564,9 @@ bool LuaDebugger::fr(const wchar_t *usage, const std::vector<std::wstring> &argv
 		debug::writef("[frame #%d] %s (%s) %s:%d", lv,
 			name, ar.what, ar.source, ar.currentline);
 		printSrcLines(ar.source, ar.currentline, DefSrcLines);
-		print_locals(&ar, DefTableDepth, true);
+		printLocalAndUpvalue(&ar, DefTableDepth, true);
+		// set current frame
+		m_currentFrame = lv;
 	}
 	else {
 		debug::writef(L"Invalid frame No: %d", lv);
@@ -473,11 +591,20 @@ bool LuaDebugger::eval(const wchar_t *usage, const std::vector<std::wstring> &ar
 	wsrc += L";";
 	auto src = util::wc2utf8(wsrc.c_str());
 
+	lua_Debug ar = { 0 };
+	lua_getstack(L, 0, &ar);
+	lua_getinfo(L, "nSltu", &ar);
 	try {
+		// load str and push function
 		int ret = luaL_loadstring(L, src.get());
 		if (ret != LUA_OK) {
 			throw LuaError("load failed", L);
 		}
+
+		// overwrite upvalue[1] (_ENV) of chunk
+		pushLocalEnv(&ar, m_currentFrame);
+		const char * uvName = lua_setupvalue(L, -2, 1);
+		ASSERT(std::strcmp(uvName, "_ENV") == 0);
 
 		// <func> => <ret...>
 		int retBase = lua_gettop(L);
