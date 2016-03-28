@@ -288,11 +288,20 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 			break;
 		}
 		// search breakpoints
-		/*lua_getinfo(L, "l", ar);
-		if (s_bp.find(ar->currentline) != s_bp.end()) {
-			brk = true;
-			break;
-		}*/
+		{
+			lua_getinfo(L, "Sl", ar);
+			// avoid frequent new at every line event
+			m_fileNameStr = ar->source;
+			auto kv = m_debugInfo.find(m_fileNameStr);
+			if (kv != m_debugInfo.end()) {
+				const auto &bps = kv->second.breakPoints;
+				int ind = ar->currentline - 1;
+				if (ind >= 0 && ind < bps.size() && bps[ind]) {
+					brk = true;
+					break;
+				}
+			}
+		}
 		break;
 	case LUA_HOOKCOUNT:
 		luaL_error(L, "Instruction count exceeded");

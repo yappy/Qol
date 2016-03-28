@@ -57,6 +57,7 @@ private:
 	lua_State *m_L;
 	bool m_debugEnable;
 	int m_currentFrame = 0;
+	std::string m_fileNameStr;
 
 	DebugState m_debugState = DebugState::CONT;
 	std::unordered_map<std::string, ChunkDebugInfo> m_debugInfo;
