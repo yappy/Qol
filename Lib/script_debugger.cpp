@@ -4,6 +4,16 @@
 #include "include/debug.h"
 #include "include/exceptions.h"
 
+#define ENABLE_LUAIMPL_DEPENDENT
+
+#ifdef ENABLE_LUAIMPL_DEPENDENT
+extern "C" {
+#include <lobject.h>
+#include <lstate.h>
+#include <ldebug.h>
+}
+#endif
+
 namespace yappy {
 namespace lua {
 namespace debugger {
@@ -44,6 +54,37 @@ private:
 	LuaDebugger *m_dbg;
 };
 
+#ifdef ENABLE_LUAIMPL_DEPENDENT
+namespace impldep {
+
+inline Proto *toproto(lua_State *L, int i)
+{
+	return getproto(L->top + (i));
+}
+
+template <class F>
+void validLines(Proto *f, F callback)
+{
+	int n = f->sizecode;
+	for (int pc = 0; pc < n; pc++) {
+		int line = getfuncline(f, pc);
+		callback(line);
+	}
+	for (int i = 0; i < f->sizep; i++) {
+		validLines(f->p[i], callback);
+	}
+}
+
+template <class F>
+void forAllValidLines(lua_State *L, F callback)
+{
+	Proto *f = toproto(L, -1);
+	validLines(f, callback);
+}
+
+}
+#endif
+
 }	// namespace
 
 LuaDebugger::LuaDebugger(lua_State *L, bool debugEnable) :
@@ -74,11 +115,19 @@ void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
 		info.srcLines.emplace_back(iter->str(1));
 	}
 
-	// TODO: get valid lines
+	// get valid lines
+	info.validLines.resize(info.srcLines.size(), 0);
 	if (!lua_isfunction(L, -1)) {
 		throw std::logic_error("stack top must be chunk");
 	}
-	info.validLines.resize(info.srcLines.size(), 0);
+#ifdef ENABLE_LUAIMPL_DEPENDENT
+	impldep::forAllValidLines(L, [&info](int line) {
+		line--;
+		if (line >= 0 && line < info.validLines.size()) {
+			info.validLines[line] = 1;
+		}
+	});
+#endif
 
 	// breakpoints (all false)
 	info.breakPoints.resize(info.srcLines.size(), 0);
@@ -377,8 +426,11 @@ void LuaDebugger::printSrcLines(const char *name, int line, int range)
 		int ssize = static_cast<int>(info.srcLines.size());
 		end = (end >= ssize) ? ssize - 1 : end;
 		for (int i = beg; i <= end; i++) {
-			char mark = (i == line) ? '>' : ' ';
-			debug::writef("%c%6d: %s", mark, i + 1, info.srcLines.at(i).c_str());
+			char execMark = (i == line) ? '>' : ' ';
+			char bpMark = (info.validLines[i]) ? 'o' : ' ';
+			bpMark = (info.breakPoints[i]) ? '*' : bpMark;
+			debug::writef("%c%c%6d: %s", execMark, bpMark, i + 1,
+				info.srcLines.at(i).c_str());
 		}
 	}
 	else {
