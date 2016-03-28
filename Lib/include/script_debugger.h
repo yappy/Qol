@@ -16,6 +16,13 @@ struct ChunkDebugInfo {
 	std::vector<uint8_t> validLines;
 	// breakpoints
 	std::vector<uint8_t> breakPoints;
+
+	// cannot copy, move only
+	ChunkDebugInfo() = default;
+	ChunkDebugInfo(const ChunkDebugInfo &) = delete;
+	ChunkDebugInfo &operator=(const ChunkDebugInfo &) = delete;
+	ChunkDebugInfo(ChunkDebugInfo &&) = default;
+	ChunkDebugInfo &operator=(ChunkDebugInfo &&) = default;
 };
 
 class LuaDebugger : private util::noncopyable {
@@ -52,7 +59,7 @@ private:
 	int m_currentFrame = 0;
 
 	DebugState m_debugState = DebugState::CONT;
-	std::vector<ChunkDebugInfo> m_debugInfo;
+	std::unordered_map<std::string, ChunkDebugInfo> m_debugInfo;
 
 	void hook(lua_Debug *ar);
 	void hookNonDebug(lua_Debug *ar);

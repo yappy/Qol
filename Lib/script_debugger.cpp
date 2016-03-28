@@ -83,7 +83,7 @@ void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
 	// breakpoints (all false)
 	info.breakPoints.resize(info.srcLines.size(), 0);
 
-	m_debugInfo.emplace_back(std::move(info));
+	m_debugInfo.emplace(name, std::move(info));
 }
 
 void LuaDebugger::pcall(int narg, int nret, int instLimit)
@@ -356,21 +356,20 @@ void LuaDebugger::summaryOnBreak(lua_Debug *ar)
 void LuaDebugger::printSrcLines(const char *name, int line, int range)
 {
 	// find info.chunkName == name
-	auto info = std::find_if(m_debugInfo.cbegin(), m_debugInfo.cend(),
-		[name](const ChunkDebugInfo &cdi) { return (cdi.chunkName == name); });
-
-	if (info != m_debugInfo.cend()) {
+	const auto &kv = m_debugInfo.find(name);
+	if (kv != m_debugInfo.cend()) {
+		const ChunkDebugInfo &info = kv->second;
 		line--;
 		int uh = (range - 1) / 2;
 		int dh = range - uh - 1;
 		int beg = line - uh;
 		beg = (beg < 0) ? 0 : beg;
 		int end = line + dh;
-		int ssize = static_cast<int>(info->srcLines.size());
+		int ssize = static_cast<int>(info.srcLines.size());
 		end = (end >= ssize) ? ssize - 1 : end;
 		for (int i = beg; i <= end; i++) {
 			char mark = (i == line) ? '>' : ' ';
-			debug::writef("%c%6d: %s", mark, i + 1, info->srcLines.at(i).c_str());
+			debug::writef("%c%6d: %s", mark, i + 1, info.srcLines.at(i).c_str());
 		}
 	}
 	else {
@@ -689,25 +688,24 @@ bool LuaDebugger::bp(const wchar_t *usage, const std::vector<std::wstring> &args
 		debug::writeLine(usage);
 		return false;
 	}
-
+	// set
 	for (int line : lines) {
-		auto info = std::find_if(m_debugInfo.begin(), m_debugInfo.end(),
-			[fileName](const ChunkDebugInfo &cdi) {
-				return (cdi.chunkName == fileName);
-		});
-		if (info == m_debugInfo.cend()) {
+		auto kv = m_debugInfo.find(fileName);
+		if (kv == m_debugInfo.cend()) {
 			debug::writef("Error: Debug info not found: \"%s\"", fileName.c_str());
 			continue;
 		}
-		if (line < 1 || line > info->breakPoints.size()) {
+		ChunkDebugInfo &info = kv->second;
+		if (line < 1 || line > info.breakPoints.size()) {
 			debug::writef("Error: %s:%d is out of range", fileName.c_str(), line);
 			continue;
 		}
-		info->breakPoints[line - 1] = 1;
+		info.breakPoints[line - 1] = 1;
 	}
-
+	// print
 	debug::writeLine(L"Breakpoints:");
-	for (const auto &info : m_debugInfo) {
+	for (const auto &kv : m_debugInfo) {
+		const ChunkDebugInfo &info = kv.second;
 		debug::writef("[%s]", info.chunkName.c_str());
 		bool any = false;
 		for (size_t i = 0; i < info.breakPoints.size(); i++) {
