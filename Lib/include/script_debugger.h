@@ -35,12 +35,16 @@ public:
 
 	bool help(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool conf(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool mem(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool bt(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool fr(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool src(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool eval(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool watch(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool cont(const wchar_t *usage, const std::vector<std::wstring> &args);
-	bool si(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool s(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool n(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool out(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool bp(const wchar_t *usage, const std::vector<std::wstring> &args);
 
 private:

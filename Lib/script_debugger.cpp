@@ -226,13 +226,18 @@ struct CmdEntry {
 const CmdEntry CmdList[] = {
 	{
 		L"help", &LuaDebugger::help,
-		L"help [<cmd>]", L"コマンドリスト、コマンド詳細説明表示",
+		L"help [<cmd>...]", L"コマンドリスト、コマンド詳細説明表示",
 		L"コマンド一覧を表示します。引数にコマンド名を指定すると詳細な説明を表示します。"
 	},
 	{
 		L"conf", &LuaDebugger::conf,
 		L"conf", L"Lua バージョンとコンパイル時設定表示",
 		L"Luaのバージョンとコンパイル時設定を表示します。"
+	},
+	{
+		L"mem", &LuaDebugger::mem,
+		L"mem [-gc]", L"メモリ使用状況表示",
+		L"現在のメモリ使用量を表示します。-gc をつけると full GC を実行します。"
 	},
 	{
 		L"bt", &LuaDebugger::bt,
@@ -251,6 +256,11 @@ const CmdEntry CmdList[] = {
 		L"引数を連結して Lua スクリプトとしてカレントフレーム上にいるかのように実行します。"
 	},
 	{
+		L"watch", &LuaDebugger::watch,
+		L"watch | watch <lua_script> | watch -d <number>", L"ウォッチ式の登録",
+		L"ブレークする度に自動で評価されるスクリプトを登録します。"
+	},
+	{
 		L"src", &LuaDebugger::src,
 		L"src [-f <file>] [<line>] [-n <numlines>] [-all]", L"ソースファイルの表示",
 		L"デバッガがロードしているソースファイルの情報を表示します。"
@@ -262,17 +272,17 @@ const CmdEntry CmdList[] = {
 		L"実行を続行します。"
 	},
 	{
-		L"n", &LuaDebugger::si,
-		L"n", L"ステップイン(next)",
+		L"s", &LuaDebugger::s,
+		L"s", L"ステップイン(step)",
 		L"新たな行に到達するまで実行します。関数呼び出しがあった場合、その中に入ります。"
 	},
 	{
-		L"so", nullptr,
-		L"so", L"ステップオーバー",
+		L"n", &LuaDebugger::n,
+		L"n", L"ステップオーバー(next)",
 		L"TODO"
 	},
 	{
-		L"out", nullptr,
+		L"out", &LuaDebugger::out,
 		L"out", L"ステップアウト",
 		L"TODO"
 	},
@@ -633,6 +643,12 @@ bool LuaDebugger::conf(const wchar_t *usage, const std::vector<std::wstring> &ar
 	return false;
 }
 
+bool LuaDebugger::mem(const wchar_t *usage, const std::vector<std::wstring> &args)
+{
+	debug::writeLine(L"[LuaDbg] Not implemented...");
+	return false;
+}
+
 bool LuaDebugger::bt(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
 	lua_State *L = m_L;
@@ -786,6 +802,12 @@ bool LuaDebugger::eval(const wchar_t *usage, const std::vector<std::wstring> &ar
 	return false;
 }
 
+bool LuaDebugger::watch(const wchar_t *usage, const std::vector<std::wstring> &args)
+{
+	debug::writeLine(L"[LuaDbg] Not implemented...");
+	return false;
+}
+
 bool LuaDebugger::cont(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
 	debug::writeLine(L"[LuaDbg] continue...");
@@ -793,11 +815,23 @@ bool LuaDebugger::cont(const wchar_t *usage, const std::vector<std::wstring> &ar
 	return true;
 }
 
-bool LuaDebugger::si(const wchar_t *usage, const std::vector<std::wstring> &args)
+bool LuaDebugger::s(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
 	debug::writeLine(L"[LuaDbg] step in...");
 	m_debugState = DebugState::STEP_IN;
 	return true;
+}
+
+bool LuaDebugger::n(const wchar_t *usage, const std::vector<std::wstring> &args)
+{
+	debug::writeLine(L"[LuaDbg] Not implemented...");
+	return false;
+}
+
+bool LuaDebugger::out(const wchar_t *usage, const std::vector<std::wstring> &args)
+{
+	debug::writeLine(L"[LuaDbg] Not implemented...");
+	return false;
 }
 
 bool LuaDebugger::bp(const wchar_t *usage, const std::vector<std::wstring> &args)
