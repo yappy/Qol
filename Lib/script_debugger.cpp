@@ -288,7 +288,7 @@ const CmdEntry CmdList[] = {
 	},
 	{
 		L"bp", &LuaDebugger::bp,
-		L"bp [-f <filename>] [<line>*]", L"Set/Show breakpoint",
+		L"bp [-f <filename>] [<line>...]", L"Set/Show breakpoint",
 		L"ブレークポイントを設定します。引数を指定しない場合、ブレークポイント一覧を表示します。"
 	},
 };
@@ -345,10 +345,12 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 	bool brk = false;
 	switch (ar->event) {
 	case LUA_HOOKCALL:
+		m_callDepth++;
 		break;
 	case LUA_HOOKTAILCALL:
 		break;
 	case LUA_HOOKRET:
+		m_callDepth--;
 		break;
 	case LUA_HOOKLINE:
 		// break at entry point
@@ -358,6 +360,11 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 		}
 		// step in
 		if (m_debugState == DebugState::STEP_IN) {
+			brk = true;
+			break;
+		}
+		// step over
+		if (m_debugState == DebugState::STEP_OVER && m_callDepth == 0) {
 			brk = true;
 			break;
 		}
@@ -842,8 +849,10 @@ bool LuaDebugger::s(const wchar_t *usage, const std::vector<std::wstring> &args)
 
 bool LuaDebugger::n(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
-	debug::writeLine(L"[LuaDbg] Not implemented...");
-	return false;
+	debug::writeLine(L"[LuaDbg] step over...");
+	m_callDepth = 0;
+	m_debugState = DebugState::STEP_OVER;
+	return true;
 }
 
 bool LuaDebugger::out(const wchar_t *usage, const std::vector<std::wstring> &args)

@@ -65,6 +65,7 @@ private:
 	std::string m_fileNameStr;
 
 	DebugState m_debugState = DebugState::CONT;
+	int m_callDepth = 0;
 	std::unordered_map<std::string, ChunkDebugInfo> m_debugInfo;
 
 	void hook(lua_Debug *ar);
