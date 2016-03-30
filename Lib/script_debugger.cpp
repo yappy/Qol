@@ -645,7 +645,25 @@ bool LuaDebugger::conf(const wchar_t *usage, const std::vector<std::wstring> &ar
 
 bool LuaDebugger::mem(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
-	debug::writeLine(L"[LuaDbg] Not implemented...");
+	lua_State *L = m_L;
+
+	bool gc = false;
+	for (const auto &str : args) {
+		if (str == L"-gc") {
+			gc = true;
+		}
+		else {
+			debug::writeLine(usage);
+			return false;
+		}
+	}
+
+	if (gc) {
+		lua_gc(L, LUA_GCCOLLECT, 0);
+	}
+	int kb = lua_gc(L, LUA_GCCOUNT, 0);
+	int b = kb * 1024 + lua_gc(L, LUA_GCCOUNTB, 0);
+	debug::writef(L"%.3f KiB", b / 1024.0);
 	return false;
 }
 
