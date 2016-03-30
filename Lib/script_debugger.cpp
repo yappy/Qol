@@ -451,6 +451,7 @@ void LuaDebugger::printSrcLines(const std::string &name,
 	if (kv != m_debugInfo.cend()) {
 		const ChunkDebugInfo &info = kv->second;
 		line--;
+		execLine--;
 		int uh = (range - 1) / 2;
 		int dh = range - uh - 1;
 		int beg = line - uh;
