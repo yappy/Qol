@@ -72,7 +72,7 @@ private:
 
 	void cmdLoop(lua_Debug *ar);
 	void summaryOnBreak(lua_Debug *ar);
-	void printSrcLines(const char *name, int line, int range);
+	void printSrcLines(const std::string &name, int line, int range, int execLine = -1);
 	void printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoName);
 	void pushLocalEnv(lua_Debug *ar, int frameNo);
 };

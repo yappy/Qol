@@ -110,9 +110,12 @@ void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
 	std::smatch m;
 	std::sregex_iterator iter(srcStr.cbegin(), srcStr.cend(), re);
 	std::sregex_iterator end;
+	// replace tab
+	std::regex tabspace("\\t");
 	for (; iter != end; ++iter) {
 		// 0: all, 1: ([^\r\n]*)
-		info.srcLines.emplace_back(iter->str(1));
+		auto result = std::regex_replace(iter->str(1), tabspace, "  ");
+		info.srcLines.emplace_back(result);
 	}
 
 	// get valid lines
@@ -223,47 +226,54 @@ struct CmdEntry {
 const CmdEntry CmdList[] = {
 	{
 		L"help", &LuaDebugger::help,
-		L"help [<cmd>]", L"Show command list or show specific command help",
+		L"help [<cmd>]", L"コマンドリスト、コマンド詳細説明表示",
 		L"コマンド一覧を表示します。引数にコマンド名を指定すると詳細な説明を表示します。"
 	},
 	{
 		L"conf", &LuaDebugger::conf,
-		L"conf", L"Show Lua version and compile configuration",
+		L"conf", L"Lua バージョンとコンパイル時設定表示",
 		L"Luaのバージョンとコンパイル時設定を表示します。"
 	},
 	{
 		L"bt", &LuaDebugger::bt,
-		L"bt", L"Show backtrace (call stack)",
+		L"bt", L"バックトレース(コールスタック)表示",
 		L"バックトレース(関数呼び出し履歴)を表示します。"
 	},
 	{
 		L"fr", &LuaDebugger::fr,
-		L"fr [<frame_no>]", L"Change current frame / Show detailed info of current frame",
+		L"fr [<frame_no>]", L"カレントフレームの変更、カレントフレームの情報表示",
 		L"コールスタックのフレーム番号を指定してそのフレームに移動します。"
 		"番号を指定しない場合、現在のフレームの詳細な情報を表示します。"
 	},
 	{
 		L"eval", &LuaDebugger::eval,
-		L"eval <lua script>",
+		L"eval <lua_script>", L"Lua スクリプトの実行",
+		L"引数を連結して Lua スクリプトとしてカレントフレーム上にいるかのように実行します。"
 	},
 	{
-		L"src", nullptr,
-		L"src [<file> <line>]", L"Show source file list or show specific file",
-		L""
+		L"src", &LuaDebugger::src,
+		L"src [-f <file>] [<line>] [-n <numlines>] [-all]", L"ソースファイルの表示",
+		L"デバッガがロードしているソースファイルの情報を表示します。"
+		L"ブレーク可能ポイントや設置済みのブレークポイントも一緒に表示します。"
 	},
 	{
 		L"cont", &LuaDebugger::cont,
-		L"cont", L"Continue the program",
+		L"cont", L"続行",
 		L"実行を続行します。"
 	},
 	{
-		L"si", &LuaDebugger::si,
-		L"si", L"Step in",
+		L"n", &LuaDebugger::si,
+		L"n", L"ステップイン(next)",
 		L"新たな行に到達するまで実行します。関数呼び出しがあった場合、その中に入ります。"
 	},
 	{
-		L"sout", nullptr,
-		L"sout", L"Step out",
+		L"so", nullptr,
+		L"so", L"ステップオーバー",
+		L"TODO"
+	},
+	{
+		L"out", nullptr,
+		L"out", L"ステップアウト",
 		L"TODO"
 	},
 	{
@@ -413,10 +423,11 @@ void LuaDebugger::summaryOnBreak(lua_Debug *ar)
 	const char *name = (ar->name == nullptr) ? "?" : ar->name;
 	debug::writef("%s (%s) %s:%d",
 		name, ar->what, ar->source, ar->currentline);
-	printSrcLines(ar->source, ar->currentline, DefSrcLines);
+	printSrcLines(ar->source, ar->currentline, DefSrcLines, ar->currentline);
 }
 
-void LuaDebugger::printSrcLines(const char *name, int line, int range)
+void LuaDebugger::printSrcLines(const std::string &name,
+	int line, int range, int execLine)
 {
 	// find info.chunkName == name
 	const auto &kv = m_debugInfo.find(name);
@@ -431,11 +442,11 @@ void LuaDebugger::printSrcLines(const char *name, int line, int range)
 		int ssize = static_cast<int>(info.srcLines.size());
 		end = (end >= ssize) ? ssize - 1 : end;
 		for (int i = beg; i <= end; i++) {
-			char execMark = (i == line) ? '>' : ' ';
+			char execMark = (i == execLine) ? '>' : ' ';
 			char bpMark = (info.validLines[i]) ? 'o' : ' ';
 			bpMark = (info.breakPoints[i]) ? '*' : bpMark;
 			debug::writef("%c%c%6d: %s", execMark, bpMark, i + 1,
-				info.srcLines.at(i).c_str());
+				info.srcLines.at(i).substr(0, 69).c_str());
 		}
 	}
 	else {
@@ -660,7 +671,7 @@ bool LuaDebugger::fr(const wchar_t *usage, const std::vector<std::wstring> &args
 		const char *name = (ar.name == nullptr) ? "?" : ar.name;
 		debug::writef("[frame #%d] %s (%s) %s:%d", lv,
 			name, ar.what, ar.source, ar.currentline);
-		printSrcLines(ar.source, ar.currentline, DefSrcLines);
+		printSrcLines(ar.source, ar.currentline, DefSrcLines, ar.currentline);
 		printLocalAndUpvalue(&ar, DefTableDepth, true);
 		// set current frame
 		m_currentFrame = lv;
@@ -673,8 +684,45 @@ bool LuaDebugger::fr(const wchar_t *usage, const std::vector<std::wstring> &args
 
 bool LuaDebugger::src(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
-	// TODO
-	debug::writeLine(L"Not implemented...");
+	lua_State *L = m_L;
+
+	lua_Debug ar = { 0 };
+	if (!lua_getstack(L, m_currentFrame, &ar)) {
+		debug::writeLine(L"Cannot get current frame info");
+		return false;
+	}
+	lua_getinfo(L, "Sl", &ar);
+
+	// [-f <file>] [<line>] [-n <numlines>] [-all]
+	std::string fileName = ar.source;
+	int line = ar.currentline;
+	int num = DefSrcLines;
+	bool all = false;
+	try {
+		for (size_t i = 0; i < args.size(); i++) {
+			if (args[i] == L"-f") {
+				i++;
+				fileName = util::wc2utf8(args.at(i).c_str()).get();
+			}
+			else if (args[i] == L"-n") {
+				i++;
+				num = stoi_s(args.at(i));
+			}
+			else if (args[i] == L"-all") {
+				all = true;
+			}
+			else {
+				line = stoi_s(args[i]);
+			}
+		}
+	}
+	catch (...) {
+		debug::writeLine(usage);
+		return false;
+	}
+
+	num = all ? 0x00ffffff : num;
+	printSrcLines(fileName, line, num);
 	return false;
 }
 
@@ -688,9 +736,10 @@ bool LuaDebugger::eval(const wchar_t *usage, const std::vector<std::wstring> &ar
 	lua_State *L = m_L;
 
 	// "return" <args...> ";"
-	std::wstring wsrc(L"return ");
-	for (size_t i = 1; i < args.size(); i++) {
-		wsrc += args[i];
+	std::wstring wsrc(L"return");
+	for (const auto &str : args) {
+		wsrc += L' ';
+		wsrc += str;
 	}
 	wsrc += L";";
 	auto src = util::wc2utf8(wsrc.c_str());
