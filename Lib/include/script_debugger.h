@@ -34,6 +34,7 @@ public:
 	void pcall(int narg, int nret, int instLimit);
 
 	bool help(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool conf(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool bt(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool fr(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool src(const wchar_t *usage, const std::vector<std::wstring> &args);

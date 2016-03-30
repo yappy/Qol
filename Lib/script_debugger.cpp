@@ -227,6 +227,11 @@ const CmdEntry CmdList[] = {
 		L"コマンド一覧を表示します。引数にコマンド名を指定すると詳細な説明を表示します。"
 	},
 	{
+		L"conf", &LuaDebugger::conf,
+		L"conf", L"Show Lua version and compile configuration",
+		L"Luaのバージョンとコンパイル時設定を表示します。"
+	},
+	{
 		L"bt", &LuaDebugger::bt,
 		L"bt", L"Show backtrace (call stack)",
 		L"バックトレース(関数呼び出し履歴)を表示します。"
@@ -590,6 +595,30 @@ bool LuaDebugger::help(const wchar_t *usage, const std::vector<std::wstring> &ar
 				entry->brief, entry->usage, entry->description);
 		}
 	}
+	return false;
+}
+
+bool LuaDebugger::conf(const wchar_t *usage, const std::vector<std::wstring> &args)
+{
+	debug::writeLine(LUA_COPYRIGHT);
+	debug::writeLine(LUA_AUTHORS);
+	debug::writeLine();
+	debug::writeLine(L"lua_Integer");
+	debug::writef(L"  0x%llx-0x%llx",
+		static_cast<long long>(LUA_MININTEGER),
+		static_cast<long long>(LUA_MAXINTEGER));
+	debug::writef(L"  (%lld)-(%lld)",
+		static_cast<long long>(LUA_MININTEGER),
+		static_cast<long long>(LUA_MAXINTEGER));
+	debug::writeLine(L"lua_Number");
+	debug::writef(L"  abs range : (%.16Le) - (%.16Le)",
+		static_cast<long double>(std::numeric_limits<lua_Number>::min()),
+		static_cast<long double>(std::numeric_limits<lua_Number>::max()));
+	debug::writef(L"  10-base digits : %d",
+		std::numeric_limits<lua_Number>::digits10);
+	debug::writef(L"  10-base exp range : (%d) - (%d)",
+		std::numeric_limits<lua_Number>::min_exponent10,
+		std::numeric_limits<lua_Number>::max_exponent10);
 	return false;
 }
 
