@@ -41,7 +41,7 @@ public:
 	bool src(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool eval(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool watch(const wchar_t *usage, const std::vector<std::wstring> &args);
-	bool cont(const wchar_t *usage, const std::vector<std::wstring> &args);
+	bool c(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool s(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool n(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool out(const wchar_t *usage, const std::vector<std::wstring> &args);

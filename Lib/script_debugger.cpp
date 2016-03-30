@@ -267,8 +267,8 @@ const CmdEntry CmdList[] = {
 		L"ブレーク可能ポイントや設置済みのブレークポイントも一緒に表示します。"
 	},
 	{
-		L"cont", &LuaDebugger::cont,
-		L"cont", L"続行",
+		L"c", &LuaDebugger::c,
+		L"c", L"続行(continue)",
 		L"実行を続行します。"
 	},
 	{
@@ -826,7 +826,7 @@ bool LuaDebugger::watch(const wchar_t *usage, const std::vector<std::wstring> &a
 	return false;
 }
 
-bool LuaDebugger::cont(const wchar_t *usage, const std::vector<std::wstring> &args)
+bool LuaDebugger::c(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
 	debug::writeLine(L"[LuaDbg] continue...");
 	m_debugState = DebugState::CONT;
