@@ -390,6 +390,7 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 		debug::writeLine();
 		debug::writeLine(L"[LuaDbg] ***** break *****");
 		summaryOnBreak(ar);
+		printWatchList();
 		debug::writeLine(L"[LuaDbg] \"help\" command for usage");
 		cmdLoop(ar);
 	}
@@ -566,6 +567,11 @@ void LuaDebugger::pushLocalEnv(lua_Debug *ar, int frameNo)
 {
 	lua_State *L = m_L;
 
+	int ret = lua_getstack(L, frameNo, ar);
+	ASSERT(ret);
+	ret = lua_getinfo(L, "nSltu", ar);
+	ASSERT(ret);
+
 	// push another _ENV for eval
 	lua_newtable(L);
 	int tabind = lua_gettop(L);
@@ -595,6 +601,62 @@ void LuaDebugger::pushLocalEnv(lua_Debug *ar, int frameNo)
 	lua_settable(L, -3);
 
 	lua_setmetatable(L, -2);
+}
+
+void LuaDebugger::printEval(const std::string &expr)
+{
+	lua_State *L = m_L;
+	try {
+		// load str and push function
+		int ret = luaL_loadstring(L, expr.c_str());
+		if (ret != LUA_OK) {
+			throw LuaError("load failed", L);
+		}
+
+		lua_Debug ar = { 0 };
+		// overwrite upvalue[1] (_ENV) of chunk
+		pushLocalEnv(&ar, m_currentFrame);
+		const char * uvName = lua_setupvalue(L, -2, 1);
+		ASSERT(std::strcmp(uvName, "_ENV") == 0);
+
+		// <func> => <ret...>
+		int retBase = lua_gettop(L);
+		ret = lua_pcall(L, 0, LUA_MULTRET, 0);
+		if (ret != LUA_OK) {
+			throw LuaError("pcall failed", L);
+		}
+
+		int retLast = lua_gettop(L);
+		if (retBase > retLast) {
+			debug::writeLine(L"No return values");
+		}
+		else {
+			for (int i = retBase; i <= retLast; i++) {
+				auto valstr = luaValueToStr(L, i, DefTableDepth);
+				debug::writeLine(valstr.c_str());
+			}
+		}
+		lua_settop(L, retBase);
+	}
+	catch (const LuaError &ex) {
+		debug::writeLine(ex.what());
+	}
+}
+
+void LuaDebugger::printWatchList()
+{
+	if (m_watchList.size() != 0) {
+		debug::writeLine("Watch List:");
+	}
+	int i = 0;
+	for (const auto &expr : m_watchList) {
+		debug::writef("[%d]%s", i, expr.c_str());
+		std::string src("return");
+		src += expr;
+		src += ";";
+		printEval(src);
+		i++;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -780,51 +842,51 @@ bool LuaDebugger::eval(const wchar_t *usage, const std::vector<std::wstring> &ar
 	wsrc += L";";
 	auto src = util::wc2utf8(wsrc.c_str());
 
-	lua_Debug ar = { 0 };
-	lua_getstack(L, 0, &ar);
-	lua_getinfo(L, "nSltu", &ar);
-	try {
-		// load str and push function
-		int ret = luaL_loadstring(L, src.get());
-		if (ret != LUA_OK) {
-			throw LuaError("load failed", L);
-		}
-
-		// overwrite upvalue[1] (_ENV) of chunk
-		pushLocalEnv(&ar, m_currentFrame);
-		const char * uvName = lua_setupvalue(L, -2, 1);
-		ASSERT(std::strcmp(uvName, "_ENV") == 0);
-
-		// <func> => <ret...>
-		int retBase = lua_gettop(L);
-		ret = lua_pcall(L, 0, LUA_MULTRET, 0);
-		if (ret != LUA_OK) {
-			throw LuaError("pcall failed", L);
-		}
-
-		int retLast = lua_gettop(L);
-		if (retBase > retLast) {
-			debug::writeLine(L"No return values");
-		}
-		else {
-			for (int i = retBase; i <= retLast; i++) {
-				auto valstr = luaValueToStr(L, i, DefTableDepth);
-				debug::writeLine(valstr.c_str());
-			}
-		}
-		lua_settop(L, retBase);
-	}
-	catch (const LuaError &ex) {
-		debug::writeLine(ex.what());
-		return false;
-	}
+	printEval(src.get());
 
 	return false;
 }
 
 bool LuaDebugger::watch(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
-	debug::writeLine(L"[LuaDbg] Not implemented...");
+	// watch [<lua_script> | -d <number>]
+	std::vector<int> delInd;
+	std::string addScript;
+	try {
+		if (args.empty()) {
+			// do nothing
+		}
+		else if (args[0] == L"-d") {
+			for (size_t i = 0; i < args.size(); i++) {
+				delInd.push_back(stoi_s(args[i]));
+			}
+		}
+		else {
+			for (size_t i = 0; i < args.size(); i++) {
+				addScript += ' ';
+				addScript += util::wc2utf8(args[i].c_str()).get();
+			}
+		}
+	}
+	catch (...) {
+		debug::writeLine(usage);
+		return false;
+	}
+	// delete
+	std::sort(delInd.begin(), delInd.end(), std::greater<int>());
+	for (int ind : delInd) {
+		if (ind < 0 || ind >= m_watchList.size()) {
+			debug::writef(L"Cannot delete: %d", ind);
+			continue;
+		}
+		m_watchList.erase(m_watchList.begin() + ind);
+	}
+	// add
+	if (!addScript.empty()) {
+		m_watchList.emplace_back(addScript);
+	}
+	// print
+	printWatchList();
 	return false;
 }
 

@@ -59,12 +59,13 @@ private:
 
 	lua_State *m_L;
 	bool m_debugEnable;
-	int m_currentFrame = 0;
-	std::string m_fileNameStr;
 
+	std::unordered_map<std::string, ChunkDebugInfo> m_debugInfo;
+	std::string m_fileNameStr;
 	DebugState m_debugState = DebugState::CONT;
 	int m_callDepth = 0;
-	std::unordered_map<std::string, ChunkDebugInfo> m_debugInfo;
+	int m_currentFrame = 0;
+	std::vector<std::string> m_watchList;
 
 	void hook(lua_Debug *ar);
 	void hookNonDebug(lua_Debug *ar);
@@ -78,6 +79,8 @@ private:
 	void printSrcLines(const std::string &name, int line, int range, int execLine = -1);
 	void printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoName);
 	void pushLocalEnv(lua_Debug *ar, int frameNo);
+	void printEval(const std::string &expr);
+	void printWatchList();
 };
 
 }
