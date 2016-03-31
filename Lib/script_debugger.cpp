@@ -257,7 +257,7 @@ const CmdEntry CmdList[] = {
 	},
 	{
 		L"watch", &LuaDebugger::watch,
-		L"watch | watch <lua_script> | watch -d <number>", L"ウォッチ式の登録",
+		L"watch [<lua_script> | -d <number>]", L"ウォッチ式の登録",
 		L"ブレークする度に自動で評価されるスクリプトを登録します。"
 	},
 	{
@@ -279,17 +279,18 @@ const CmdEntry CmdList[] = {
 	{
 		L"n", &LuaDebugger::n,
 		L"n", L"ステップオーバー(next)",
-		L"TODO"
+		L"新たな行に到達するまで実行します。関数呼び出しがあった場合、それが終わるまで実行します。"
 	},
 	{
 		L"out", &LuaDebugger::out,
 		L"out", L"ステップアウト",
-		L"TODO"
+		L"現在の関数から戻るまで実行します。"
 	},
 	{
 		L"bp", &LuaDebugger::bp,
-		L"bp [-f <filename>] [<line>...]", L"Set/Show breakpoint",
+		L"bp [-d] [-f <filename>] [<line>...]", L"ブレークポイントの設置/削除/表示",
 		L"ブレークポイントを設定します。引数を指定しない場合、ブレークポイント一覧を表示します。"
+		L"-d を指定すると削除します。"
 	},
 };
 
@@ -869,9 +870,14 @@ bool LuaDebugger::bp(const wchar_t *usage, const std::vector<std::wstring> &args
 		lua_getinfo(L, "S", &ar);
 		fileName = ar.source;
 	}
+	// bp [-d] [-f <filename>] [<line>...]
+	bool del = false;
 	try {
 		for (size_t i = 0; i < args.size(); i++) {
-			if (args[i] == L"-f") {
+			if (args[i] == L"-d") {
+				del = true;
+			}
+			else if (args[i] == L"-f") {
 				i++;
 				fileName = util::wc2utf8(args.at(i).c_str()).get();
 			}
@@ -884,7 +890,7 @@ bool LuaDebugger::bp(const wchar_t *usage, const std::vector<std::wstring> &args
 		debug::writeLine(usage);
 		return false;
 	}
-	// set
+	// set/delete
 	for (int line : lines) {
 		auto kv = m_debugInfo.find(fileName);
 		if (kv == m_debugInfo.cend()) {
@@ -896,7 +902,7 @@ bool LuaDebugger::bp(const wchar_t *usage, const std::vector<std::wstring> &args
 			debug::writef("Error: %s:%d is out of range", fileName.c_str(), line);
 			continue;
 		}
-		info.breakPoints[line - 1] = 1;
+		info.breakPoints[line - 1] = del ? 0 : 1;
 	}
 	// print
 	debug::writeLine(L"Breakpoints:");
