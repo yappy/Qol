@@ -14,6 +14,15 @@ void drawString(resourceSetId, resourceId,
 
 trace.write("sinki", "sinki", "return", "sinki", "sinki", "gg");
 
+local dbg_x, dbg_y = 3, 5;
+local function dbg_test(t)
+	if t > 0 then
+		trace.write(dbg_y);
+		return dbg_test(t - 1);
+	end
+end
+dbg_test(dbg_x);
+
 local frame = 0;
 local w, h;
 local unyopos = {
@@ -23,7 +32,7 @@ local unyopos = {
 -- coroutine (wrap function) list
 local colist = {};
 
-local function addCo(f)
+local function add_co(f)
 	table.insert(colist, coroutine.wrap(f));
 end
 
@@ -66,7 +75,7 @@ function update(keyinput)
 	for k, v in pairs(keyinput) do
 		if v and not (k == "UP" or k == "DOWN" or k == "LEFT" or k == "RIGHT") then
 			trace.write("Key input in lua: " .. k);
-			addCo(function()
+			add_co(function()
 					local delay = 30;
 					for i = 1, delay do
 						coroutine.yield(true);

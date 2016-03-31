@@ -147,7 +147,7 @@ void LuaDebugger::pcall(int narg, int nret, int instLimit)
 	{
 		LuaHook hook(this, hookRaw, mask, instLimit);
 		// TODO: break at first
-		m_debugState = DebugState::INIT_BREAK;
+		m_debugState = DebugState::BREAK_LINE_ANY;
 		int base = lua_gettop(L) - narg;	// function index
 		lua_pushcfunction(L, msghandler);	// push message handler
 		lua_insert(L, base);				// put it under function and args
@@ -353,18 +353,11 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 		m_callDepth--;
 		break;
 	case LUA_HOOKLINE:
-		// break at entry point
-		if (m_debugState == DebugState::INIT_BREAK) {
+		if (m_debugState == DebugState::BREAK_LINE_ANY) {
 			brk = true;
 			break;
 		}
-		// step in
-		if (m_debugState == DebugState::STEP_IN) {
-			brk = true;
-			break;
-		}
-		// step over
-		if (m_debugState == DebugState::STEP_OVER && m_callDepth == 0) {
+		if (m_debugState == DebugState::BREAK_LINE_DEPTH0 && m_callDepth == 0) {
 			brk = true;
 			break;
 		}
@@ -844,7 +837,7 @@ bool LuaDebugger::c(const wchar_t *usage, const std::vector<std::wstring> &args)
 bool LuaDebugger::s(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
 	debug::writeLine(L"[LuaDbg] step in...");
-	m_debugState = DebugState::STEP_IN;
+	m_debugState = DebugState::BREAK_LINE_ANY;
 	return true;
 }
 
@@ -852,14 +845,16 @@ bool LuaDebugger::n(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
 	debug::writeLine(L"[LuaDbg] step over...");
 	m_callDepth = 0;
-	m_debugState = DebugState::STEP_OVER;
+	m_debugState = DebugState::BREAK_LINE_DEPTH0;
 	return true;
 }
 
 bool LuaDebugger::out(const wchar_t *usage, const std::vector<std::wstring> &args)
 {
-	debug::writeLine(L"[LuaDbg] Not implemented...");
-	return false;
+	debug::writeLine(L"[LuaDbg] step out...");
+	m_callDepth = 1;
+	m_debugState = DebugState::BREAK_LINE_DEPTH0;
+	return true;
 }
 
 bool LuaDebugger::bp(const wchar_t *usage, const std::vector<std::wstring> &args)

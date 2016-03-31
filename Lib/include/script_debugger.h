@@ -49,11 +49,9 @@ public:
 
 private:
 	enum class DebugState {
-		CONT,			// only bp or error
-		INIT_BREAK,		// line event (once)
-		STEP_IN,		// line or call event
-		STEP_OUT,		// ret event
-		STEP_OVER,		// line event, if call-ret count == 0
+		CONT,				// only bp or error
+		BREAK_LINE_ANY,		// line event any
+		BREAK_LINE_DEPTH0,	// line event, if call-ret count == 0
 	};
 
 	static const int DefSrcLines = 21;
