@@ -122,5 +122,27 @@ void writef(const char *fmt, ...) noexcept
 	write(buf, true);
 }
 
+void writef_nonl(const wchar_t *fmt, ...) noexcept
+{
+	va_list args;
+	va_start(args, fmt);
+	wchar_t buf[1024];
+	_vsnwprintf_s(buf, _TRUNCATE, fmt, args);
+	va_end(args);
+
+	write(buf, false);
+}
+
+void writef_nonl(const char *fmt, ...) noexcept
+{
+	va_list args;
+	va_start(args, fmt);
+	char buf[1024];
+	vsnprintf_s(buf, _TRUNCATE, fmt, args);
+	va_end(args);
+
+	write(buf, false);
+}
+
 }
 }

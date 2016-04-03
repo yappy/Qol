@@ -476,8 +476,10 @@ void LuaDebugger::printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoN
 		debug::writeLine(L"Local variables:");
 		while ((name = lua_getlocal(L, ar, n)) != nullptr) {
 			if (!skipNoName || name[0] != '(') {
-				debug::writef("[%3d] %s = %s", n, name,
-					luaValueToStr(L, -1, maxDepth, 0).c_str());
+				debug::writef_nonl("[%3d] %s = ", n, name);
+				for (const auto &val : luaValueToStrList(L, -1, maxDepth, 0)) {
+					debug::writeLine(val.c_str());
+				}
 			}
 			// pop value
 			lua_pop(L, 1);
@@ -495,8 +497,10 @@ void LuaDebugger::printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoN
 			if (std::strcmp(name, "_ENV") == 0) {
 				d = 1;
 			}
-			debug::writef("[%3d] %s = %s", n, name,
-				luaValueToStr(L, -1, d, 0).c_str());
+			debug::writef_nonl("[%3d] %s = ", n, name);
+			for (const auto &val : luaValueToStrList(L, -1, d, 0)) {
+				debug::writeLine(val.c_str());
+			}
 			// pop value
 			lua_pop(L, 1);
 			n++;
@@ -632,8 +636,9 @@ void LuaDebugger::printEval(const std::string &expr)
 		}
 		else {
 			for (int i = retBase; i <= retLast; i++) {
-				auto valstr = luaValueToStr(L, i, DefTableDepth);
-				debug::writeLine(valstr.c_str());
+				for (const auto &val : luaValueToStrList(L, i, DefTableDepth)) {
+					debug::writeLine(val.c_str());
+				}
 			}
 		}
 		lua_settop(L, retBase);

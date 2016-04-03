@@ -196,9 +196,9 @@ void Lua::pcallInternal(int narg, int nret, int instLimit)
 	m_dbg->pcall(narg, nret, instLimit);
 }
 
-std::string luaValueToStr(lua_State *L, int ind, int maxDepth, int depth)
+std::vector<std::string> luaValueToStrList(lua_State *L, int ind, int maxDepth, int depth)
 {
-	std::string result;
+	std::vector<std::string> result;
 
 	int tind = lua_absindex(L, ind);
 
@@ -218,23 +218,25 @@ std::string luaValueToStr(lua_State *L, int ind, int maxDepth, int depth)
 		valstr = lua_toboolean(L, ind) ? "true" : "false";
 	}
 
-	result += "(";
-	result += typestr;
-	result += ") ";
-	result += valstr;
+	{
+		std::string str;
+		for (int i = 0; i < depth; i++) {
+			str += "    ";
+		}
+		str += "(";
+		str += typestr;
+		str += ") ";
+		str += valstr;
+		result.emplace_back(std::move(str));
+	}
 	if (type == LUA_TTABLE && depth < maxDepth) {
 		lua_pushnil(L);
 		while (lua_next(L, tind) != 0) {
 			// key:-2, value:-1
-			std::string key = luaValueToStr(L, -2, maxDepth, depth + 1);
-			std::string val = luaValueToStr(L, -1, maxDepth, depth + 1);
-			result += "\n";
-			for (int i = 0; i < depth + 1; i++) {
-				result += "    ";
-			}
-			result += key;
-			result += " = ";
-			result += val;
+			auto key = luaValueToStrList(L, -2, maxDepth, depth + 1);
+			auto val = luaValueToStrList(L, -1, maxDepth, depth + 1);
+			result.insert(result.end(), key.begin(), key.end());
+			result.insert(result.end(), key.begin(), key.end());
 			// pop value, keep key
 			lua_pop(L, 1);
 		}

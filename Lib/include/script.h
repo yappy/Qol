@@ -111,7 +111,7 @@ private:
 	void pcallInternal(int narg, int nret, int instLimit);
 };
 
-std::string luaValueToStr(lua_State *L, int ind,
+std::vector<std::string> luaValueToStrList(lua_State *L, int ind,
 	int maxDepth = 0, int depth = 0);
 
 }
