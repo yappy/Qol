@@ -87,8 +87,7 @@ void forAllValidLines(lua_State *L, F callback)
 
 }	// namespace
 
-LuaDebugger::LuaDebugger(lua_State *L, bool debugEnable) :
-	m_L(L), m_debugEnable(debugEnable)
+LuaDebugger::LuaDebugger(lua_State *L) : m_L(L)
 {
 	extra(L).dbg = nullptr;
 }
@@ -138,16 +137,19 @@ void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
 	m_debugInfo.emplace(name, std::move(info));
 }
 
-void LuaDebugger::pcall(int narg, int nret, int instLimit)
+void LuaDebugger::pcall(int narg, int nret, int instLimit, bool debugEnable, bool autoBreak)
 {
 	lua_State *L = m_L;
-	int mask = m_debugEnable ?
+	m_debugEnable = debugEnable;
+	// switch hook condition by debugEnable
+	int mask = debugEnable ?
 		(LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT) : 
 		LUA_MASKCOUNT;
 	{
 		LuaHook hook(this, hookRaw, mask, instLimit);
-		// TODO: break at first
-		m_debugState = DebugState::BREAK_LINE_ANY;
+		// break at the first line?
+		m_debugState = autoBreak ?
+			DebugState::BREAK_LINE_ANY : DebugState::CONT;
 		int base = lua_gettop(L) - narg;	// function index
 		lua_pushcfunction(L, msghandler);	// push message handler
 		lua_insert(L, base);				// put it under function and args

@@ -36,7 +36,7 @@ local function add_co(f)
 	table.insert(colist, coroutine.wrap(f));
 end
 
-function load(resource)
+function load()
 	resource:addTexture(1, "unyo", "../sampledata/test_400_300.png");
 	resource:addTexture(1, "ball", "../sampledata/circle.png");
 	resource:addBgm(1, "testbgm", "../sampledata/Epoq-Lepidoptera.ogg");

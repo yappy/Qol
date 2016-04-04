@@ -25,12 +25,11 @@ private:
 class Lua : private util::noncopyable {
 public:
 	/** @brief Create new lua_State and open standard libs.
-	 * @param[in]	debugEnable		Enable debug feature
 	 * @param[in]	maxHeapSize		Max memory usage
 	 *								(only virtual address range will be reserved at first)
 	 * @param[in]	initHeapSize	Initial commit size (physical memory mapped)
 	 */
-	Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize = 1024 * 1024);
+	Lua(size_t maxHeapSize, size_t initHeapSize = 1024 * 1024);
 	/** @brief Destruct lua_State.
 	 */
 	~Lua();
@@ -41,8 +40,7 @@ public:
 	lua_State *getLuaState() const;
 
 	void loadTraceLib();
-	void callWithResourceLib(const char *funcName, framework::Application *app,
-		int instLimit = 0);
+	void loadResourceLib(framework::Application *app);
 	void loadGraphLib(framework::Application *app);
 	void loadSoundLib(framework::Application *app);
 
@@ -50,7 +48,8 @@ public:
 	 * @param[in] fileName	Script file name.
 	 * @param[in] instLimit		Instruction count limit for prevent inf loop. (no limit if 0)
 	 */
-	void loadFile(const wchar_t *fileName, int instLimit = 0);
+	void loadFile(const wchar_t *fileName, int instLimit,
+		bool debugEnable, bool autoBreak);
 
 	struct doNothing {
 		void operator ()(lua_State *L) {}
@@ -77,7 +76,8 @@ public:
 	 * @param[in] nret			Return values count.
 	 */
 	template <class ParamFunc = doNothing, class RetFunc = doNothing>
-	void callGlobal(const char *funcName, int instLimit = 0,
+	void callGlobal(const char *funcName, int instLimit,
+		bool debugEnable, bool autoBreak,
 		ParamFunc pushArgFunc = doNothing(), int narg = 0,
 		RetFunc getRetFunc = doNothing(), int nret = 0)
 	{
@@ -86,7 +86,7 @@ public:
 		// push args
 		pushArgFunc(L);
 		// pcall
-		pcallInternal(narg, nret, instLimit);
+		pcallInternal(narg, nret, instLimit, debugEnable, autoBreak);
 		// get results
 		getRetFunc(L);
 		// clear stack
@@ -108,7 +108,8 @@ private:
 	// custom allocator
 	static void *luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize);
 
-	void pcallInternal(int narg, int nret, int instLimit);
+	void pcallInternal(int narg, int nret, int instLimit,
+		bool debugEnable, bool autoBreak);
 };
 
 std::vector<std::string> luaValueToStrList(lua_State *L, int ind,

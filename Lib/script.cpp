@@ -96,8 +96,7 @@ void *Lua::luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
 	}
 }
 
-Lua::Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize) :
-	m_debugEnable(debugEnable)
+Lua::Lua(size_t maxHeapSize, size_t initHeapSize)
 {
 	debug::writeLine("Initializing lua...");
 	HANDLE tmpHeap = ::HeapCreate(HeapOption, initHeapSize, maxHeapSize);
@@ -109,7 +108,7 @@ Lua::Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize) :
 		throw std::bad_alloc();
 	}
 	m_lua.reset(tmpLua);
-	m_dbg = std::make_unique<debugger::LuaDebugger>(m_lua.get(), debugEnable);
+	m_dbg = std::make_unique<debugger::LuaDebugger>(m_lua.get());
 	debug::writeLine("Initializing lua OK");
 
 	::lua_atpanic(m_lua.get(), atpanic);
@@ -133,20 +132,14 @@ void Lua::loadTraceLib()
 	lua_setglobal(L, "trace");
 }
 
-void Lua::callWithResourceLib(const char *funcName, framework::Application *app,
-	int instLimit)
+void Lua::loadResourceLib(framework::Application *app)
 {
 	lua_State *L = m_lua.get();
-	callGlobal(funcName, instLimit,
-		[app](lua_State *L) {
-			// args
-			// stack[1]: resource function table
-			luaL_newlib(L, export::resource_RegList);
-			lua_pushstring(L, export::resource_RawFieldName);
-			lua_pushlightuserdata(L, app);
-			lua_settable(L, -3);
-		}, 1,
-		[](lua_State *L) {}, 0);
+	luaL_newlib(L, export::resource_RegList);
+	lua_pushstring(L, export::resource_RawFieldName);
+	lua_pushlightuserdata(L, app);
+	lua_settable(L, -3);
+	lua_setglobal(L, "resource");
 }
 
 void Lua::loadGraphLib(framework::Application *app)
@@ -169,7 +162,8 @@ void Lua::loadSoundLib(framework::Application *app)
 	lua_setglobal(L, "sound");
 }
 
-void Lua::loadFile(const wchar_t *fileName, int instLimit)
+void Lua::loadFile(const wchar_t *fileName, int instLimit,
+	bool debugEnable, bool autoBreak)
 {
 	lua_State *L = m_lua.get();
 
@@ -188,12 +182,13 @@ void Lua::loadFile(const wchar_t *fileName, int instLimit)
 	m_dbg->loadDebugInfo(chunkName.c_str(),
 		reinterpret_cast<const char *>(buf.data()), buf.size());
 	// call it
-	pcallInternal(0, 0, instLimit);
+	pcallInternal(0, 0, instLimit, debugEnable, autoBreak);
 }
 
-void Lua::pcallInternal(int narg, int nret, int instLimit)
+void Lua::pcallInternal(int narg, int nret, int instLimit,
+	bool debugEnable, bool autoBreak)
 {
-	m_dbg->pcall(narg, nret, instLimit);
+	m_dbg->pcall(narg, nret, instLimit, debugEnable, autoBreak);
 }
 
 std::vector<std::string> luaValueToStrList(lua_State *L, int ind, int maxDepth, int depth)

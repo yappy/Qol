@@ -1,15 +1,16 @@
 #include "stdafx.h"
 #include "App.h"
 
-MainScene::MainScene(MyApp *app) : m_app(app), m_lua(true, LuaHeapSize)
+MainScene::MainScene(MyApp *app) : m_app(app), m_lua(LuaHeapSize)
 {
 	m_lua.loadTraceLib();
+	m_lua.loadResourceLib(m_app);
 	m_lua.loadGraphLib(m_app);
 	m_lua.loadSoundLib(m_app);
 
-	m_lua.loadFile(L"../sampledata/test.lua", LuaInstLimit);
+	m_lua.loadFile(L"../sampledata/test.lua", LuaInstLimit, true, true);
 
-	m_lua.callWithResourceLib("load", m_app);
+	m_lua.callGlobal("load", LuaInstLimit, true, true);
 }
 
 void MainScene::setup()
@@ -34,7 +35,7 @@ void MainScene::update()
 		updateLoadStatus();
 		if (isLoadCompleted()) {
 			m_loading = false;
-			m_lua.callGlobal("start", LuaInstLimit);
+			m_lua.callGlobal("start", LuaInstLimit, true, true);
 		}
 		else {
 			return;
@@ -43,7 +44,8 @@ void MainScene::update()
 
 	auto keys = m_app->input().getKeys();
 
-	m_lua.callGlobal("update", LuaInstLimit, [&keys](lua_State *L) {
+	m_lua.callGlobal("update", LuaInstLimit, true, true,
+		[&keys](lua_State *L) {
 		// arg1: key input table str->bool
 		const int Count = static_cast<int>(keys.size());
 		lua_createtable(L, 0, Count);
@@ -57,7 +59,7 @@ void MainScene::update()
 
 	if (keys[DIK_SPACE]) {
 		// SPACE to sub scene
-		m_lua.callGlobal("exit");
+		m_lua.callGlobal("exit", LuaInstLimit, true, true);
 		auto *next = m_app->getSceneAs<SubScene>(SceneId::Sub);
 		next->setup();
 		next->update();
@@ -71,5 +73,5 @@ void MainScene::render()
 		// Loading screen
 		return;
 	}
-	m_lua.callGlobal("draw", LuaInstLimit);
+	m_lua.callGlobal("draw", LuaInstLimit, true, true);
 }

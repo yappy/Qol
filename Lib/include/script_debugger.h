@@ -27,11 +27,11 @@ struct ChunkDebugInfo {
 
 class LuaDebugger : private util::noncopyable {
 public:
-	LuaDebugger(lua_State *L, bool debugEnable);
+	LuaDebugger(lua_State *L);
 
 	lua_State *getLuaState() const;
 	void loadDebugInfo(const char *name, const char *src, size_t size);
-	void pcall(int narg, int nret, int instLimit);
+	void pcall(int narg, int nret, int instLimit, bool debugEnable, bool autoBreak);
 
 	bool help(const wchar_t *usage, const std::vector<std::wstring> &args);
 	bool conf(const wchar_t *usage, const std::vector<std::wstring> &args);
