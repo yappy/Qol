@@ -87,7 +87,8 @@ void forAllValidLines(lua_State *L, F callback)
 
 }	// namespace
 
-LuaDebugger::LuaDebugger(lua_State *L) : m_L(L)
+LuaDebugger::LuaDebugger(lua_State *L, bool debugEnable) :
+	m_L(L), m_debugEnable(debugEnable)
 {
 	extra(L).dbg = nullptr;
 }
@@ -137,12 +138,11 @@ void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
 	m_debugInfo.emplace(name, std::move(info));
 }
 
-void LuaDebugger::pcall(int narg, int nret, int instLimit, bool debugEnable, bool autoBreak)
+void LuaDebugger::pcall(int narg, int nret, int instLimit, bool autoBreak)
 {
 	lua_State *L = m_L;
-	m_debugEnable = debugEnable;
 	// switch hook condition by debugEnable
-	int mask = debugEnable ?
+	int mask = m_debugEnable ?
 		(LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT) : 
 		LUA_MASKCOUNT;
 	{

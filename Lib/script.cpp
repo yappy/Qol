@@ -96,7 +96,8 @@ void *Lua::luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
 	}
 }
 
-Lua::Lua(size_t maxHeapSize, size_t initHeapSize)
+Lua::Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize) :
+	m_debugEnable(debugEnable)
 {
 	debug::writeLine("Initializing lua...");
 	HANDLE tmpHeap = ::HeapCreate(HeapOption, initHeapSize, maxHeapSize);
@@ -108,7 +109,7 @@ Lua::Lua(size_t maxHeapSize, size_t initHeapSize)
 		throw std::bad_alloc();
 	}
 	m_lua.reset(tmpLua);
-	m_dbg = std::make_unique<debugger::LuaDebugger>(m_lua.get());
+	m_dbg = std::make_unique<debugger::LuaDebugger>(m_lua.get(), debugEnable);
 	debug::writeLine("Initializing lua OK");
 
 	::lua_atpanic(m_lua.get(), atpanic);
@@ -162,8 +163,7 @@ void Lua::loadSoundLib(framework::Application *app)
 	lua_setglobal(L, "sound");
 }
 
-void Lua::loadFile(const wchar_t *fileName, int instLimit,
-	bool debugEnable, bool autoBreak)
+void Lua::loadFile(const wchar_t *fileName, int instLimit, bool autoBreak)
 {
 	lua_State *L = m_lua.get();
 
@@ -182,13 +182,12 @@ void Lua::loadFile(const wchar_t *fileName, int instLimit,
 	m_dbg->loadDebugInfo(chunkName.c_str(),
 		reinterpret_cast<const char *>(buf.data()), buf.size());
 	// call it
-	pcallInternal(0, 0, instLimit, debugEnable, autoBreak);
+	pcallInternal(0, 0, instLimit, autoBreak);
 }
 
-void Lua::pcallInternal(int narg, int nret, int instLimit,
-	bool debugEnable, bool autoBreak)
+void Lua::pcallInternal(int narg, int nret, int instLimit, bool autoBreak)
 {
-	m_dbg->pcall(narg, nret, instLimit, debugEnable, autoBreak);
+	m_dbg->pcall(narg, nret, instLimit, autoBreak);
 }
 
 std::vector<std::string> luaValueToStrList(lua_State *L, int ind, int maxDepth, int depth)
