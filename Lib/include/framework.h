@@ -28,9 +28,20 @@ namespace yappy {
 namespace framework {
 
 /** @brief Command line utility.
-* @return Parsed result vector. (argc-argv compatible)
-*/
+ * @return Parsed result vector. (argc-argv compatible)
+ */
 std::vector<std::wstring> parseCommandLine();
+
+/** @brief Get key state by GetAsyncKeyState().
+ * @param[in]	vKey	VK_XXX
+ * @return		true if the key is pressed.
+ */
+inline bool keyPressedAsync(int vKey)
+{
+	short ret = ::GetAsyncKeyState(vKey);
+	return (ret & 0x8000) != 0;
+}
+
 
 /// %Resource ID is fixed-length string; char[16].
 using IdString = util::IdString;
@@ -302,7 +313,6 @@ public:
 	 */
 	const sound::XAudio2::BgmResourcePtr getBgm(
 		size_t setId, const char *resId) const;
-
 
 protected:
 	/** @brief User initialization code.
