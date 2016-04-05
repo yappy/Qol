@@ -128,7 +128,7 @@ public:
 		size_t setId, const char *resId) const;
 
 private:
-	bool m_locked = false;
+	bool m_locked = true;
 
 	// int setId -> char[16] resId -> Resource<T>
 	template <class T>

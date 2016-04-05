@@ -3,7 +3,9 @@
 
 SubScene::SubScene(MyApp *app) : m_app(app)
 {
+	m_app->lockResource(false);
 	m_app->addSeResource(1, "testse", L"/C:/Windows/Media/chimes.wav");
+	m_app->lockResource(true);
 	m_app->loadResourceSet(1, std::atomic_bool());
 }
 

@@ -15,7 +15,9 @@ MainScene::MainScene(MyApp *app, bool debugEnable) :
 	bool dbg = keyPressedAsync(VK_F12);
 	m_lua.loadFile(L"../sampledata/test.lua", dbg);
 
+	app->lockResource(false);
 	m_lua.callGlobal("load", dbg);
+	app->lockResource(true);
 }
 
 void MainScene::setup()
