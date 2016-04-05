@@ -40,6 +40,8 @@ function load()
 	resource:addTexture(1, "unyo", "../sampledata/test_400_300.png");
 	resource:addTexture(1, "ball", "../sampledata/circle.png");
 	resource:addBgm(1, "testbgm", "../sampledata/Epoq-Lepidoptera.ogg");
+	-- Cause C++ exception (resource ID string already exists)
+	-- resource:addBgm(1, "testbgm", "../sampledata/Epoq-Lepidoptera.ogg");
 end
 
 function start()

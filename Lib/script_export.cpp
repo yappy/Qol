@@ -22,6 +22,18 @@ inline T *getPtrFromSelf(lua_State *L, const char *fieldName)
 	return result;
 }
 
+template <class F>
+inline void exceptToLuaError(lua_State *L, F proc)
+{
+	try {
+		proc();
+	}
+	catch (const std::exception &ex) {
+		// push string ex.what() and throw
+		luaL_error(L, "%s", ex.what());
+	}
+}
+
 template <class T>
 using lim = std::numeric_limits<T>;
 
@@ -95,16 +107,18 @@ inline float getOptFloat(lua_State *L, int arg, float def,
  */
 int trace::write(lua_State *L)
 {
-	int argc = lua_gettop(L);
-	for (int i = 1; i <= argc; i++) {
-		const char *str = ::lua_tostring(L, i);
-		if (str != nullptr) {
-			debug::writeLine(str);
+	exceptToLuaError(L, [L]() {
+		int argc = lua_gettop(L);
+		for (int i = 1; i <= argc; i++) {
+			const char *str = ::lua_tostring(L, i);
+			if (str != nullptr) {
+				debug::writeLine(str);
+			}
+			else {
+				debug::writef("<%s>", luaL_typename(L, i));
+			}
 		}
-		else {
-			debug::writef("<%s>", luaL_typename(L, i));
-		}
-	}
+	});
 	return 0;
 }
 
@@ -126,13 +140,14 @@ int trace::write(lua_State *L)
  */
 int resource::addTexture(lua_State *L)
 {
-	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
-	int setId = getInt(L, 2, 0);
-	const char *resId = luaL_checkstring(L, 3);
-	const char *path = luaL_checkstring(L, 4);
+	exceptToLuaError(L, [L]() {
+		auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
+		int setId = getInt(L, 2, 0);
+		const char *resId = luaL_checkstring(L, 3);
+		const char *path = luaL_checkstring(L, 4);
 
-	app->addTextureResource(setId, resId, util::utf82wc(path).get());
-
+		app->addTextureResource(setId, resId, util::utf82wc(path).get());
+	});
 	return 0;
 }
 
@@ -150,23 +165,24 @@ int resource::addTexture(lua_State *L)
  */
 int resource::addFont(lua_State *L)
 {
-	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
-	int setId = getInt(L, 2, 0);
-	const char *resId = luaL_checkstring(L, 3);
-	const char *fontName = luaL_checkstring(L, 4);
-	const char *startCharStr = luaL_checkstring(L, 5);
-	luaL_argcheck(L, *startCharStr != '\0', 5, "empty string is NG");
-	const char *endCharStr = luaL_checkstring(L, 6);
-	luaL_argcheck(L, *endCharStr != '\0', 6, "empty string is NG");
-	int w = getInt(L, 7, 0);
-	int h = getInt(L, 8, 0);
+	exceptToLuaError(L, [L]() {
+		auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
+		int setId = getInt(L, 2, 0);
+		const char *resId = luaL_checkstring(L, 3);
+		const char *fontName = luaL_checkstring(L, 4);
+		const char *startCharStr = luaL_checkstring(L, 5);
+		luaL_argcheck(L, *startCharStr != '\0', 5, "empty string is NG");
+		const char *endCharStr = luaL_checkstring(L, 6);
+		luaL_argcheck(L, *endCharStr != '\0', 6, "empty string is NG");
+		int w = getInt(L, 7, 0);
+		int h = getInt(L, 8, 0);
 
-	wchar_t startChar = util::utf82wc(startCharStr)[0];
-	wchar_t endChar = util::utf82wc(endCharStr)[0];
+		wchar_t startChar = util::utf82wc(startCharStr)[0];
+		wchar_t endChar = util::utf82wc(endCharStr)[0];
 
-	app->addFontResource(setId, resId, util::utf82wc(fontName).get(),
-		startChar, endChar, w, h);
-
+		app->addFontResource(setId, resId, util::utf82wc(fontName).get(),
+			startChar, endChar, w, h);
+	});
 	return 0;
 }
 
@@ -184,13 +200,14 @@ int resource::addFont(lua_State *L)
  */
 int resource::addSe(lua_State *L)
 {
-	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
-	int setId = getInt(L, 2, 0);
-	const char *resId = luaL_checkstring(L, 3);
-	const char *path = luaL_checkstring(L, 4);
+	exceptToLuaError(L, [L]() {
+		auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
+		int setId = getInt(L, 2, 0);
+		const char *resId = luaL_checkstring(L, 3);
+		const char *path = luaL_checkstring(L, 4);
 
-	app->addSeResource(setId, resId, util::utf82wc(path).get());
-
+		app->addSeResource(setId, resId, util::utf82wc(path).get());
+	});
 	return 0;
 }
 
@@ -208,13 +225,14 @@ int resource::addSe(lua_State *L)
  */
 int resource::addBgm(lua_State *L)
 {
-	auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
-	int setId = getInt(L, 2, 0);
-	const char *resId = luaL_checkstring(L, 3);
-	const char *path = luaL_checkstring(L, 4);
+	exceptToLuaError(L, [L]() {
+		auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
+		int setId = getInt(L, 2, 0);
+		const char *resId = luaL_checkstring(L, 3);
+		const char *path = luaL_checkstring(L, 4);
 
-	app->addBgmResource(setId, resId, util::utf82wc(path).get());
-
+		app->addBgmResource(setId, resId, util::utf82wc(path).get());
+	});
 	return 0;
 }
 
@@ -237,15 +255,16 @@ int resource::addBgm(lua_State *L)
  */
 int graph::getTextureSize(lua_State *L)
 {
-	auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
-	int setId = getInt(L, 2, 0);
-	const char *resId = luaL_checkstring(L, 3);
+	exceptToLuaError(L, [L]() {
+		auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
+		int setId = getInt(L, 2, 0);
+		const char *resId = luaL_checkstring(L, 3);
 
-	const auto &pTex = app->getTexture(setId, resId);
+		const auto &pTex = app->getTexture(setId, resId);
 
-	lua_pushinteger(L, pTex->w);
-	lua_pushinteger(L, pTex->h);
-
+		lua_pushinteger(L, pTex->w);
+		lua_pushinteger(L, pTex->h);
+	});
 	return 2;
 }
 
@@ -283,29 +302,30 @@ int graph::getTextureSize(lua_State *L)
  */
 int graph::drawTexture(lua_State *L)
 {
-	auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
-	int setId = getInt(L, 2, 0);
-	const char *resId = luaL_checkstring(L, 3);
-	int dx = getInt(L, 4);
-	int dy = getInt(L, 5);
+	exceptToLuaError(L, [L]() {
+		auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
+		int setId = getInt(L, 2, 0);
+		const char *resId = luaL_checkstring(L, 3);
+		int dx = getInt(L, 4);
+		int dy = getInt(L, 5);
 
-	bool lrInv = lua_toboolean(L, 6) != 0;
-	bool udInv = lua_toboolean(L, 7) != 0;
-	int sx = getOptInt(L, 8, 0);
-	int sy = getOptInt(L, 9, 0);
-	int sw = getOptInt(L, 10, -1);
-	int sh = getOptInt(L, 11, -1);
-	int cx = getOptInt(L, 12, 0);
-	int cy = getOptInt(L, 13, 0);
-	float angle = getOptFloat(L, 14, 0.0f);
-	float scaleX = getOptFloat(L, 15, 1.0f);
-	float scaleY = getOptFloat(L, 16, 1.0f);
-	float alpha = getOptFloat(L, 17, 1.0f);
+		bool lrInv = lua_toboolean(L, 6) != 0;
+		bool udInv = lua_toboolean(L, 7) != 0;
+		int sx = getOptInt(L, 8, 0);
+		int sy = getOptInt(L, 9, 0);
+		int sw = getOptInt(L, 10, -1);
+		int sh = getOptInt(L, 11, -1);
+		int cx = getOptInt(L, 12, 0);
+		int cy = getOptInt(L, 13, 0);
+		float angle = getOptFloat(L, 14, 0.0f);
+		float scaleX = getOptFloat(L, 15, 1.0f);
+		float scaleY = getOptFloat(L, 16, 1.0f);
+		float alpha = getOptFloat(L, 17, 1.0f);
 
-	const auto &pTex = app->getTexture(setId, resId);
-	app->graph().drawTexture(pTex, dx, dy, lrInv, udInv, sx, sy, sw, sh, cx, cy,
-		angle, scaleX, scaleY, alpha);
-
+		const auto &pTex = app->getTexture(setId, resId);
+		app->graph().drawTexture(pTex, dx, dy, lrInv, udInv, sx, sy, sw, sh, cx, cy,
+			angle, scaleX, scaleY, alpha);
+	});
 	return 0;
 }
 
@@ -334,23 +354,24 @@ int graph::drawTexture(lua_State *L)
  */
 int graph::drawString(lua_State *L)
 {
-	auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
-	int setId = getInt(L, 2, 0);
-	const char *resId = luaL_checkstring(L, 3);
-	const char *str = luaL_checkstring(L, 4);
-	int dx = getInt(L, 5);
-	int dy = getInt(L, 6);
+	exceptToLuaError(L, [L]() {
+		auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
+		int setId = getInt(L, 2, 0);
+		const char *resId = luaL_checkstring(L, 3);
+		const char *str = luaL_checkstring(L, 4);
+		int dx = getInt(L, 5);
+		int dy = getInt(L, 6);
 
-	int color = getOptInt(L, 7, 0x000000);
-	int ajustX = getOptInt(L, 8, 0);
-	float scaleX = getOptFloat(L, 9, 1.0f);
-	float scaleY = getOptFloat(L, 10, 1.0f);
-	float alpha = getOptFloat(L, 11, 1.0f);
+		int color = getOptInt(L, 7, 0x000000);
+		int ajustX = getOptInt(L, 8, 0);
+		float scaleX = getOptFloat(L, 9, 1.0f);
+		float scaleY = getOptFloat(L, 10, 1.0f);
+		float alpha = getOptFloat(L, 11, 1.0f);
 
-	const auto &pFont = app->getFont(setId, resId);
-	app->graph().drawString(pFont, util::utf82wc(str).get(), dx, dy,
-		color, ajustX, scaleX, scaleY, alpha);
-
+		const auto &pFont = app->getFont(setId, resId);
+		app->graph().drawString(pFont, util::utf82wc(str).get(), dx, dy,
+			color, ajustX, scaleX, scaleY, alpha);
+	});
 	return 0;
 }
 
@@ -371,13 +392,14 @@ int graph::drawString(lua_State *L)
  */
 int sound::playSe(lua_State *L)
 {
-	auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
-	int setId = getInt(L, 2, 0);
-	const char *resId = luaL_checkstring(L, 3);
+	exceptToLuaError(L, [L]() {
+		auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
+		int setId = getInt(L, 2, 0);
+		const char *resId = luaL_checkstring(L, 3);
 
-	const auto &pSoundEffect = app->getSoundEffect(setId, resId);
-	app->sound().playSoundEffect(pSoundEffect);
-
+		const auto &pSoundEffect = app->getSoundEffect(setId, resId);
+		app->sound().playSoundEffect(pSoundEffect);
+	});
 	return 0;
 }
 
@@ -394,13 +416,14 @@ int sound::playSe(lua_State *L)
  */
 int sound::playBgm(lua_State *L)
 {
-	auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
-	int setId = getInt(L, 2, 0);
-	const char *resId = luaL_checkstring(L, 3);
+	exceptToLuaError(L, [L]() {
+		auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
+		int setId = getInt(L, 2, 0);
+		const char *resId = luaL_checkstring(L, 3);
 
-	auto &pBgm = app->getBgm(setId, resId);
-	app->sound().playBgm(pBgm);
-
+		auto &pBgm = app->getBgm(setId, resId);
+		app->sound().playBgm(pBgm);
+	});
 	return 0;
 }
 
@@ -415,10 +438,11 @@ int sound::playBgm(lua_State *L)
  */
 int sound::stopBgm(lua_State *L)
 {
-	auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
+	exceptToLuaError(L, [L]() {
+		auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
 
-	app->sound().stopBgm();
-
+		app->sound().stopBgm();
+	});
 	return 0;
 }
 
