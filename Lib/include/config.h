@@ -20,6 +20,9 @@ public:
 	ConfigFile(const wchar_t *fileName, InitList keyAndDefaults);
 	~ConfigFile();
 
+	void load();
+	void save();
+
 	void setString(const std::string &key, const std::string &value);
 	const std::string &getString(const std::string &key) const;
 	bool getBool(const std::string &key);
@@ -29,9 +32,6 @@ private:
 	const wchar_t *const m_fileName;
 	MapType m_defaults;
 	MapType m_map;
-
-	void load();
-	void save();
 };
 
 }

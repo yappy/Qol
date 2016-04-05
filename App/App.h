@@ -1,9 +1,13 @@
 #pragma once
 
 #include <framework.h>
+#include <config.h>
 #include <script.h>
 
 using namespace yappy;
+
+// global
+extern config::ConfigFile g_config;
 
 enum class SceneId {
 	Main,
@@ -49,7 +53,7 @@ private:
 
 class MainScene : public framework::AsyncLoadScene {
 public:
-	explicit MainScene(MyApp *app);
+	MainScene(MyApp *app, bool debugEnable);
 	~MainScene() = default;
 
 	// Scene specific initialization at scene start

@@ -3,7 +3,9 @@
 
 using framework::keyPressedAsync;
 
-MainScene::MainScene(MyApp *app) : m_app(app), m_lua(true, LuaHeapSize)
+MainScene::MainScene(MyApp *app, bool debugEnable) :
+	m_app(app),
+	m_lua(debugEnable, LuaHeapSize)
 {
 	m_lua.loadTraceLib();
 	m_lua.loadResourceLib(m_app);
