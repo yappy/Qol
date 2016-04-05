@@ -286,7 +286,9 @@ public:
 	void addBgmResource(size_t setId, const char *resId, const wchar_t *path);
 
 	/** @brief Set the lock state of resources.
-	 * @param[in] lock	addXXXResource() will be failed if true.
+	 * @details If resource manager is sealed, addXXXResource() will be failed.
+	 * @param[in] seal	new state.
+	 * @sa UnsealResource
 	 */
 	void sealResource(bool seal);
 
@@ -359,6 +361,24 @@ private:
 	void onIdle();
 	void updateInternal();
 	void renderInternal();
+};
+
+/** @brief Auto re-seal helper
+ * @sa Application::sealResource()
+ */
+class UnsealResource : util::noncopyable {
+public:
+	explicit UnsealResource(Application &app) : m_app(app)
+	{
+		m_app.sealResource(false);
+	}
+	~UnsealResource()
+	{
+		m_app.sealResource(true);
+	}
+
+private:
+	Application &m_app;
 };
 
 }
