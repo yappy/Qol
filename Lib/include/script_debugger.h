@@ -55,7 +55,7 @@ private:
 	};
 
 	static const int DefSrcLines = 21;
-	static const int DefTableDepth = 1;
+	static const int DefTableDepth = 3;
 
 	lua_State *m_L;
 	bool m_debugEnable;

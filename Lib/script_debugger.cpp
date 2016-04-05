@@ -486,12 +486,8 @@ void LuaDebugger::printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoN
 		const char *name = nullptr;
 		debug::writeLine(L"Upvalues:");
 		while ((name = lua_getupvalue(L, -1, n)) != nullptr) {
-			int d = maxDepth;
-			if (std::strcmp(name, "_ENV") == 0) {
-				d = 1;
-			}
 			debug::writef_nonl("[%3d] %s = ", n, name);
-			for (const auto &val : luaValueToStrList(L, -1, d, 0)) {
+			for (const auto &val : luaValueToStrList(L, -1, maxDepth, 0)) {
 				debug::writeLine(val.c_str());
 			}
 			// pop value
@@ -768,7 +764,7 @@ bool LuaDebugger::fr(const wchar_t *usage, const std::vector<std::wstring> &args
 		debug::writef("[frame #%d] %s (%s) %s:%d", lv,
 			name, ar.what, ar.source, ar.currentline);
 		printSrcLines(ar.source, ar.currentline, DefSrcLines, ar.currentline);
-		printLocalAndUpvalue(&ar, DefTableDepth, true);
+		printLocalAndUpvalue(&ar, 0, true);
 		// set current frame
 		m_currentFrame = lv;
 	}
