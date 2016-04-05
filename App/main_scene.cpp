@@ -1,15 +1,21 @@
 #include "stdafx.h"
 #include "App.h"
 
-MainScene::MainScene(MyApp *app) : m_app(app), m_lua(LuaHeapSize)
+using framework::keyPressedAsync;
+
+MainScene::MainScene(MyApp *app, bool debugEnable) :
+	m_app(app),
+	m_lua(debugEnable, LuaHeapSize)
 {
 	m_lua.loadTraceLib();
+	m_lua.loadResourceLib(m_app);
 	m_lua.loadGraphLib(m_app);
 	m_lua.loadSoundLib(m_app);
 
-	m_lua.loadFile(L"../sampledata/test.lua", "testfile.lua");
+	bool dbg = keyPressedAsync(VK_F12);
+	m_lua.loadFile(L"../sampledata/test.lua", dbg);
 
-	m_lua.callWithResourceLib("load", m_app);
+	m_lua.callGlobal("load", dbg);
 }
 
 void MainScene::setup()
@@ -30,11 +36,13 @@ void MainScene::loadOnSubThread(std::atomic_bool &cancel)
 
 void MainScene::update()
 {
+	bool dbg = keyPressedAsync(VK_F12);
+
 	if (m_loading) {
 		updateLoadStatus();
 		if (isLoadCompleted()) {
 			m_loading = false;
-			m_lua.callGlobal("start");
+			m_lua.callGlobal("start", dbg);
 		}
 		else {
 			return;
@@ -43,7 +51,8 @@ void MainScene::update()
 
 	auto keys = m_app->input().getKeys();
 
-	m_lua.callGlobal("update", 0, [&keys](lua_State *L) {
+	m_lua.callGlobal("update", dbg,
+		[&keys](lua_State *L) {
 		// arg1: key input table str->bool
 		const int Count = static_cast<int>(keys.size());
 		lua_createtable(L, 0, Count);
@@ -57,7 +66,7 @@ void MainScene::update()
 
 	if (keys[DIK_SPACE]) {
 		// SPACE to sub scene
-		m_lua.callGlobal("exit");
+		m_lua.callGlobal("exit", dbg);
 		auto *next = m_app->getSceneAs<SubScene>(SceneId::Sub);
 		next->setup();
 		next->update();
@@ -71,5 +80,6 @@ void MainScene::render()
 		// Loading screen
 		return;
 	}
-	m_lua.callGlobal("draw");
+	bool dbg = keyPressedAsync(VK_F12);
+	m_lua.callGlobal("draw", dbg);
 }

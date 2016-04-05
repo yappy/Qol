@@ -2,7 +2,10 @@
 
 #include "util.h"
 #include "framework.h"
-#include <lua.hpp>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+#include "script_debugger.h"
 #include "script_export.h"
 
 namespace yappy {
@@ -24,11 +27,13 @@ private:
 class Lua : private util::noncopyable {
 public:
 	/** @brief Create new lua_State and open standard libs.
+	 * @param[in]	debugEnable		Enable debug feature
 	 * @param[in]	maxHeapSize		Max memory usage
 	 *								(only virtual address range will be reserved at first)
 	 * @param[in]	initHeapSize	Initial commit size (physical memory mapped)
 	 */
-	explicit Lua(size_t maxHeapSize, size_t initHeapSize = 1024 * 1024);
+	Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize = 1024 * 1024,
+		int instLimit = 0x0fffffff);
 	/** @brief Destruct lua_State.
 	 */
 	~Lua();
@@ -39,17 +44,14 @@ public:
 	lua_State *getLuaState() const;
 
 	void loadTraceLib();
-	void callWithResourceLib(const char *funcName, framework::Application *app,
-		int instLimit = 0);
+	void loadResourceLib(framework::Application *app);
 	void loadGraphLib(framework::Application *app);
 	void loadSoundLib(framework::Application *app);
 
 	/** @brief Load script file and eval it.
 	 * @param[in] fileName	Script file name.
-	 * @param[in] name		Chunk name. It will be used by Lua runtime for debug message.
-	 *						If null, fileName is used.
 	 */
-	void loadFile(const wchar_t *fileName, const char *name = nullptr);
+	void loadFile(const wchar_t *fileName, bool autoBreak);
 
 	struct doNothing {
 		void operator ()(lua_State *L) {}
@@ -76,7 +78,7 @@ public:
 	 * @param[in] nret			Return values count.
 	 */
 	template <class ParamFunc = doNothing, class RetFunc = doNothing>
-	void callGlobal(const char *funcName, int instLimit = 0,
+	void callGlobal(const char *funcName, bool autoBreak,
 		ParamFunc pushArgFunc = doNothing(), int narg = 0,
 		RetFunc getRetFunc = doNothing(), int nret = 0)
 	{
@@ -84,10 +86,12 @@ public:
 		lua_getglobal(L, funcName);
 		// push args
 		pushArgFunc(L);
-		// call
-		pcallWithLimit(L, narg, nret, 0, instLimit);
+		// pcall
+		pcallInternal(narg, nret, autoBreak);
 		// get results
 		getRetFunc(L);
+		// clear stack
+		lua_settop(L, 0);
 	}
 
 private:
@@ -97,13 +101,19 @@ private:
 		void operator()(lua_State *L);
 	};
 
+	bool m_debugEnable;
 	util::HeapPtr m_heap;
 	std::unique_ptr<lua_State, LuaDeleter> m_lua;
+	std::unique_ptr<debugger::LuaDebugger> m_dbg;
 
+	// custom allocator
 	static void *luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize);
-	static int pcallWithLimit(lua_State *L,
-		int narg, int nret, int msgh, int instLimit);
+
+	void pcallInternal(int narg, int nret, bool autoBreak);
 };
+
+std::vector<std::string> luaValueToStrList(lua_State *L, int ind,
+	int maxDepth = 0, int depth = 0);
 
 }
 }
