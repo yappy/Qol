@@ -112,8 +112,8 @@ public:
 	void addBgm(size_t setId, const char *resId,
 		std::function<sound::XAudio2::BgmResourcePtr()> loadFunc);
 
-	void lock(bool lock);
-	bool isLocked();
+	void setSealed(bool sealed);
+	bool isSealed();
 
 	void loadResourceSet(size_t setId, std::atomic_bool &cancel);
 	void unloadResourceSet(size_t setId);
@@ -128,7 +128,7 @@ public:
 		size_t setId, const char *resId) const;
 
 private:
-	bool m_locked = true;
+	bool m_sealed = true;
 
 	// int setId -> char[16] resId -> Resource<T>
 	template <class T>
@@ -288,7 +288,7 @@ public:
 	/** @brief Set the lock state of resources.
 	 * @param[in] lock	addXXXResource() will be failed if true.
 	 */
-	void lockResource(bool lock);
+	void sealResource(bool seal);
 
 	/** @brief Load resources by resource set ID.
 	 * @param[in] setId	%Resource set ID.

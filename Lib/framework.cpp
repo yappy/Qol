@@ -70,35 +70,35 @@ void addResource(ResourceManager::ResMapVec<T> *targetMapVec, bool locked,
 void ResourceManager::addTexture(size_t setId, const char * resId,
 	std::function<graphics::DGraphics::TextureResourcePtr()> loadFunc)
 {
-	addResource(&m_texMapVec, m_locked, setId, resId, loadFunc);
+	addResource(&m_texMapVec, m_sealed, setId, resId, loadFunc);
 }
 
 void ResourceManager::addFont(size_t setId, const char *resId,
 	std::function<graphics::DGraphics::FontResourcePtr()> loadFunc)
 {
-	addResource(&m_fontMapVec, m_locked, setId, resId, loadFunc);
+	addResource(&m_fontMapVec, m_sealed, setId, resId, loadFunc);
 }
 
 void ResourceManager::addSoundEffect(size_t setId, const char *resId,
 	std::function<sound::XAudio2::SeResourcePtr()> loadFunc)
 {
-	addResource(&m_seMapVec, m_locked, setId, resId, loadFunc);
+	addResource(&m_seMapVec, m_sealed, setId, resId, loadFunc);
 }
 
 void ResourceManager::addBgm(size_t setId, const char *resId,
 	std::function<sound::XAudio2::BgmResourcePtr()> loadFunc)
 {
-	addResource(&m_bgmMapVec, m_locked, setId, resId, loadFunc);
+	addResource(&m_bgmMapVec, m_sealed, setId, resId, loadFunc);
 }
 
-void ResourceManager::lock(bool lock)
+void ResourceManager::setSealed(bool seal)
 {
-	m_locked = lock;
+	m_sealed = seal;
 }
 
-bool ResourceManager::isLocked()
+bool ResourceManager::isSealed()
 {
-	return m_locked;
+	return m_sealed;
 }
 
 namespace {
@@ -530,9 +530,9 @@ void Application::addBgmResource(size_t setId, const char *resId, const wchar_t 
 	});
 }
 
-void Application::lockResource(bool lock)
+void Application::sealResource(bool seal)
 {
-	m_resMgr.lock(lock);
+	m_resMgr.setSealed(seal);
 }
 
 void Application::loadResourceSet(size_t setId, std::atomic_bool &cancel)
