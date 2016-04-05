@@ -32,28 +32,6 @@ inline ExtraSpace &extra(lua_State *L)
 	return *reinterpret_cast<ExtraSpace *>(extra);
 }
 
-// safe unset hook
-class LuaHook : private util::noncopyable {
-public:
-	explicit LuaHook(LuaDebugger *dbg, lua_Hook hook, int mask, int count) :
-		m_dbg(dbg)
-	{
-		lua_State *L = m_dbg->getLuaState();
-		ASSERT(extra(L).dbg == nullptr);
-		extra(L).dbg = dbg;
-		lua_sethook(L, hook, mask, count);
-	}
-	~LuaHook()
-	{
-		lua_State *L = m_dbg->getLuaState();
-		ASSERT(extra(L).dbg == m_dbg);
-		lua_sethook(L, nullptr, 0, 0);
-		extra(L).dbg = nullptr;
-	}
-private:
-	LuaDebugger *m_dbg;
-};
-
 #ifdef ENABLE_LUAIMPL_DEPENDENT
 namespace impldep {
 
@@ -87,10 +65,15 @@ void forAllValidLines(lua_State *L, F callback)
 
 }	// namespace
 
-LuaDebugger::LuaDebugger(lua_State *L, bool debugEnable) :
+LuaDebugger::LuaDebugger(lua_State *L, bool debugEnable, int instLimit) :
 	m_L(L), m_debugEnable(debugEnable)
 {
-	extra(L).dbg = nullptr;
+	extra(L).dbg = this;
+	// switch hook condition by debugEnable
+	int mask = m_debugEnable ?
+		(LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT) :
+		LUA_MASKCOUNT;
+	lua_sethook(L, hookRaw, mask, instLimit);
 }
 
 lua_State *LuaDebugger::getLuaState() const
@@ -138,15 +121,10 @@ void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
 	m_debugInfo.emplace(name, std::move(info));
 }
 
-void LuaDebugger::pcall(int narg, int nret, int instLimit, bool autoBreak)
+void LuaDebugger::pcall(int narg, int nret, bool autoBreak)
 {
 	lua_State *L = m_L;
-	// switch hook condition by debugEnable
-	int mask = m_debugEnable ?
-		(LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT) : 
-		LUA_MASKCOUNT;
 	{
-		LuaHook hook(this, hookRaw, mask, instLimit);
 		// break at the first line?
 		m_debugState = autoBreak ?
 			DebugState::BREAK_LINE_ANY : DebugState::CONT;

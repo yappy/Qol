@@ -8,9 +8,9 @@ MainScene::MainScene(MyApp *app) : m_app(app), m_lua(true, LuaHeapSize)
 	m_lua.loadGraphLib(m_app);
 	m_lua.loadSoundLib(m_app);
 
-	m_lua.loadFile(L"../sampledata/test.lua", LuaInstLimit, true);
+	m_lua.loadFile(L"../sampledata/test.lua", true);
 
-	m_lua.callGlobal("load", LuaInstLimit, true);
+	m_lua.callGlobal("load", true);
 }
 
 void MainScene::setup()
@@ -35,7 +35,7 @@ void MainScene::update()
 		updateLoadStatus();
 		if (isLoadCompleted()) {
 			m_loading = false;
-			m_lua.callGlobal("start", LuaInstLimit, true);
+			m_lua.callGlobal("start", true);
 		}
 		else {
 			return;
@@ -44,7 +44,7 @@ void MainScene::update()
 
 	auto keys = m_app->input().getKeys();
 
-	m_lua.callGlobal("update", LuaInstLimit, true,
+	m_lua.callGlobal("update", true,
 		[&keys](lua_State *L) {
 		// arg1: key input table str->bool
 		const int Count = static_cast<int>(keys.size());
@@ -59,7 +59,7 @@ void MainScene::update()
 
 	if (keys[DIK_SPACE]) {
 		// SPACE to sub scene
-		m_lua.callGlobal("exit", LuaInstLimit, true);
+		m_lua.callGlobal("exit", true);
 		auto *next = m_app->getSceneAs<SubScene>(SceneId::Sub);
 		next->setup();
 		next->update();
@@ -73,5 +73,5 @@ void MainScene::render()
 		// Loading screen
 		return;
 	}
-	m_lua.callGlobal("draw", LuaInstLimit, true);
+	m_lua.callGlobal("draw", true);
 }
