@@ -51,6 +51,8 @@ function start()
 	colist = {};
 
 	sound:playBgm(1, "testbgm");
+	-- Cause C++ exception (resource manager is sealed)
+	-- resource:addBgm(1, "testbgm", "../sampledata/Epoq-Lepidoptera.ogg");
 end
 
 function exit()

@@ -155,6 +155,19 @@ int LuaDebugger::msghandler(lua_State *L)
 				luaL_typename(L, 1));
 	}
 	luaL_traceback(L, L, msg, 1);  /* append a standard traceback */
+
+	// enter debugger if debugEnable
+	LuaDebugger *dbg = extra(L).dbg;
+	if (dbg->m_debugEnable) {
+		debug::writeLine();
+		debug::writeLine(L"[LuaDbg] ***** Lua error occurred *****");
+		debug::writeLine(lua_tostring(L, 1));
+		debug::writeLine(L"[LuaDbg] Check \"bt\" and \"fr <callstack>\"");
+		debug::writeLine(L"[LuaDbg] \"help\" command for usage");
+		dbg->cmdLoop();
+	}
+
+	lua_settop(L, 1);
 	return 1;  /* return the traceback */
 }
 
@@ -372,11 +385,11 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 		summaryOnBreak(ar);
 		printWatchList();
 		debug::writeLine(L"[LuaDbg] \"help\" command for usage");
-		cmdLoop(ar);
+		cmdLoop();
 	}
 }
 
-void LuaDebugger::cmdLoop(lua_Debug *ar)
+void LuaDebugger::cmdLoop()
 {
 	try {
 		while (1) {
@@ -443,7 +456,7 @@ void LuaDebugger::printSrcLines(const std::string &name,
 		}
 	}
 	else {
-		debug::writef("Debug info not found: %s", name);
+		debug::writef("Debug info not found: %s", name.c_str());
 	}
 }
 
@@ -473,12 +486,8 @@ void LuaDebugger::printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoN
 		const char *name = nullptr;
 		debug::writeLine(L"Upvalues:");
 		while ((name = lua_getupvalue(L, -1, n)) != nullptr) {
-			int d = maxDepth;
-			if (std::strcmp(name, "_ENV") == 0) {
-				d = 1;
-			}
 			debug::writef_nonl("[%3d] %s = ", n, name);
-			for (const auto &val : luaValueToStrList(L, -1, d, 0)) {
+			for (const auto &val : luaValueToStrList(L, -1, maxDepth, 0)) {
 				debug::writeLine(val.c_str());
 			}
 			// pop value
@@ -755,7 +764,7 @@ bool LuaDebugger::fr(const wchar_t *usage, const std::vector<std::wstring> &args
 		debug::writef("[frame #%d] %s (%s) %s:%d", lv,
 			name, ar.what, ar.source, ar.currentline);
 		printSrcLines(ar.source, ar.currentline, DefSrcLines, ar.currentline);
-		printLocalAndUpvalue(&ar, DefTableDepth, true);
+		printLocalAndUpvalue(&ar, 0, true);
 		// set current frame
 		m_currentFrame = lv;
 	}
