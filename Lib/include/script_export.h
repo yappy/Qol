@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#include <lua.h>
+#include <lauxlib.h>
+
 /** @file
  * @brief Luaへエクスポートする関数群。
  * @details

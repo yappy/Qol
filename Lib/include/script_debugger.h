@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util.h"
-#include <lua.hpp>
+#include <lua.h>
 
 namespace yappy {
 namespace lua {

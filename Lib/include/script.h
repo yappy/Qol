@@ -2,7 +2,9 @@
 
 #include "util.h"
 #include "framework.h"
-#include <lua.hpp>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 #include "script_debugger.h"
 #include "script_export.h"
 
