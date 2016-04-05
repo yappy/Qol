@@ -74,7 +74,7 @@ private:
 	static int msghandler(lua_State *L);
 	static void hookRaw(lua_State *L, lua_Debug *ar);
 
-	void cmdLoop(lua_Debug *ar);
+	void cmdLoop();
 	void summaryOnBreak(lua_Debug *ar);
 	void printSrcLines(const std::string &name, int line, int range, int execLine = -1);
 	void printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoName);
