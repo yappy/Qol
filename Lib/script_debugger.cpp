@@ -109,7 +109,7 @@ void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
 #ifdef ENABLE_LUAIMPL_DEPENDENT
 	impldep::forAllValidLines(L, [&info](int line) {
 		line--;
-		if (line >= 0 && line < info.validLines.size()) {
+		if (line >= 0 && static_cast<size_t>(line) < info.validLines.size()) {
 			info.validLines[line] = 1;
 		}
 	});
@@ -351,7 +351,7 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 			if (kv != m_debugInfo.end()) {
 				const auto &bps = kv->second.breakPoints;
 				int ind = ar->currentline - 1;
-				if (ind >= 0 && ind < bps.size() && bps[ind]) {
+				if (ind >= 0 && static_cast<size_t>(ind) < bps.size() && bps[ind]) {
 					brk = true;
 					break;
 				}
@@ -860,7 +860,7 @@ bool LuaDebugger::watch(const wchar_t *usage, const std::vector<std::wstring> &a
 	// delete
 	std::sort(delInd.begin(), delInd.end(), std::greater<int>());
 	for (int ind : delInd) {
-		if (ind < 0 || ind >= m_watchList.size()) {
+		if (ind < 0 || static_cast<size_t>(ind) >= m_watchList.size()) {
 			debug::writef(L"Cannot delete: %d", ind);
 			continue;
 		}
@@ -945,7 +945,7 @@ bool LuaDebugger::bp(const wchar_t *usage, const std::vector<std::wstring> &args
 			continue;
 		}
 		ChunkDebugInfo &info = kv->second;
-		if (line < 1 || line > info.breakPoints.size()) {
+		if (line < 1 || static_cast<size_t>(line) > info.breakPoints.size()) {
 			debug::writef("Error: %s:%d is out of range", fileName.c_str(), line);
 			continue;
 		}
