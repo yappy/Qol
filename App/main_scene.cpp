@@ -15,7 +15,10 @@ MainScene::MainScene(MyApp *app, bool debugEnable) :
 	bool dbg = keyPressedAsync(VK_F12);
 	m_lua.loadFile(L"../sampledata/test.lua", dbg);
 
-	m_lua.callGlobal("load", dbg);
+	{
+		framework::UnsealResource autoSeal(*m_app);
+		m_lua.callGlobal("load", dbg);
+	}
 }
 
 void MainScene::setup()
