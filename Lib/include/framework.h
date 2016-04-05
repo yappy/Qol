@@ -112,6 +112,9 @@ public:
 	void addBgm(size_t setId, const char *resId,
 		std::function<sound::XAudio2::BgmResourcePtr()> loadFunc);
 
+	void lock(bool lock);
+	bool isLocked();
+
 	void loadResourceSet(size_t setId, std::atomic_bool &cancel);
 	void unloadResourceSet(size_t setId);
 
@@ -125,6 +128,8 @@ public:
 		size_t setId, const char *resId) const;
 
 private:
+	bool m_locked = false;
+
 	// int setId -> char[16] resId -> Resource<T>
 	template <class T>
 	using ResMapVec = std::vector<std::unordered_map<IdString, Resource<T>>>;
@@ -279,6 +284,11 @@ public:
 	 * @param[in] path	File path.
 	 */
 	void addBgmResource(size_t setId, const char *resId, const wchar_t *path);
+
+	/** @brief Set the lock state of resources.
+	 * @param[in] lock	addXXXResource() will be failed if true.
+	 */
+	void lockResource(bool lock);
 
 	/** @brief Load resources by resource set ID.
 	 * @param[in] setId	%Resource set ID.
