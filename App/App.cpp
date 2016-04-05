@@ -6,8 +6,15 @@
 #include "resource.h"
 #include <debug.h>
 #include <file.h>
-#include <config.h>
 #include <array>
+
+// global
+config::ConfigFile g_config(L"config.txt", {
+	{ "graphics.skip", "0" },
+	{ "graphics.cursor", "true" },
+	{ "graphics.fullscreen", "false" },
+	{ "script.debug", "true" },
+});
 
 MyApp::MyApp(const framework::AppParam &appParam,
 	const graphics::GraphicsParam &graphParam)
@@ -33,8 +40,10 @@ void MyApp::init()
 	addBgmResource(ResSetId::Common, "testbgm", L"../sampledata/Epoq-Lepidoptera.ogg");
 	loadResourceSet(ResSetId::Common, std::atomic_bool());
 
-	m_scenes[static_cast<uint32_t>(SceneId::Main)] = std::make_unique<MainScene>(this);
-	m_scenes[static_cast<uint32_t>(SceneId::Sub)] = std::make_unique<SubScene>(this);
+	m_scenes[static_cast<uint32_t>(SceneId::Main)] =
+		std::make_unique<MainScene>(this, g_config.getBool("script.debug"));
+	m_scenes[static_cast<uint32_t>(SceneId::Sub)] = 
+		std::make_unique<SubScene>(this);
 
 	// set initial scene
 	auto mainScene = getSceneAs<MainScene>(SceneId::Main);
@@ -100,21 +109,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	int result = 0;
 	try {
-		struct {
-			int skip;
-			bool cursor;
-			bool fullscreen;
-		} config;
-		{
-			config::ConfigFile cf(L"config.txt", {
-				{ "graphics.skip", "0" },
-				{ "graphics.cursor", "true" },
-				{ "graphics.fullscreen", "false" }
-			});
-			config.skip       = cf.getInt("graphics.skip");
-			config.cursor     = cf.getBool("graphics.cursor");
-			config.fullscreen = cf.getBool("graphics.fullscreen");
-		}
+		g_config.load();
 
 		file::initWithFileSystem(L".");
 
@@ -122,15 +117,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		graphics::GraphicsParam graphParam;
 		appParam.hInstance = hInstance;
 		appParam.wndClsName = L"TestAppClass";
-		appParam.title = L"Test App";
+		appParam.title = L"Test App (F12: Launch Lua Debugger)";
 		appParam.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP));
 		appParam.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
 		appParam.nCmdShow = nCmdShow;
-		appParam.frameSkip = config.skip;
-		appParam.showCursor = config.cursor;
+		appParam.frameSkip = g_config.getInt("graphics.skip");
+		appParam.showCursor = g_config.getBool("graphics.cursor");
 		graphParam.w = 1024;
 		graphParam.h = 768;
-		graphParam.fullScreen = config.fullscreen;
+		graphParam.fullScreen = g_config.getBool("graphics.fullscreen");
 
 		auto app = std::make_unique<MyApp>(appParam, graphParam);
 		result = app->run();

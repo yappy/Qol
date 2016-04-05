@@ -8,20 +8,12 @@ namespace config {
 
 ConfigFile::ConfigFile(const wchar_t *fileName, InitList keyAndDefaults) :
 	m_fileName(fileName),
-	m_defaults(keyAndDefaults), m_map()
-{
-	load();
-}
+	m_defaults(keyAndDefaults),
+	m_map()
+{}
 
 ConfigFile::~ConfigFile()
-{
-	try {
-		save();
-	}
-	catch (const std::exception &e) {
-		debug::writef(L"Config save error: %s", util::utf82wc(e.what()));
-	}
-}
+{}
 
 void ConfigFile::load()
 {

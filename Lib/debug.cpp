@@ -29,6 +29,12 @@ bool enableConsoleOutput() noexcept
 	}
 	BOOL ret = ::AllocConsole();
 	if (ret) {
+		HANDLE hOut = ::GetStdHandle(STD_OUTPUT_HANDLE);
+		COORD maxSize = GetLargestConsoleWindowSize(hOut);
+		COORD bufSize = { 80, maxSize.Y * 10 };
+		SMALL_RECT rect = { 0, 0, bufSize.X - 1, maxSize.Y * 3 / 4 };
+		SetConsoleScreenBufferSize(hOut, bufSize);
+		SetConsoleWindowInfo(hOut, TRUE, &rect);
 		s_consoleOut = true;
 	}
 	return s_consoleOut;
@@ -114,6 +120,28 @@ void writef(const char *fmt, ...) noexcept
 	va_end(args);
 
 	write(buf, true);
+}
+
+void writef_nonl(const wchar_t *fmt, ...) noexcept
+{
+	va_list args;
+	va_start(args, fmt);
+	wchar_t buf[1024];
+	_vsnwprintf_s(buf, _TRUNCATE, fmt, args);
+	va_end(args);
+
+	write(buf, false);
+}
+
+void writef_nonl(const char *fmt, ...) noexcept
+{
+	va_list args;
+	va_start(args, fmt);
+	char buf[1024];
+	vsnprintf_s(buf, _TRUNCATE, fmt, args);
+	va_end(args);
+
+	write(buf, false);
 }
 
 }

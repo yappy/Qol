@@ -59,22 +59,32 @@ inline void write(const char *str, bool newline = false) noexcept { write(util::
  * @param[in] str		Debug message string.
  * @param[in] newline	true if new line after str.
  */
-inline void writeLine(const wchar_t *str) noexcept { write(str, true); }
+inline void writeLine(const wchar_t *str = L"") noexcept { write(str, true); }
 /** @brief Write debug string and new line.
  * @param[in] str		Debug message string.
  * @param[in] newline	true if new line after str.
  */
 inline void writeLine(const char *str) noexcept { write(util::utf82wc(str).get(), true); }
 /** @brief Write debug message using format string like printf.
- * @param[in] fmt	Format string.
- * @param[in] ...	Additional params.
- */
+* @param[in] fmt	Format string.
+* @param[in] ...	Additional params.
+*/
 void writef(const wchar_t *fmt, ...) noexcept;
 /** @brief Write debug message using format string like printf.
- * @param[in] fmt	Format string.
- * @param[in] ...	Additional params.
- */
+* @param[in] fmt	Format string.
+* @param[in] ...	Additional params.
+*/
 void writef(const char *fmt, ...) noexcept;
+/** @brief Write debug message using format string like printf.
+* @param[in] fmt	Format string.
+* @param[in] ...	Additional params.
+*/
+void writef_nonl(const wchar_t *fmt, ...) noexcept;
+/** @brief Write debug message using format string like printf.
+* @param[in] fmt	Format string.
+* @param[in] ...	Additional params.
+*/
+void writef_nonl(const char *fmt, ...) noexcept;
 
 
 /** @brief Stop watch utility for performance measurement.

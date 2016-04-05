@@ -17,6 +17,7 @@ LuaError::LuaError(const std::string &msg, lua_State *L) :
 	else {
 		m_what = msg + ": " + str;
 	}
+	lua_pop(L, 1);
 }
 
 namespace {
@@ -28,28 +29,6 @@ int atpanic(lua_State *L)
 	throw std::runtime_error("Lua panic");
 	// Don't return
 }
-
-// lua_Hook which always raises an error
-void alwaysErrorHook(lua_State *L, lua_Debug *ar)
-{
-	luaL_error(L, "Execute instructions count exceeded");
-}
-
-class LuaHook : private util::noncopyable {
-public:
-	explicit LuaHook(lua_State *L, lua_Hook hook, int count) : m_lua(L)
-	{
-		if (count != 0) {
-			lua_sethook(m_lua, hook, LUA_MASKCOUNT, count);
-		}
-	}
-	~LuaHook()
-	{
-		lua_sethook(m_lua, nullptr, 0, 0);
-	}
-private:
-	lua_State *m_lua;
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Copied from linit.c
@@ -117,9 +96,12 @@ void *Lua::luaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
 	}
 }
 
-Lua::Lua(size_t maxHeapSize, size_t initHeapSize)
+Lua::Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize,
+	int instLimit) :
+	m_debugEnable(debugEnable)
 {
 	debug::writeLine("Initializing lua...");
+
 	HANDLE tmpHeap = ::HeapCreate(HeapOption, initHeapSize, maxHeapSize);
 	error::checkWin32Result(tmpHeap != nullptr, "HeapCreate() failed");
 	m_heap.reset(tmpHeap);
@@ -129,6 +111,9 @@ Lua::Lua(size_t maxHeapSize, size_t initHeapSize)
 		throw std::bad_alloc();
 	}
 	m_lua.reset(tmpLua);
+
+	m_dbg = std::make_unique<debugger::LuaDebugger>(m_lua.get(), debugEnable, instLimit);
+
 	debug::writeLine("Initializing lua OK");
 
 	::lua_atpanic(m_lua.get(), atpanic);
@@ -152,19 +137,14 @@ void Lua::loadTraceLib()
 	lua_setglobal(L, "trace");
 }
 
-void Lua::callWithResourceLib(const char *funcName, framework::Application *app,
-	int instLimit)
+void Lua::loadResourceLib(framework::Application *app)
 {
-	callGlobal(funcName, instLimit,
-		[app](lua_State *L) {
-			// args
-			// stack[1]: resource function table
-			luaL_newlib(L, export::resource_RegList);
-			lua_pushstring(L, export::resource_RawFieldName);
-			lua_pushlightuserdata(L, app);
-			lua_settable(L, -3);
-		}, 1,
-		[](lua_State *L) {}, 0);
+	lua_State *L = m_lua.get();
+	luaL_newlib(L, export::resource_RegList);
+	lua_pushstring(L, export::resource_RawFieldName);
+	lua_pushlightuserdata(L, app);
+	lua_settable(L, -3);
+	lua_setglobal(L, "resource");
 }
 
 void Lua::loadGraphLib(framework::Application *app)
@@ -187,37 +167,79 @@ void Lua::loadSoundLib(framework::Application *app)
 	lua_setglobal(L, "sound");
 }
 
-void Lua::loadFile(const wchar_t *fileName, const char *name)
+void Lua::loadFile(const wchar_t *fileName, bool autoBreak)
 {
 	lua_State *L = m_lua.get();
 
 	file::Bytes buf = file::loadFile(fileName);
 
-	// Use fileName if name is nullptr
-	auto cvtName = util::wc2utf8(fileName);
-	name = (name == nullptr) ? cvtName.get() : name;
+	// push chunk function
+	std::string chunkName("@");
+	chunkName += util::wc2utf8(fileName).get();
 	int ret = ::luaL_loadbufferx(L,
 		reinterpret_cast<const char *>(buf.data()), buf.size(),
-		name, "t");
+		chunkName.c_str(), "t");
 	if (ret != LUA_OK) {
 		throw LuaError("Load script failed", L);
 	}
-
-	ret = ::lua_pcall(L, 0, LUA_MULTRET, 0);
-	if (ret != LUA_OK) {
-		throw LuaError("Execute chunk failed", L);
-	}
+	// prepare debug info
+	m_dbg->loadDebugInfo(chunkName.c_str(),
+		reinterpret_cast<const char *>(buf.data()), buf.size());
+	// call it
+	pcallInternal(0, 0, autoBreak);
 }
 
-int Lua::pcallWithLimit(lua_State *L,
-	int narg, int nret, int msgh, int instLimit)
+void Lua::pcallInternal(int narg, int nret, bool autoBreak)
 {
-	LuaHook hook(L, alwaysErrorHook, instLimit);
-	int ret = lua_pcall(L, narg, nret, 0);
-	if (ret != LUA_OK) {
-		throw LuaError("Call global function failed", L);
+	m_dbg->pcall(narg, nret, autoBreak);
+}
+
+std::vector<std::string> luaValueToStrList(lua_State *L, int ind, int maxDepth, int depth)
+{
+	std::vector<std::string> result;
+
+	int tind = lua_absindex(L, ind);
+
+	int type = lua_type(L, ind);
+	if (type == LUA_TNONE) {
+		throw std::logic_error("invalid index: " + std::to_string(ind));
 	}
-	return ret;
+	const char *typestr = lua_typename(L, type);
+	// copy and tostring it
+	lua_pushvalue(L, ind);
+	const char *valstr = lua_tostring(L, -1);
+	valstr = (valstr == NULL) ? "" : valstr;
+	// pop copy
+	lua_pop(L, 1);
+	// boolean cannot be tostring
+	if (type == LUA_TBOOLEAN) {
+		valstr = lua_toboolean(L, ind) ? "true" : "false";
+	}
+
+	{
+		std::string str;
+		for (int i = 0; i < depth; i++) {
+			str += "    ";
+		}
+		str += "(";
+		str += typestr;
+		str += ") ";
+		str += valstr;
+		result.emplace_back(std::move(str));
+	}
+	if (type == LUA_TTABLE && depth < maxDepth) {
+		lua_pushnil(L);
+		while (lua_next(L, tind) != 0) {
+			// key:-2, value:-1
+			auto key = luaValueToStrList(L, -2, maxDepth, depth + 1);
+			auto val = luaValueToStrList(L, -1, maxDepth, depth + 1);
+			result.insert(result.end(), key.begin(), key.end());
+			result.insert(result.end(), key.begin(), key.end());
+			// pop value, keep key
+			lua_pop(L, 1);
+		}
+	}
+	return result;
 }
 
 }
