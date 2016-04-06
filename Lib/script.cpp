@@ -118,6 +118,15 @@ Lua::Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize,
 
 	::lua_atpanic(m_lua.get(), atpanic);
 	my_luaL_openlibs(m_lua.get());
+
+	// delete load function
+	lua_State *L = m_lua.get();
+	lua_pushnil(L);
+	lua_setglobal(L, "dofile");
+	lua_pushnil(L);
+	lua_setglobal(L, "loadfile");
+	lua_pushnil(L);
+	lua_setglobal(L, "load");
 }
 
 lua_State *Lua::getLuaState() const
