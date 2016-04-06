@@ -252,9 +252,8 @@ std::vector<std::string> luaValueToStrList(lua_State *L, int ind, int maxDepth, 
 			// key:-2, value:-1
 			auto key = luaValueToStrList(L, -2, maxDepth, depth + 1);
 			auto val = luaValueToStrList(L, -1, maxDepth, depth + 1);
-			// TODO: bug
 			result.insert(result.end(), key.begin(), key.end());
-			result.insert(result.end(), key.begin(), key.end());
+			result.insert(result.end(), val.begin(), val.end());
 			// pop value, keep key
 			lua_pop(L, 1);
 		}
