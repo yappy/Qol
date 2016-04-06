@@ -119,5 +119,15 @@ private:
 	LARGE_INTEGER m_begin;
 };
 
-}
+}	// debug
+
+// On memory fast logging
+namespace trace {
+
+void initialize(size_t bufsize);
+void output();
+
+void write(const char *str);
+
+}	// trace
 }

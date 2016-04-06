@@ -122,6 +122,20 @@ int trace::write(lua_State *L)
 	return 0;
 }
 
+int trace::perf(lua_State *L)
+{
+	exceptToLuaError(L, [L]() {
+		int argc = lua_gettop(L);
+		for (int i = 1; i <= argc; i++) {
+			const char *str = ::lua_tostring(L, i);
+			if (str != nullptr) {
+				yappy::trace::write(str);
+			}
+		}
+	});
+	return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // "resource" table
 ///////////////////////////////////////////////////////////////////////////////

@@ -14,6 +14,7 @@ config::ConfigFile g_config(L"config.txt", {
 	{ "graphics.cursor", "true" },
 	{ "graphics.fullscreen", "false" },
 	{ "script.debug", "true" },
+	{ "perf.output", "false" },
 });
 
 MyApp::MyApp(const framework::AppParam &appParam,
@@ -93,8 +94,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		::GetCurrentDirectory(MAX_PATH, dir);
 		debug::writef(L"Current dir: %s", dir);
 	}
+	// trace test
 	// fixed length string key test
 	{
+		trace::initialize(1 * 1024 * 1024);
+		for (int i = 0; i < 1024 * 1024; i++) {
+			trace::write("test");
+		}
+		trace::write("test start");
+
 		using util::IdString;
 		IdString key1, key2, key3;
 		util::createFixedString(&key1, "alice");
@@ -108,6 +116,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		for (auto entry : hash) {
 			debug::writef("%s=%d", entry.first.data(), entry.second);
 		}
+
+		trace::write("test end");
+		// open with notepad
+		// trace::output();
 	}
 
 	int result = 0;
@@ -132,6 +144,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		auto app = std::make_unique<MyApp>(appParam, graphParam);
 		result = app->run();
+
+		if (g_config.getBool("perf.output")) {
+			trace::output();
+		}
 		// destruct app
 	}
 	catch (const std::exception &ex) {
