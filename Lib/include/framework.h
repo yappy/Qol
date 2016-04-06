@@ -4,6 +4,7 @@
  * @section つぎに
  * @ref framework.h の Application クラスとか。
  * @ref debug.h , @ref util.h もおすすめです。
+ * Lua へエクスポートされている関数仕様は @ref yappy::lua::export にあります。
  * @section おわりに
  * ホワイト。
  */

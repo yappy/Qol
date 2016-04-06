@@ -114,6 +114,8 @@ inline float getOptFloat(lua_State *L, int arg, float def,
  *
  * @param[in]	...	任意の型および数の出力する値
  * @return			なし
+ *
+ * @sa yappy::debug
  */
 int trace::write(lua_State *L)
 {
@@ -132,6 +134,18 @@ int trace::write(lua_State *L)
 	return 0;
 }
 
+/** @brief メモリ上のバッファに高速なログ出力を行う。
+ * @details
+ * @code
+ * function trace.perf(...)
+ * end
+ * @endcode
+ *
+ * @param[in]	...	任意の型および数の出力する値
+ * @return			なし
+ *
+ * @sa yappy::trace
+ */
 int trace::perf(lua_State *L)
 {
 	exceptToLuaError(L, [L]() {
@@ -140,6 +154,9 @@ int trace::perf(lua_State *L)
 			const char *str = ::lua_tostring(L, i);
 			if (str != nullptr) {
 				yappy::trace::write(str);
+			}
+			else {
+				debug::writef("<%s>", luaL_typename(L, i));
 			}
 		}
 	});
@@ -150,6 +167,22 @@ int trace::perf(lua_State *L)
 // "sys" table
 ///////////////////////////////////////////////////////////////////////////////
 
+/** @brief 別の Lua ソースファイルを実行する。
+ * @details
+ * @code
+ * function sys.include(...)
+ * end
+ * @endcode
+ * Lua 標準関数 dofile() とおおよそ同じです。
+ * (ロード系の標準関数は全て削除されています。)
+ * ファイルのロードはライブラリのローダを呼び出して行うようになっています。
+ * デバッグ情報のロードも行うようになっています。
+ *
+ * @param[in]	...	ファイル名
+ * @return			なし
+ *
+ * @sa yappy::file
+ */
 int sys::include(lua_State *L)
 {
 	exceptToLuaError(L, [L]() {
