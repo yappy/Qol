@@ -8,6 +8,7 @@ namespace export {
 
 namespace {
 
+// TODO: deprecated
 // Get reinterpret_cast<T *>(self.fieldName)
 // self is the first argument (stack[1])
 template <class T>
@@ -17,9 +18,18 @@ inline T *getPtrFromSelf(lua_State *L, const char *fieldName)
 	lua_getfield(L, 1, fieldName);
 	luaL_checktype(L, -1, LUA_TLIGHTUSERDATA);
 	void *p = lua_touserdata(L, -1);
-	T *result = reinterpret_cast<T *>(p);
+	T *result = static_cast<T *>(p);
 	lua_pop(L, 1);
 	return result;
+}
+
+template <class T>
+inline T *getPtrFromUpvalue(lua_State *L, int uvInd)
+{
+	int idx = lua_upvalueindex(uvInd);
+	ASSERT(lua_type(L, idx) == LUA_TLIGHTUSERDATA);
+	void *p = lua_touserdata(L, idx);
+	return static_cast<T *>(p);
 }
 
 template <class F>
@@ -131,6 +141,26 @@ int trace::perf(lua_State *L)
 			if (str != nullptr) {
 				yappy::trace::write(str);
 			}
+		}
+	});
+	return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// "sys" table
+///////////////////////////////////////////////////////////////////////////////
+
+int sys::include(lua_State *L)
+{
+	exceptToLuaError(L, [L]() {
+		auto *lua = getPtrFromUpvalue<Lua>(L, 1);
+
+		int argc = lua_gettop(L);
+		for (int i = 1; i <= argc; i++) {
+			const char *fileName = ::lua_tostring(L, i);
+			luaL_argcheck(L, fileName != nullptr, i, "string needed");
+
+			lua->loadFile(util::utf82wc(fileName).get(), false);
 		}
 	});
 	return 0;

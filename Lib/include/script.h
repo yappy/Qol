@@ -44,6 +44,7 @@ public:
 	lua_State *getLuaState() const;
 
 	void loadTraceLib();
+	void loadSysLib();
 	void loadResourceLib(framework::Application *app);
 	void loadGraphLib(framework::Application *app);
 	void loadSoundLib(framework::Application *app);

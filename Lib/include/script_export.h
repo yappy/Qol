@@ -46,11 +46,11 @@ namespace export {
 	 * @endcode
 	 */
 	struct sys {
-		static int dofile(lua_State *L);
+		static int include(lua_State *L);
 		sys() = delete;
 	};
 	const luaL_Reg sys_RegList[] = {
-		{ "dofile",	sys::dofile },
+		{ "dofile",	sys::include },
 		{ nullptr, nullptr }
 	};
 

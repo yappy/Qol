@@ -146,6 +146,16 @@ void Lua::loadTraceLib()
 	lua_setglobal(L, "trace");
 }
 
+void Lua::loadSysLib()
+{
+	lua_State *L = m_lua.get();
+	luaL_newlibtable(L, export::trace_RegList);
+	// upvalue[1]: Lua *this
+	lua_pushlightuserdata(L, this);
+	luaL_setfuncs(L, export::trace_RegList, 0);
+	lua_setglobal(L, "sys");
+}
+
 void Lua::loadResourceLib(framework::Application *app)
 {
 	lua_State *L = m_lua.get();
