@@ -14,6 +14,7 @@ config::ConfigFile g_config(L"config.txt", {
 	{ "graphics.cursor", "true" },
 	{ "graphics.fullscreen", "false" },
 	{ "script.debug", "true" },
+	{ "perf.output", "false" },
 });
 
 MyApp::MyApp(const framework::AppParam &appParam,
@@ -143,6 +144,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		auto app = std::make_unique<MyApp>(appParam, graphParam);
 		result = app->run();
+
+		if (g_config.getBool("perf.output")) {
+			trace::output();
+		}
 		// destruct app
 	}
 	catch (const std::exception &ex) {

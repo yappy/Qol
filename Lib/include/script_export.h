@@ -30,10 +30,12 @@ namespace export {
 	 */
 	struct trace {
 		static int write(lua_State *L);
+		static int perf(lua_State *L);
 		trace() = delete;
 	};
 	const luaL_Reg trace_RegList[] = {
 		{ "write",	trace::write	},
+		{ "perf",	trace::perf		},
 		{ nullptr, nullptr			}
 	};
 
