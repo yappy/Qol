@@ -152,7 +152,7 @@ void Lua::loadSysLib()
 	luaL_newlibtable(L, export::trace_RegList);
 	// upvalue[1]: Lua *this
 	lua_pushlightuserdata(L, this);
-	luaL_setfuncs(L, export::trace_RegList, 0);
+	luaL_setfuncs(L, export::sys_RegList, 1);
 	lua_setglobal(L, "sys");
 }
 
@@ -252,6 +252,7 @@ std::vector<std::string> luaValueToStrList(lua_State *L, int ind, int maxDepth, 
 			// key:-2, value:-1
 			auto key = luaValueToStrList(L, -2, maxDepth, depth + 1);
 			auto val = luaValueToStrList(L, -1, maxDepth, depth + 1);
+			// TODO: bug
 			result.insert(result.end(), key.begin(), key.end());
 			result.insert(result.end(), key.begin(), key.end());
 			// pop value, keep key

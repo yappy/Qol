@@ -50,7 +50,7 @@ namespace export {
 		sys() = delete;
 	};
 	const luaL_Reg sys_RegList[] = {
-		{ "dofile",	sys::include },
+		{ "include",	sys::include },
 		{ nullptr, nullptr }
 	};
 

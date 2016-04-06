@@ -66,5 +66,8 @@
     <None Include="..\sampledata\test.lua">
       <Filter>Script Files</Filter>
     </None>
+    <None Include="..\sampledata\sub.lua">
+      <Filter>Script Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

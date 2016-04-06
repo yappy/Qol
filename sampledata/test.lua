@@ -12,6 +12,8 @@ void drawString(resourceSetId, resourceId,
 	/* int *nextx = nullptr, int *nexty = nullptr */);
 ]]--
 
+sys.include("../sampledata/sub.lua");
+
 trace.write("sinki", "sinki", "return", "sinki", "sinki", "gg");
 
 local dbg_x, dbg_y = 3, 5;
