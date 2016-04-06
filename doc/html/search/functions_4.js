@@ -1,11 +1,8 @@
 var searchData=
 [
-  ['getbgm',['getBgm',['../classyappy_1_1framework_1_1Application.html#a1eca2d02cfa691818c3bc59605cad542',1,'yappy::framework::Application']]],
-  ['getfont',['getFont',['../classyappy_1_1framework_1_1Application.html#a9a3116cda8692a94a460fed661b1ebeb',1,'yappy::framework::Application']]],
-  ['gethwnd',['getHWnd',['../classyappy_1_1framework_1_1Application.html#a5c9da5f2de82bbb82c7131380effb925',1,'yappy::framework::Application']]],
-  ['getluastate',['getLuaState',['../classyappy_1_1lua_1_1Lua.html#a203dd22ba1005277e50b047f29e90008',1,'yappy::lua::Lua']]],
-  ['getsoundeffect',['getSoundEffect',['../classyappy_1_1framework_1_1Application.html#ada0cb419e21aeaa945be31552d2b6e6c',1,'yappy::framework::Application']]],
-  ['gettexture',['getTexture',['../classyappy_1_1framework_1_1Application.html#a9c85ee0df72500a4ce37a6c5858ae5c7',1,'yappy::framework::Application']]],
-  ['gettexturesize',['getTextureSize',['../structyappy_1_1lua_1_1export_1_1graph.html#a30c47ede30085e0780b773ef30ac1716',1,'yappy::lua::export::graph']]],
-  ['graph',['graph',['../classyappy_1_1framework_1_1Application.html#a314376526aedf066232ddda65c15a741',1,'yappy::framework::Application']]]
+  ['enableconsoleoutput',['enableConsoleOutput',['../namespaceyappy_1_1debug.html#a0add3b08978677800968746611d196ed',1,'yappy::debug']]],
+  ['enabledebugoutput',['enableDebugOutput',['../namespaceyappy_1_1debug.html#ad36f7dc338b3ec5d4bc17139b72a218b',1,'yappy::debug']]],
+  ['enablefileoutput',['enableFileOutput',['../namespaceyappy_1_1debug.html#afff3e88cdb1955f6be9fbf970d77ebcf',1,'yappy::debug']]],
+  ['endframe',['endFrame',['../classyappy_1_1framework_1_1FrameControl.html#abdb85a5af462594241e8f930bf0667a9',1,'yappy::framework::FrameControl']]],
+  ['eval',['eval',['../classyappy_1_1lua_1_1debugger_1_1LuaDebugger.html#af4b109f3b33586243b79acebe430da52',1,'yappy::lua::debugger::LuaDebugger']]]
 ];

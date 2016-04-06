@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['wc2utf8',['wc2utf8',['../namespaceyappy_1_1util.html#a98bad7a528396bc64da92a6c06a440b2',1,'yappy::util']]],
-  ['write',['write',['../structyappy_1_1lua_1_1export_1_1trace.html#a50355a34b995231e597ed9fb8da1a058',1,'yappy::lua::export::trace::write()'],['../namespaceyappy_1_1debug.html#a1eb446364d207eb060b83740b73b4bac',1,'yappy::debug::write(const wchar_t *str, bool newline=false) noexcept'],['../namespaceyappy_1_1debug.html#a89e1e8381339eba61e7fc48528a7e211',1,'yappy::debug::write(const char *str, bool newline=false) noexcept']]],
-  ['writef',['writef',['../namespaceyappy_1_1debug.html#afd9b4c025e197e02b287daab175ffeac',1,'yappy::debug::writef(const wchar_t *fmt,...) noexcept'],['../namespaceyappy_1_1debug.html#a03ffad910f61258b80aed7e22079bb57',1,'yappy::debug::writef(const char *fmt,...) noexcept']]],
-  ['writeline',['writeLine',['../namespaceyappy_1_1debug.html#a009cadfe1e58f00328061947f5567c0b',1,'yappy::debug::writeLine(const wchar_t *str) noexcept'],['../namespaceyappy_1_1debug.html#ae5ae14be3f2b659bef5db8f62d45ad62',1,'yappy::debug::writeLine(const char *str) noexcept']]]
+  ['mem',['mem',['../classyappy_1_1lua_1_1debugger_1_1LuaDebugger.html#a58e3cf2756e234c02d501374c55fa6a0',1,'yappy::lua::debugger::LuaDebugger']]],
+  ['mmioerror',['MmioError',['../classyappy_1_1error_1_1MmioError.html#affbc84fdbc62639acd9d38e4b171a570',1,'yappy::error::MmioError']]]
 ];
