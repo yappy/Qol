@@ -39,6 +39,21 @@ namespace export {
 		{ nullptr, nullptr			}
 	};
 
+	/** @brief システム関連関数。<b>sys</b>グローバルテーブルに提供。
+	 * @details
+	 * @code
+	 * sys = {};
+	 * @endcode
+	 */
+	struct sys {
+		static int include(lua_State *L);
+		sys() = delete;
+	};
+	const luaL_Reg sys_RegList[] = {
+		{ "include",	sys::include },
+		{ nullptr, nullptr }
+	};
+
 	/** @brief 使用リソース登録関数。
 	 * @details
 	 * 各関数は最初の引数に self オブジェクトが必要です。

@@ -8,6 +8,7 @@ namespace export {
 
 namespace {
 
+// TODO: deprecated
 // Get reinterpret_cast<T *>(self.fieldName)
 // self is the first argument (stack[1])
 template <class T>
@@ -17,9 +18,18 @@ inline T *getPtrFromSelf(lua_State *L, const char *fieldName)
 	lua_getfield(L, 1, fieldName);
 	luaL_checktype(L, -1, LUA_TLIGHTUSERDATA);
 	void *p = lua_touserdata(L, -1);
-	T *result = reinterpret_cast<T *>(p);
+	T *result = static_cast<T *>(p);
 	lua_pop(L, 1);
 	return result;
+}
+
+template <class T>
+inline T *getPtrFromUpvalue(lua_State *L, int uvInd)
+{
+	int idx = lua_upvalueindex(uvInd);
+	ASSERT(lua_type(L, idx) == LUA_TLIGHTUSERDATA);
+	void *p = lua_touserdata(L, idx);
+	return static_cast<T *>(p);
 }
 
 template <class F>
@@ -104,6 +114,8 @@ inline float getOptFloat(lua_State *L, int arg, float def,
  *
  * @param[in]	...	任意の型および数の出力する値
  * @return			なし
+ *
+ * @sa yappy::debug
  */
 int trace::write(lua_State *L)
 {
@@ -122,6 +134,18 @@ int trace::write(lua_State *L)
 	return 0;
 }
 
+/** @brief メモリ上のバッファに高速なログ出力を行う。
+ * @details
+ * @code
+ * function trace.perf(...)
+ * end
+ * @endcode
+ *
+ * @param[in]	...	任意の型および数の出力する値
+ * @return			なし
+ *
+ * @sa yappy::trace
+ */
 int trace::perf(lua_State *L)
 {
 	exceptToLuaError(L, [L]() {
@@ -131,6 +155,45 @@ int trace::perf(lua_State *L)
 			if (str != nullptr) {
 				yappy::trace::write(str);
 			}
+			else {
+				debug::writef("<%s>", luaL_typename(L, i));
+			}
+		}
+	});
+	return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// "sys" table
+///////////////////////////////////////////////////////////////////////////////
+
+/** @brief 別の Lua ソースファイルを実行する。
+ * @details
+ * @code
+ * function sys.include(...)
+ * end
+ * @endcode
+ * Lua 標準関数 dofile() とおおよそ同じです。
+ * (ロード系の標準関数は全て削除されています。)
+ * ファイルのロードはライブラリのローダを呼び出して行うようになっています。
+ * デバッグ情報のロードも行うようになっています。
+ *
+ * @param[in]	...	ファイル名
+ * @return			なし
+ *
+ * @sa yappy::file
+ */
+int sys::include(lua_State *L)
+{
+	exceptToLuaError(L, [L]() {
+		auto *lua = getPtrFromUpvalue<Lua>(L, 1);
+
+		int argc = lua_gettop(L);
+		for (int i = 1; i <= argc; i++) {
+			const char *fileName = ::lua_tostring(L, i);
+			luaL_argcheck(L, fileName != nullptr, i, "string needed");
+
+			lua->loadFile(util::utf82wc(fileName).get(), false, false);
 		}
 	});
 	return 0;

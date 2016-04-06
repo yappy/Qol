@@ -44,14 +44,17 @@ public:
 	lua_State *getLuaState() const;
 
 	void loadTraceLib();
+	void loadSysLib();
 	void loadResourceLib(framework::Application *app);
 	void loadGraphLib(framework::Application *app);
 	void loadSoundLib(framework::Application *app);
 
 	/** @brief Load script file and eval it.
 	 * @param[in] fileName	Script file name.
+	 * @param[in] autoBreak	Debug break at first line.
+	 * @param[in] prot		Use pcall() if true. (false is include from Lua only)
 	 */
-	void loadFile(const wchar_t *fileName, bool autoBreak);
+	void loadFile(const wchar_t *fileName, bool autoBreak, bool prot = true);
 
 	struct doNothing {
 		void operator ()(lua_State *L) {}
