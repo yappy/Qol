@@ -172,7 +172,7 @@ struct VirtualDeleter {
 
 std::unique_ptr<LineBuffer[], VirtualDeleter> s_buf;
 size_t s_size;
-size_t s_number;
+uint32_t s_number;
 
 }	// namespace
 
@@ -210,7 +210,7 @@ void output()
 			continue;
 		}
 		auto writeFunc = [&hFile](const char *str) {
-			size_t len = std::strlen(str);
+			DWORD len = static_cast<DWORD>(std::strlen(str));
 			DWORD writeSize = 0;
 			BOOL bret = WriteFile(hFile.get(), str, len, &writeSize, nullptr);
 			checkWin32Result(bret != 0, "WriteFile() failed");
@@ -234,7 +234,7 @@ void output()
 	// open with notepad
 	HINSTANCE hret = ::ShellExecute(
 		nullptr, nullptr, L"notepad", filePath, nullptr, SW_NORMAL);
-	checkWin32Result(reinterpret_cast<ULONG>(hret) > 32, "ShellExecute() failed");
+	checkWin32Result(reinterpret_cast<ULONG_PTR>(hret) > 32, "ShellExecute() failed");
 }
 
 void write(const char *str)
