@@ -186,7 +186,7 @@ void Lua::loadSoundLib(framework::Application *app)
 	lua_setglobal(L, "sound");
 }
 
-void Lua::loadFile(const wchar_t *fileName, bool autoBreak)
+void Lua::loadFile(const wchar_t *fileName, bool autoBreak, bool prot)
 {
 	lua_State *L = m_lua.get();
 
@@ -205,7 +205,12 @@ void Lua::loadFile(const wchar_t *fileName, bool autoBreak)
 	m_dbg->loadDebugInfo(chunkName.c_str(),
 		reinterpret_cast<const char *>(buf.data()), buf.size());
 	// call it
-	pcallInternal(0, 0, autoBreak);
+	if (prot) {
+		pcallInternal(0, 0, autoBreak);
+	}
+	else {
+		lua_call(L, 0, 0);
+	}
 }
 
 void Lua::pcallInternal(int narg, int nret, bool autoBreak)

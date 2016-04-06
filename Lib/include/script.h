@@ -51,8 +51,10 @@ public:
 
 	/** @brief Load script file and eval it.
 	 * @param[in] fileName	Script file name.
+	 * @param[in] autoBreak	Debug break at first line.
+	 * @param[in] prot		Use pcall() if true. (false is include from Lua only)
 	 */
-	void loadFile(const wchar_t *fileName, bool autoBreak);
+	void loadFile(const wchar_t *fileName, bool autoBreak, bool prot = true);
 
 	struct doNothing {
 		void operator ()(lua_State *L) {}

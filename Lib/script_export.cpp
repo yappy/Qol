@@ -160,7 +160,7 @@ int sys::include(lua_State *L)
 			const char *fileName = ::lua_tostring(L, i);
 			luaL_argcheck(L, fileName != nullptr, i, "string needed");
 
-			lua->loadFile(util::utf82wc(fileName).get(), false);
+			lua->loadFile(util::utf82wc(fileName).get(), false, false);
 		}
 	});
 	return 0;
