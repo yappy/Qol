@@ -30,11 +30,28 @@ namespace export {
 	 */
 	struct trace {
 		static int write(lua_State *L);
+		static int perf(lua_State *L);
 		trace() = delete;
 	};
 	const luaL_Reg trace_RegList[] = {
 		{ "write",	trace::write	},
+		{ "perf",	trace::perf		},
 		{ nullptr, nullptr			}
+	};
+
+	/** @brief システム関連関数。<b>sys</b>グローバルテーブルに提供。
+	 * @details
+	 * @code
+	 * sys = {};
+	 * @endcode
+	 */
+	struct sys {
+		static int include(lua_State *L);
+		sys() = delete;
+	};
+	const luaL_Reg sys_RegList[] = {
+		{ "include",	sys::include },
+		{ nullptr, nullptr }
 	};
 
 	/** @brief 使用リソース登録関数。

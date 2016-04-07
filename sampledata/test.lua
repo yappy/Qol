@@ -12,6 +12,8 @@ void drawString(resourceSetId, resourceId,
 	/* int *nextx = nullptr, int *nexty = nullptr */);
 ]]--
 
+sys.include("../sampledata/sub.lua");
+
 trace.write("sinki", "sinki", "return", "sinki", "sinki", "gg");
 
 local dbg_x, dbg_y = 3, 5;
@@ -51,6 +53,8 @@ function start()
 	colist = {};
 
 	sound:playBgm(1, "testbgm");
+	-- Cause C++ exception (resource manager is sealed)
+	-- resource:addBgm(1, "testbgm", "../sampledata/Epoq-Lepidoptera.ogg");
 end
 
 function exit()
@@ -58,6 +62,8 @@ function exit()
 end
 
 function update(keyinput)
+	trace.perf("update start");
+
 	frame = frame + 1;
 
 	local amount = 4;
@@ -101,9 +107,13 @@ function update(keyinput)
 	if #colist ~= 0 then
 		trace.write("Active coroutine: " .. #colist);
 	end
+
+	trace.perf("update end");
 end
 
 function draw()
+	trace.perf("draw start");
+
 	local t = frame * 3 % 512;
 	graph:drawTexture(1, "unyo", unyopos.x, unyopos.y, false, false, 0, 0, -1, -1, w / 2, h / 2,
 		frame / 3.14 / 10);
@@ -115,6 +125,8 @@ function draw()
 	graph:drawString(0, "j", "やじるしでうごくよ", 300, 640, 0x000000, -80, 0.5, 0.5);
 	graph:drawString(0, "j", "ほかのきいででぃれいさうんど", 300, 680, 0x000000, -80, 0.5, 0.5);
 	graph:drawString(0, "e", "SPACE key: goto C++ impl scene", 0, 0);
+
+	trace.perf("draw end");
 end
 
 return a, b, c, d;

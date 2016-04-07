@@ -118,6 +118,15 @@ Lua::Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize,
 
 	::lua_atpanic(m_lua.get(), atpanic);
 	my_luaL_openlibs(m_lua.get());
+
+	// delete load function
+	lua_State *L = m_lua.get();
+	lua_pushnil(L);
+	lua_setglobal(L, "dofile");
+	lua_pushnil(L);
+	lua_setglobal(L, "loadfile");
+	lua_pushnil(L);
+	lua_setglobal(L, "load");
 }
 
 lua_State *Lua::getLuaState() const
@@ -135,6 +144,16 @@ void Lua::loadTraceLib()
 	lua_State *L = m_lua.get();
 	luaL_newlib(L, export::trace_RegList);
 	lua_setglobal(L, "trace");
+}
+
+void Lua::loadSysLib()
+{
+	lua_State *L = m_lua.get();
+	luaL_newlibtable(L, export::trace_RegList);
+	// upvalue[1]: Lua *this
+	lua_pushlightuserdata(L, this);
+	luaL_setfuncs(L, export::sys_RegList, 1);
+	lua_setglobal(L, "sys");
 }
 
 void Lua::loadResourceLib(framework::Application *app)
@@ -167,7 +186,7 @@ void Lua::loadSoundLib(framework::Application *app)
 	lua_setglobal(L, "sound");
 }
 
-void Lua::loadFile(const wchar_t *fileName, bool autoBreak)
+void Lua::loadFile(const wchar_t *fileName, bool autoBreak, bool prot)
 {
 	lua_State *L = m_lua.get();
 
@@ -186,7 +205,12 @@ void Lua::loadFile(const wchar_t *fileName, bool autoBreak)
 	m_dbg->loadDebugInfo(chunkName.c_str(),
 		reinterpret_cast<const char *>(buf.data()), buf.size());
 	// call it
-	pcallInternal(0, 0, autoBreak);
+	if (prot) {
+		pcallInternal(0, 0, autoBreak);
+	}
+	else {
+		lua_call(L, 0, 0);
+	}
 }
 
 void Lua::pcallInternal(int narg, int nret, bool autoBreak)
@@ -234,7 +258,7 @@ std::vector<std::string> luaValueToStrList(lua_State *L, int ind, int maxDepth, 
 			auto key = luaValueToStrList(L, -2, maxDepth, depth + 1);
 			auto val = luaValueToStrList(L, -1, maxDepth, depth + 1);
 			result.insert(result.end(), key.begin(), key.end());
-			result.insert(result.end(), key.begin(), key.end());
+			result.insert(result.end(), val.begin(), val.end());
 			// pop value, keep key
 			lua_pop(L, 1);
 		}

@@ -4,6 +4,7 @@
  * @section つぎに
  * @ref framework.h の Application クラスとか。
  * @ref debug.h , @ref util.h もおすすめです。
+ * Lua へエクスポートされている関数仕様は @ref yappy::lua::export にあります。
  * @section おわりに
  * ホワイト。
  */
@@ -112,6 +113,9 @@ public:
 	void addBgm(size_t setId, const char *resId,
 		std::function<sound::XAudio2::BgmResourcePtr()> loadFunc);
 
+	void setSealed(bool sealed);
+	bool isSealed();
+
 	void loadResourceSet(size_t setId, std::atomic_bool &cancel);
 	void unloadResourceSet(size_t setId);
 
@@ -125,6 +129,8 @@ public:
 		size_t setId, const char *resId) const;
 
 private:
+	bool m_sealed = true;
+
 	// int setId -> char[16] resId -> Resource<T>
 	template <class T>
 	using ResMapVec = std::vector<std::unordered_map<IdString, Resource<T>>>;
@@ -280,6 +286,13 @@ public:
 	 */
 	void addBgmResource(size_t setId, const char *resId, const wchar_t *path);
 
+	/** @brief Set the lock state of resources.
+	 * @details If resource manager is sealed, addXXXResource() will be failed.
+	 * @param[in] seal	new state.
+	 * @sa UnsealResource
+	 */
+	void sealResource(bool seal);
+
 	/** @brief Load resources by resource set ID.
 	 * @param[in] setId	%Resource set ID.
 	 */
@@ -349,6 +362,24 @@ private:
 	void onIdle();
 	void updateInternal();
 	void renderInternal();
+};
+
+/** @brief Auto re-seal helper
+ * @sa Application::sealResource()
+ */
+class UnsealResource : util::noncopyable {
+public:
+	explicit UnsealResource(Application &app) : m_app(app)
+	{
+		m_app.sealResource(false);
+	}
+	~UnsealResource()
+	{
+		m_app.sealResource(true);
+	}
+
+private:
+	Application &m_app;
 };
 
 }

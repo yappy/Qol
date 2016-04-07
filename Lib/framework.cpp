@@ -44,9 +44,13 @@ ResourceManager::ResourceManager(size_t resSetCount) :
 namespace {
 
 template <class T, class U>
-void addResource(ResourceManager::ResMapVec<T> *targetMapVec,
+void addResource(ResourceManager::ResMapVec<T> *targetMapVec, bool locked,
 	size_t setId, const char * resId, std::function<U> loadFunc)
 {
+	if (locked) {
+		throw std::logic_error("Resource is not allowed to be added now");
+	}
+
 	IdString fixedResId;
 	util::createFixedString(&fixedResId, resId);
 	std::unordered_map<IdString, Resource<T>> &map =
@@ -66,25 +70,35 @@ void addResource(ResourceManager::ResMapVec<T> *targetMapVec,
 void ResourceManager::addTexture(size_t setId, const char * resId,
 	std::function<graphics::DGraphics::TextureResourcePtr()> loadFunc)
 {
-	addResource(&m_texMapVec, setId, resId, loadFunc);
+	addResource(&m_texMapVec, m_sealed, setId, resId, loadFunc);
 }
 
 void ResourceManager::addFont(size_t setId, const char *resId,
 	std::function<graphics::DGraphics::FontResourcePtr()> loadFunc)
 {
-	addResource(&m_fontMapVec, setId, resId, loadFunc);
+	addResource(&m_fontMapVec, m_sealed, setId, resId, loadFunc);
 }
 
 void ResourceManager::addSoundEffect(size_t setId, const char *resId,
 	std::function<sound::XAudio2::SeResourcePtr()> loadFunc)
 {
-	addResource(&m_seMapVec, setId, resId, loadFunc);
+	addResource(&m_seMapVec, m_sealed, setId, resId, loadFunc);
 }
 
 void ResourceManager::addBgm(size_t setId, const char *resId,
 	std::function<sound::XAudio2::BgmResourcePtr()> loadFunc)
 {
-	addResource(&m_bgmMapVec, setId, resId, loadFunc);
+	addResource(&m_bgmMapVec, m_sealed, setId, resId, loadFunc);
+}
+
+void ResourceManager::setSealed(bool seal)
+{
+	m_sealed = seal;
+}
+
+bool ResourceManager::isSealed()
+{
+	return m_sealed;
 }
 
 namespace {
@@ -514,6 +528,11 @@ void Application::addBgmResource(size_t setId, const char *resId, const wchar_t 
 		yappy::debug::writef(L"LoadBgm: %s", pathCopy.c_str());
 		return m_ds->loadBgm(pathCopy.c_str());
 	});
+}
+
+void Application::sealResource(bool seal)
+{
+	m_resMgr.setSealed(seal);
 }
 
 void Application::loadResourceSet(size_t setId, std::atomic_bool &cancel)

@@ -144,5 +144,108 @@ void writef_nonl(const char *fmt, ...) noexcept
 	write(buf, false);
 }
 
+}	// debug
+
+namespace trace {
+
+namespace {
+
+using error::checkWin32Result;
+
+const size_t LINE_DATA_SIZE = 128;
+struct LineBuffer {
+	LARGE_INTEGER counter;
+	uint32_t number;
+	char msg[LINE_DATA_SIZE - sizeof(LARGE_INTEGER) - sizeof(uint32_t)];
+};
+static_assert(sizeof(LineBuffer) == LINE_DATA_SIZE, "invalid struct def");
+
+struct VirtualDeleter {
+	void operator()(void *p)
+	{
+		BOOL ret = ::VirtualFree(p, 0, MEM_RELEASE);
+		if (!ret) {
+			debug::writeLine(L"VirtualFree() failed");
+		}
+	}
+};
+
+std::unique_ptr<LineBuffer[], VirtualDeleter> s_buf;
+size_t s_size;
+uint32_t s_number;
+
+}	// namespace
+
+void initialize(size_t bufsize)
+{
+	void *p = ::VirtualAlloc(nullptr, bufsize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	checkWin32Result(p != nullptr, "VirtualAlloc() failed");
+	s_buf.reset(static_cast<LineBuffer *>(p));
+	s_size = bufsize / sizeof(LineBuffer);
+	s_number = 0;
+
+	std::memset(s_buf.get(), 0, bufsize);
 }
+
+void output()
+{
+	wchar_t tempPath[MAX_PATH];
+	DWORD dret = GetTempPath(MAX_PATH, tempPath);
+	checkWin32Result(dret != 0, "GetTempPath() failed");
+	wchar_t filePath[MAX_PATH];
+	UINT uret = GetTempFileName(tempPath, L"trc", 0, filePath);
+	checkWin32Result(uret != 0, "GetTempFileName() failed");
+	HANDLE tmpFile = CreateFile(filePath, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+	checkWin32Result(tmpFile != INVALID_HANDLE_VALUE, "GetTempFileName() failed");
+	util::HandlePtr hFile(tmpFile);
+
+	LARGE_INTEGER freq = { 0 };
+	::QueryPerformanceFrequency(&freq);
+
+	LARGE_INTEGER prevCount = { 0 };
+	for (size_t i = 0; i < s_size; i++) {
+		size_t ind = (s_number + i) % s_size;
+		const LineBuffer &line = s_buf[ind];
+		if (line.counter.QuadPart == 0) {
+			continue;
+		}
+		auto writeFunc = [&hFile](const char *str) {
+			DWORD len = static_cast<DWORD>(std::strlen(str));
+			DWORD writeSize = 0;
+			BOOL bret = WriteFile(hFile.get(), str, len, &writeSize, nullptr);
+			checkWin32Result(bret != 0, "WriteFile() failed");
+		};
+		{
+			double sec = 0.0;
+			if (prevCount.QuadPart != 0) {
+				sec = static_cast<double>(line.counter.QuadPart - prevCount.QuadPart) / freq.QuadPart;
+			}
+			prevCount = s_buf[ind].counter;
+			char buf[64];
+			::sprintf_s(buf, "[%08x +%07.4fms] ", s_buf[ind].number, sec * 1e3);
+			writeFunc(buf);
+		}
+		writeFunc(line.msg);
+		writeFunc("\r\n");
+	}
+
+	// close file
+	hFile.reset();
+	// open with notepad
+	HINSTANCE hret = ::ShellExecute(
+		nullptr, nullptr, L"notepad", filePath, nullptr, SW_NORMAL);
+	checkWin32Result(reinterpret_cast<ULONG_PTR>(hret) > 32, "ShellExecute() failed");
+}
+
+void write(const char *str)
+{
+	LineBuffer &line = s_buf[s_number % s_size];
+	::QueryPerformanceCounter(&line.counter);
+	line.number = s_number;
+
+	::strncpy_s(line.msg, str, sizeof(line.msg) - 1);
+	s_number++;
+}
+
+}	// trace
 }

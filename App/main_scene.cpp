@@ -8,6 +8,7 @@ MainScene::MainScene(MyApp *app, bool debugEnable) :
 	m_lua(debugEnable, LuaHeapSize)
 {
 	m_lua.loadTraceLib();
+	m_lua.loadSysLib();
 	m_lua.loadResourceLib(m_app);
 	m_lua.loadGraphLib(m_app);
 	m_lua.loadSoundLib(m_app);
@@ -15,7 +16,10 @@ MainScene::MainScene(MyApp *app, bool debugEnable) :
 	bool dbg = keyPressedAsync(VK_F12);
 	m_lua.loadFile(L"../sampledata/test.lua", dbg);
 
-	m_lua.callGlobal("load", dbg);
+	{
+		framework::UnsealResource autoSeal(*m_app);
+		m_lua.callGlobal("load", dbg);
+	}
 }
 
 void MainScene::setup()
