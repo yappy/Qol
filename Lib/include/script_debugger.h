@@ -60,6 +60,7 @@ private:
 
 	lua_State *m_L;
 	bool m_debugEnable;
+	int m_instLimit;
 
 	std::unordered_map<std::string, ChunkDebugInfo> m_debugInfo;
 	std::string m_fileNameStr;

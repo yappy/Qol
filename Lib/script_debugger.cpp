@@ -66,15 +66,9 @@ void forAllValidLines(lua_State *L, F callback)
 }	// namespace
 
 LuaDebugger::LuaDebugger(lua_State *L, bool debugEnable, int instLimit) :
-	m_L(L), m_debugEnable(debugEnable)
+	m_L(L), m_debugEnable(debugEnable), m_instLimit(instLimit)
 {
 	extra(L).dbg = this;
-	// switch hook condition by debugEnable
-	int mask = m_debugEnable ?
-		(LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT) :
-		LUA_MASKCOUNT;
-	// TODO: ? count must be reset at external pcall
-	lua_sethook(L, hookRaw, mask, instLimit);
 }
 
 lua_State *LuaDebugger::getLuaState() const
@@ -125,6 +119,15 @@ void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
 void LuaDebugger::pcall(int narg, int nret, bool autoBreak)
 {
 	lua_State *L = m_L;
+
+	// switch hook condition by debugEnable
+	// reset "count" with instLimit for each pcall()
+	// MEMO: coroutine's lua_State has separated mask and count
+	// This is
+	int mask = m_debugEnable ?
+		(LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT) :
+		LUA_MASKCOUNT;
+	lua_sethook(L, hookRaw, mask, m_instLimit);
 	{
 		// break at the first line?
 		m_debugState = autoBreak ?
@@ -362,7 +365,7 @@ void LuaDebugger::hookDebug(lua_Debug *ar)
 			lua_getinfo(L, "Sl", ar);
 			// avoid frequent new at every line event
 			m_fileNameStr = ar->source;
-			auto kv = m_debugInfo.find(m_fileNameStr);
+			const auto &kv = m_debugInfo.find(m_fileNameStr);
 			if (kv != m_debugInfo.end()) {
 				const auto &bps = kv->second.breakPoints;
 				int ind = ar->currentline - 1;

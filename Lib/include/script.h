@@ -40,7 +40,7 @@ public:
 	 * @param[in]	instLimit		Lua bytecode instruction count limit. (no limit if 0)
 	 */
 	Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize = 1024 * 1024,
-		int instLimit = 0x0fffffff);
+		int instLimit = 10 * 10000);
 	/** @brief Destruct lua_State.
 	 */
 	~Lua();
