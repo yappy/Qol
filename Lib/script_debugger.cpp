@@ -146,33 +146,24 @@ void LuaDebugger::pcall(int narg, int nret, bool autoBreak)
 // called when lua_error occurred
 // (* Lua call stack is not unwinded yet *)
 // return errmsg + backtrace
-// copied from lua.c
+// ref: lua.c
 int LuaDebugger::msghandler(lua_State *L)
 {
 	const char *msg = lua_tostring(L, 1);
-	if (msg == NULL) {  /* is error object not a string? */
-		if (luaL_callmeta(L, 1, "__tostring") &&  /* does it have a metamethod */
-			lua_type(L, -1) == LUA_TSTRING)  /* that produces a string? */
-			return 1;  /* that is the message */
-		else
-			msg = lua_pushfstring(L, "(error object is a %s value)",
-				luaL_typename(L, 1));
-	}
 	luaL_traceback(L, L, msg, 1);  /* append a standard traceback */
 
 	// enter debugger if debugEnable
+	int origTop = lua_gettop(L);
 	LuaDebugger *dbg = extra(L).dbg;
 	if (dbg->m_debugEnable) {
 		debug::writeLine();
 		debug::writeLine(L"[LuaDbg] ***** Lua error occurred *****");
-		// TODO: ?
-		debug::writeLine(lua_tostring(L, 1));
+		debug::writeLine(lua_tostring(L, -1));
 		debug::writeLine(L"[LuaDbg] Check \"bt\" and \"fr <callstack>\"");
 		debug::writeLine(L"[LuaDbg] \"help\" command for usage");
 		dbg->cmdLoop();
 	}
-	// TODO: ?
-	lua_settop(L, 1);
+	lua_settop(L, origTop);
 	return 1;  /* return the traceback */
 }
 
