@@ -29,7 +29,7 @@ static_assert(sizeof(ExtraSpace) <= LUA_EXTRASPACE,
 inline ExtraSpace &extra(lua_State *L)
 {
 	void *extra = lua_getextraspace(L);
-	return *reinterpret_cast<ExtraSpace *>(extra);
+	return *static_cast<ExtraSpace *>(extra);
 }
 
 #ifdef ENABLE_LUAIMPL_DEPENDENT
@@ -73,6 +73,7 @@ LuaDebugger::LuaDebugger(lua_State *L, bool debugEnable, int instLimit) :
 	int mask = m_debugEnable ?
 		(LUA_MASKCALL | LUA_MASKRET | LUA_MASKLINE | LUA_MASKCOUNT) :
 		LUA_MASKCOUNT;
+	// TODO: ? count must be reset at external pcall
 	lua_sethook(L, hookRaw, mask, instLimit);
 }
 
@@ -161,12 +162,13 @@ int LuaDebugger::msghandler(lua_State *L)
 	if (dbg->m_debugEnable) {
 		debug::writeLine();
 		debug::writeLine(L"[LuaDbg] ***** Lua error occurred *****");
+		// TODO: ?
 		debug::writeLine(lua_tostring(L, 1));
 		debug::writeLine(L"[LuaDbg] Check \"bt\" and \"fr <callstack>\"");
 		debug::writeLine(L"[LuaDbg] \"help\" command for usage");
 		dbg->cmdLoop();
 	}
-
+	// TODO: ?
 	lua_settop(L, 1);
 	return 1;  /* return the traceback */
 }

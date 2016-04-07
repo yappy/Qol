@@ -52,7 +52,7 @@ private:
 	enum class DebugState {
 		CONT,				// only bp or error
 		BREAK_LINE_ANY,		// line event any
-		BREAK_LINE_DEPTH0,	// line event, if call-ret count == 0
+		BREAK_LINE_DEPTH0,	// line event, if call-ret depth == 0
 	};
 
 	static const int DefSrcLines = 21;
