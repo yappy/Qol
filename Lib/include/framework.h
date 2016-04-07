@@ -228,8 +228,10 @@ class Application : private util::noncopyable {
 public:
 	/** @brief Constructor.
 	 * @details This needs AppParam and graphics::GraphicsParam.
+	 * Valid resource serId is: 0 .. resSetCount-1.
 	 * @param[in] appParam		%Application parameters.
 	 * @param[in] graphParam	Graphics parameters.
+	 * @param[in] resSetCount	Count of resource set.
 	 */
 	Application(const AppParam &appParam, const graphics::GraphicsParam &graphParam,
 		size_t resSetCount);
@@ -294,7 +296,10 @@ public:
 	void sealResource(bool seal);
 
 	/** @brief Load resources by resource set ID.
-	 * @param[in] setId	%Resource set ID.
+	 * @details This function blocks until all resource is loaded.
+	 * Processing can be cancelled by writing true to cancel from another thread.
+	 * @param[in] setId		%Resource set ID.
+	 * @param[in] cancel	async cancel atomic
 	 */
 	void loadResourceSet(size_t setId, std::atomic_bool &cancel);
 	/** @brief Unload resources by resource set ID.

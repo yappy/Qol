@@ -54,17 +54,24 @@ void write(const wchar_t *str, bool newline = false) noexcept;
  * @param[in] str		Debug message string.
  * @param[in] newline	true if new line after str.
  */
-inline void write(const char *str, bool newline = false) noexcept { write(util::utf82wc(str).get(), newline); }
+inline void write(const char *str, bool newline = false) noexcept
+{
+	write(util::utf82wc(str).get(), newline);
+}
 /** @brief Write debug string and new line.
  * @param[in] str		Debug message string.
- * @param[in] newline	true if new line after str.
  */
-inline void writeLine(const wchar_t *str = L"") noexcept { write(str, true); }
+inline void writeLine(const wchar_t *str = L"") noexcept
+{
+	write(str, true);
+}
 /** @brief Write debug string and new line.
  * @param[in] str		Debug message string.
- * @param[in] newline	true if new line after str.
  */
-inline void writeLine(const char *str) noexcept { write(util::utf82wc(str).get(), true); }
+inline void writeLine(const char *str) noexcept
+{
+	write(util::utf82wc(str).get(), true);
+}
 /** @brief Write debug message using format string like printf.
 * @param[in] fmt	Format string.
 * @param[in] ...	Additional params.
@@ -75,12 +82,12 @@ void writef(const wchar_t *fmt, ...) noexcept;
 * @param[in] ...	Additional params.
 */
 void writef(const char *fmt, ...) noexcept;
-/** @brief Write debug message using format string like printf.
+/** @brief Write debug message using format string like printf. (No new line)
 * @param[in] fmt	Format string.
 * @param[in] ...	Additional params.
 */
 void writef_nonl(const wchar_t *fmt, ...) noexcept;
-/** @brief Write debug message using format string like printf.
+/** @brief Write debug message using format string like printf. (No new line)
 * @param[in] fmt	Format string.
 * @param[in] ...	Additional params.
 */
@@ -121,12 +128,21 @@ private:
 
 }	// debug
 
-// On memory fast logging
+/// On memory fast logging
 namespace trace {
 
-void initialize(size_t bufsize);
+/** @brief Initialize trace buffer.
+ * @param [in] bufsize	Memory size. It should be page size (4KiB) align.
+ */
+void initialize(size_t bufsize = 1024 * 1024);
+/** @brief Output to a temporary file and open it with notepad.
+ */
 void output();
 
+/** @brief Write string to buffer.
+ * @details String will be logged with current time.
+ * @param[in] str	String to be written.
+ */
 void write(const char *str);
 
 }	// trace

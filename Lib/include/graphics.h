@@ -111,7 +111,7 @@ public:
 	 * @param[in] sh		source height (texture size if SRC_SIZE_DEFAULT)
 	 * @param[in] cx		center X from (sx, sy)
 	 * @param[in] cy		center Y from (sx, sy)
-	 * @param[in] angl		rotation angle [rad] (using center pos)
+	 * @param[in] angle		rotation angle [rad] (using center pos)
 	 * @param[in] scaleX	size scaling factor X
 	 * @param[in] scaleY	size scaling factor Y
 	 * @param[in] alpha		alpha value

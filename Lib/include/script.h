@@ -23,17 +23,24 @@ private:
 
 /** @brief Lua state manager.
  * @details Each Lua object manages one lua_State.
+ * If debugEnable at the constructor is true, full debug hook will be enabled.
+ * This may be heavy.
+ * If debugEnable is false, debug hook mask is only instruction count.
+ * instLimit is a feature for preventing infinite loop.
+ * LuaDebugger set it as hook count, and if COUNT event would happened,
+ * hook function raises an lua error.
  */
 class Lua : private util::noncopyable {
 public:
 	/** @brief Create new lua_State and open standard libs.
-	 * @param[in]	debugEnable		Enable debug feature
-	 * @param[in]	maxHeapSize		Max memory usage
+	 * @param[in]	debugEnable		Enable debug feature.
+	 * @param[in]	maxHeapSize		Max memory usage.
 	 *								(only virtual address range will be reserved at first)
-	 * @param[in]	initHeapSize	Initial commit size (physical memory mapped)
+	 * @param[in]	initHeapSize	Initial commit size. (physical memory mapped)
+	 * @param[in]	instLimit		Lua bytecode instruction count limit. (no limit if 0)
 	 */
 	Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize = 1024 * 1024,
-		int instLimit = 0x0fffffff);
+		int instLimit = 10 * 10000);
 	/** @brief Destruct lua_State.
 	 */
 	~Lua();
@@ -74,8 +81,8 @@ public:
 	 * @endcode
 	 *
 	 * @param[in] funcName		Function name.
-	 * @param[in] instLimit		Instruction count limit for prevent inf loop. (no limit if 0)
-	 * @param[in] pushParamFunc	Will be called just before lua_pcall().
+	 * @param[in] autoBreak		Break by debugger at the first LINE event if true.
+	 * @param[in] pushArgFunc	Will be called just before lua_pcall().
 	 * @param[in] narg			Args count.
 	 * @param[in] getRetFunc	Will be called just after lua_pcall().
 	 * @param[in] nret			Return values count.
