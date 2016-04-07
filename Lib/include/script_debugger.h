@@ -5,25 +5,8 @@
 
 namespace yappy {
 namespace lua {
+/// Lua script debugger
 namespace debugger {
-
-struct ChunkDebugInfo {
-	// must be unique
-	std::string chunkName;
-	// source code lines array
-	std::vector<std::string> srcLines;
-	// each line is valid? (can put breakpoint?)
-	std::vector<uint8_t> validLines;
-	// breakpoints
-	std::vector<uint8_t> breakPoints;
-
-	// cannot copy, move only
-	ChunkDebugInfo() = default;
-	ChunkDebugInfo(const ChunkDebugInfo &) = delete;
-	ChunkDebugInfo &operator=(const ChunkDebugInfo &) = delete;
-	ChunkDebugInfo(ChunkDebugInfo &&) = default;
-	ChunkDebugInfo &operator=(ChunkDebugInfo &&) = default;
-};
 
 class LuaDebugger : private util::noncopyable {
 public:
@@ -48,6 +31,24 @@ public:
 	bool bp(const wchar_t *usage, const std::vector<std::wstring> &args);
 
 private:
+	struct ChunkDebugInfo {
+		// must be unique
+		std::string chunkName;
+		// source code lines array
+		std::vector<std::string> srcLines;
+		// each line is valid? (can put breakpoint?)
+		std::vector<uint8_t> validLines;
+		// breakpoints
+		std::vector<uint8_t> breakPoints;
+
+		// Cannot copy, move only
+		ChunkDebugInfo() = default;
+		ChunkDebugInfo(const ChunkDebugInfo &) = delete;
+		ChunkDebugInfo &operator=(const ChunkDebugInfo &) = delete;
+		ChunkDebugInfo(ChunkDebugInfo &&) = default;
+		ChunkDebugInfo &operator=(ChunkDebugInfo &&) = default;
+	};
+
 	enum class DebugState {
 		CONT,				// only bp or error
 		BREAK_LINE_ANY,		// line event any

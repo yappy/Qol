@@ -60,7 +60,6 @@ inline void write(const char *str, bool newline = false) noexcept
 }
 /** @brief Write debug string and new line.
  * @param[in] str		Debug message string.
- * @param[in] newline	true if new line after str.
  */
 inline void writeLine(const wchar_t *str = L"") noexcept
 {
@@ -68,7 +67,6 @@ inline void writeLine(const wchar_t *str = L"") noexcept
 }
 /** @brief Write debug string and new line.
  * @param[in] str		Debug message string.
- * @param[in] newline	true if new line after str.
  */
 inline void writeLine(const char *str) noexcept
 {
