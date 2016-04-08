@@ -47,10 +47,14 @@ namespace export {
 	 */
 	struct sys {
 		static int include(lua_State *L);
+		static int readFile(lua_State *L);
+		static int writeFile(lua_State *L);
 		sys() = delete;
 	};
 	const luaL_Reg sys_RegList[] = {
-		{ "include",	sys::include },
+		{ "include",	sys::include	},
+		{ "readFile",	sys::readFile	},
+		{ "writeFile",	sys::writeFile	},
 		{ nullptr, nullptr }
 	};
 
