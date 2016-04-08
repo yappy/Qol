@@ -291,7 +291,7 @@ public:
 	/** @brief Set the lock state of resources.
 	 * @details If resource manager is sealed, addXXXResource() will be failed.
 	 * @param[in] seal	new state.
-	 * @sa UnsealResource
+	 * @sa @ref UnsealResource
 	 */
 	void sealResource(bool seal);
 
@@ -334,7 +334,7 @@ public:
 
 protected:
 	/** @brief User initialization code.
-	 * @details Called at the beginning of run().
+	 * @details Called at the beginning of @ref run().
 	 */
 	virtual void init() = 0;
 	/** @brief Process frame.
@@ -342,7 +342,7 @@ protected:
 	 */
 	virtual void update() = 0;
 	/** @brief Process rendering.
-	 * @details Called after update(), unless frame skipping.
+	 * @details Called after @ref update(), unless frame skipping.
 	 */
 	virtual void render() = 0;
 
@@ -370,7 +370,7 @@ private:
 };
 
 /** @brief Auto re-seal helper
- * @sa Application::sealResource()
+ * @sa @ref Application::sealResource()
  */
 class UnsealResource : util::noncopyable {
 public:

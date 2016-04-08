@@ -116,7 +116,7 @@ inline float getOptFloat(lua_State *L, int arg, float def,
  * @param[in]	...	任意の型および数の出力する値
  * @return			なし
  *
- * @sa yappy::debug
+ * @sa @ref yappy::debug
  */
 int trace::write(lua_State *L)
 {
@@ -145,7 +145,7 @@ int trace::write(lua_State *L)
  * @param[in]	...	任意の型および数の出力する値
  * @return			なし
  *
- * @sa yappy::trace
+ * @sa @ref yappy::trace
  */
 int trace::perf(lua_State *L)
 {
@@ -182,7 +182,7 @@ int trace::perf(lua_State *L)
  * @param[in]	...	ファイル名
  * @return			なし
  *
- * @sa yappy::file
+ * @sa @ref yappy::file
  */
 int sys::include(lua_State *L)
 {
@@ -497,7 +497,7 @@ int graph::getTextureSize(lua_State *L)
  * @param[in]	alpha	透明度(0.0 - 1.0)
  * @return				なし
  *
- * @sa graphics::DGraphics::drawTexture()
+ * @sa @ref yappy::graphics::DGraphics::drawTexture()
  */
 int graph::drawTexture(lua_State *L)
 {
@@ -549,7 +549,7 @@ int graph::drawTexture(lua_State *L)
  * @param[in]	alpha	透明度(0.0 - 1.0)
  * @return				なし
  *
- * @sa graphics::DGraphics::drawString()
+ * @sa @ref yappy::graphics::DGraphics::drawString()
  */
 int graph::drawString(lua_State *L)
 {
