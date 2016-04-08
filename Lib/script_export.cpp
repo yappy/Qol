@@ -8,21 +8,6 @@ namespace export {
 
 namespace {
 
-// TODO: deprecated
-// Get reinterpret_cast<T *>(self.fieldName)
-// self is the first argument (stack[1])
-template <class T>
-inline T *getPtrFromSelf(lua_State *L, const char *fieldName)
-{
-	luaL_checktype(L, 1, LUA_TTABLE);
-	lua_getfield(L, 1, fieldName);
-	luaL_checktype(L, -1, LUA_TLIGHTUSERDATA);
-	void *p = lua_touserdata(L, -1);
-	T *result = static_cast<T *>(p);
-	lua_pop(L, 1);
-	return result;
-}
-
 template <class T>
 inline T *getPtrFromUpvalue(lua_State *L, int uvInd)
 {
@@ -340,7 +325,7 @@ int sys::writeFile(lua_State *L)
 int resource::addTexture(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
-		auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
+		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 		const char *path = luaL_checkstring(L, 4);
@@ -365,7 +350,7 @@ int resource::addTexture(lua_State *L)
 int resource::addFont(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
-		auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
+		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 		const char *fontName = luaL_checkstring(L, 4);
@@ -400,7 +385,7 @@ int resource::addFont(lua_State *L)
 int resource::addSe(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
-		auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
+		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 		const char *path = luaL_checkstring(L, 4);
@@ -425,7 +410,7 @@ int resource::addSe(lua_State *L)
 int resource::addBgm(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
-		auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
+		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 		const char *path = luaL_checkstring(L, 4);
@@ -455,7 +440,7 @@ int resource::addBgm(lua_State *L)
 int graph::getTextureSize(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
-		auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
+		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 
@@ -502,7 +487,7 @@ int graph::getTextureSize(lua_State *L)
 int graph::drawTexture(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
-		auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
+		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 		int dx = getInt(L, 4);
@@ -554,7 +539,7 @@ int graph::drawTexture(lua_State *L)
 int graph::drawString(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
-		auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
+		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 		const char *str = luaL_checkstring(L, 4);
@@ -592,7 +577,7 @@ int graph::drawString(lua_State *L)
 int sound::playSe(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
-		auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
+		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 
@@ -616,7 +601,7 @@ int sound::playSe(lua_State *L)
 int sound::playBgm(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
-		auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
+		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 
@@ -638,7 +623,7 @@ int sound::playBgm(lua_State *L)
 int sound::stopBgm(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
-		auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
+		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
 
 		app->sound().stopBgm();
 		return 0;
