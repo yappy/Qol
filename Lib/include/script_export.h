@@ -82,7 +82,6 @@ namespace export {
 		{ "addBgm",		resource::addBgm		},
 		{ nullptr, nullptr }
 	};
-	const char *const resource_RawFieldName = "_rawptr";
 
 	/** @brief グラフィックス描画関連関数。<b>graph</b>グローバルテーブルに提供。
 	 * @details
@@ -107,7 +106,6 @@ namespace export {
 		{ "drawString",		graph::drawString		},
 		{ nullptr, nullptr }
 	};
-	const char *const graph_RawFieldName = "_rawptr";
 
 	/** @brief 音声再生関連関数。<b>sound</b>グローバルテーブルに提供。
 	 * @details
@@ -130,7 +128,6 @@ namespace export {
 		{ "stopBgm",	sound::stopBgm	},
 		{ nullptr, nullptr }
 	};
-	const char *const sound_RawFieldName = "_rawptr";
 
 }
 }

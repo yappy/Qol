@@ -8,6 +8,9 @@ config.txt
 # release files
 dist/
 
+# takenoko
+App/takenoko.txt
+
 
 # User-specific files
 *.suo
