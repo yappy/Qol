@@ -58,7 +58,7 @@ public:
 
 	/** @brief Load script file and eval it.
 	 * @param[in] fileName	Script file name.
-	 * @param[in] autoBreak	Debug break at first line.
+	 * @param[in] autoBreak	Debug break at the first line.
 	 * @param[in] prot		Use pcall() if true. (false is include from Lua only)
 	 */
 	void loadFile(const wchar_t *fileName, bool autoBreak, bool prot = true);
@@ -83,7 +83,7 @@ public:
 	 * @param[in] funcName		Function name.
 	 * @param[in] autoBreak		Break by debugger at the first LINE event if true.
 	 * @param[in] pushArgFunc	Will be called just before lua_pcall().
-	 * @param[in] narg			Args count.
+	 * @param[in] narg			Arguments count.
 	 * @param[in] getRetFunc	Will be called just after lua_pcall().
 	 * @param[in] nret			Return values count.
 	 */
