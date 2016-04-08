@@ -6,7 +6,6 @@ var searchData=
   ['scaley',['scaleY',['../structyappy_1_1graphics_1_1DrawTask.html#a5965ab3a7598275d49596a61a6aa58e0',1,'yappy::graphics::DrawTask']]],
   ['sh',['sh',['../structyappy_1_1graphics_1_1DrawTask.html#abed80247f29cfe902d1025aad607097e',1,'yappy::graphics::DrawTask']]],
   ['showcursor',['showCursor',['../structyappy_1_1framework_1_1AppParam.html#a43968aafe4f73efdc529d641de7bd5e6',1,'yappy::framework::AppParam']]],
-  ['sound_5frawfieldname',['sound_RawFieldName',['../namespaceyappy_1_1lua_1_1export.html#a22436703b6744024b65414c573f0778d',1,'yappy::lua::export']]],
   ['sound_5freglist',['sound_RegList',['../namespaceyappy_1_1lua_1_1export.html#a41ba685be3525cada183ec853ec85862',1,'yappy::lua::export']]],
   ['soundeffectplaymax',['SoundEffectPlayMax',['../namespaceyappy_1_1sound.html#a64ed76ed11e81d5c10acf34e3eae94a4',1,'yappy::sound']]],
   ['soundfilesizemax',['SoundFileSizeMax',['../namespaceyappy_1_1sound.html#ac859813db49d21aa53150cd54bed7d30',1,'yappy::sound']]],

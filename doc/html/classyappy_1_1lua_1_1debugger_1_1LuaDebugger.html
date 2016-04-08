@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lib
-   &#160;<span id="projectnumber">(2413ead) 2016-04-07 22:05:11 +0900 (HEAD -&gt; master, origin/master, origin/HEAD)</span>
+   &#160;<span id="projectnumber">(2702a11) 2016-04-09 01:09:48 +0900 (HEAD -&gt; master, origin/master, origin/HEAD)</span>
    </div>
    <div id="projectbrief">QOLを高める</div>
   </td>
@@ -98,6 +98,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 
+<p>Lua debugger.  
+ <a href="classyappy_1_1lua_1_1debugger_1_1LuaDebugger.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="script__debugger_8h_source.html">script_debugger.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for yappy::lua::debugger::LuaDebugger:</div>
@@ -112,12 +115,16 @@ Inheritance diagram for yappy::lua::debugger::LuaDebugger:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a9552e3d15b81597f9a527dae7fc7171b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1lua_1_1debugger_1_1LuaDebugger.html#a9552e3d15b81597f9a527dae7fc7171b">LuaDebugger</a> (lua_State *L, bool debugEnable, int instLimit)</td></tr>
+<tr class="memdesc:a9552e3d15b81597f9a527dae7fc7171b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a9552e3d15b81597f9a527dae7fc7171b">More...</a><br /></td></tr>
 <tr class="separator:a9552e3d15b81597f9a527dae7fc7171b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5628dd7eb9e8843651646d88b7297a3a"><td class="memItemLeft" align="right" valign="top">lua_State *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1lua_1_1debugger_1_1LuaDebugger.html#a5628dd7eb9e8843651646d88b7297a3a">getLuaState</a> () const </td></tr>
+<tr class="memdesc:a5628dd7eb9e8843651646d88b7297a3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get Lua state.  <a href="#a5628dd7eb9e8843651646d88b7297a3a">More...</a><br /></td></tr>
 <tr class="separator:a5628dd7eb9e8843651646d88b7297a3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56e5aa9bf734c736aa941b243e7909db"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1lua_1_1debugger_1_1LuaDebugger.html#a56e5aa9bf734c736aa941b243e7909db">loadDebugInfo</a> (const char *name, const char *<a class="el" href="classyappy_1_1lua_1_1debugger_1_1LuaDebugger.html#af70b3669940699e808157ae732d8ea1e">src</a>, size_t size)</td></tr>
+<tr class="memdesc:a56e5aa9bf734c736aa941b243e7909db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load debug info from chunk name and source string.  <a href="#a56e5aa9bf734c736aa941b243e7909db">More...</a><br /></td></tr>
 <tr class="separator:a56e5aa9bf734c736aa941b243e7909db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a13898f54d9be4b5ac4b42b628e08029c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1lua_1_1debugger_1_1LuaDebugger.html#a13898f54d9be4b5ac4b42b628e08029c">pcall</a> (int narg, int nret, bool autoBreak)</td></tr>
+<tr class="memdesc:a13898f54d9be4b5ac4b42b628e08029c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare and call lua_pcall().  <a href="#a13898f54d9be4b5ac4b42b628e08029c">More...</a><br /></td></tr>
 <tr class="separator:a13898f54d9be4b5ac4b42b628e08029c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea7d03de823cd623f3bccdcb47349815"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1lua_1_1debugger_1_1LuaDebugger.html#aea7d03de823cd623f3bccdcb47349815">help</a> (const wchar_t *<a class="el" href="script__debugger_8cpp.html#ac63e46cab85d0b9f81b1596e49bab55e">usage</a>, const std::vector&lt; std::wstring &gt; &amp;args)</td></tr>
 <tr class="separator:aea7d03de823cd623f3bccdcb47349815"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -147,8 +154,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aa2e5f695145bd7887b82ddfedac62dfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p>Definition at line <a class="el" href="script__debugger_8h_source.html#l00011">11</a> of file <a class="el" href="script__debugger_8h_source.html">script_debugger.h</a>.</p>
+<div class="textblock"><p>Lua debugger. </p>
+<p>Used in <a class="el" href="classyappy_1_1lua_1_1Lua.html">Lua</a> class. </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classyappy_1_1lua_1_1Lua.html">yappy::lua::Lua</a> </dd></dl>
+
+<p>Definition at line <a class="el" href="script__debugger_8h_source.html#l00015">15</a> of file <a class="el" href="script__debugger_8h_source.html">script_debugger.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a9552e3d15b81597f9a527dae7fc7171b"></a>
 <div class="memitem">
@@ -179,6 +188,16 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Constructor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">L</td><td>Lua state. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">debugEnable</td><td>Debug hook enabled switch. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">instLimit</td><td>Lua bytecode instruction count limit. (no limit if 0) </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p>Definition at line <a class="el" href="script__debugger_8cpp_source.html#l00068">68</a> of file <a class="el" href="script__debugger_8cpp_source.html">script_debugger.cpp</a>.</p>
 
@@ -366,6 +385,9 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Get Lua state. </p>
+<dl class="section return"><dt>Returns</dt><dd>Lua state. </dd></dl>
+
 <p>Definition at line <a class="el" href="script__debugger_8cpp_source.html#l00074">74</a> of file <a class="el" href="script__debugger_8cpp_source.html">script_debugger.cpp</a>.</p>
 
 </div>
@@ -427,6 +449,16 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Load debug info from chunk name and source string. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>Chunk name (file name) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>Source string. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Source string size. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p>Definition at line <a class="el" href="script__debugger_8cpp_source.html#l00079">79</a> of file <a class="el" href="script__debugger_8cpp_source.html">script_debugger.cpp</a>.</p>
 
@@ -545,6 +577,16 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Prepare and call lua_pcall(). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">narg</td><td>Arguments count. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nret</td><td>Return values count. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">autoBreak</td><td>Debug break at the first line. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 <p>Definition at line <a class="el" href="script__debugger_8cpp_source.html#l00119">119</a> of file <a class="el" href="script__debugger_8cpp_source.html">script_debugger.cpp</a>.</p>
 

@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lib
-   &#160;<span id="projectnumber">(2413ead) 2016-04-07 22:05:11 +0900 (HEAD -&gt; master, origin/master, origin/HEAD)</span>
+   &#160;<span id="projectnumber">(2702a11) 2016-04-09 01:09:48 +0900 (HEAD -&gt; master, origin/master, origin/HEAD)</span>
    </div>
    <div id="projectbrief">QOLを高める</div>
   </td>
@@ -113,11 +113,17 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a5d91d9c7a0242ce4d8054c8dd685769a"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structyappy_1_1lua_1_1export_1_1sys.html#a5d91d9c7a0242ce4d8054c8dd685769a">include</a> (lua_State *L)</td></tr>
 <tr class="memdesc:a5d91d9c7a0242ce4d8054c8dd685769a"><td class="mdescLeft">&#160;</td><td class="mdescRight">別の Lua ソースファイルを実行する。  <a href="#a5d91d9c7a0242ce4d8054c8dd685769a">More...</a><br /></td></tr>
 <tr class="separator:a5d91d9c7a0242ce4d8054c8dd685769a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a6ae3fbebec2aad4bca41a63227ea98"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structyappy_1_1lua_1_1export_1_1sys.html#a6a6ae3fbebec2aad4bca41a63227ea98">readFile</a> (lua_State *L)</td></tr>
+<tr class="memdesc:a6a6ae3fbebec2aad4bca41a63227ea98"><td class="mdescLeft">&#160;</td><td class="mdescRight">ファイルを読む。  <a href="#a6a6ae3fbebec2aad4bca41a63227ea98">More...</a><br /></td></tr>
+<tr class="separator:a6a6ae3fbebec2aad4bca41a63227ea98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69a383b56b94fe35a8615751014dd6dd"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structyappy_1_1lua_1_1export_1_1sys.html#a69a383b56b94fe35a8615751014dd6dd">writeFile</a> (lua_State *L)</td></tr>
+<tr class="memdesc:a69a383b56b94fe35a8615751014dd6dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">ファイルを書く。  <a href="#a69a383b56b94fe35a8615751014dd6dd">More...</a><br /></td></tr>
+<tr class="separator:a69a383b56b94fe35a8615751014dd6dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>システム関連関数。<b>sys</b>グローバルテーブルに提供。 </p>
 <div class="fragment"><div class="line"><a class="code" href="structyappy_1_1lua_1_1export_1_1sys.html#acf0091e9c8d2cb26cab035cfe6d929da">sys</a> = {};</div></div><!-- fragment --> 
-<p>Definition at line <a class="el" href="script__export_8h_source.html#l00048">48</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8h_source.html#l00047">47</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="acf0091e9c8d2cb26cab035cfe6d929da"></a>
 <div class="memitem">
@@ -174,9 +180,81 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>なし</dd></dl>
-<dl class="section see"><dt>See also</dt><dd>yappy::file </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="namespaceyappy_1_1file.html">yappy::file</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00186">186</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00172">172</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a6a6ae3fbebec2aad4bca41a63227ea98"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int yappy::lua::export::sys::readFile </td>
+          <td>(</td>
+          <td class="paramtype">lua_State *&#160;</td>
+          <td class="paramname"><em>L</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ファイルを読む。 </p>
+<div class="fragment"><div class="line"><span class="keyword">function</span> <a class="code" href="structyappy_1_1lua_1_1export_1_1sys.html#acf0091e9c8d2cb26cab035cfe6d929da">sys</a>.readFile(str fileName)</div><div class="line">    <span class="keywordflow">return</span> ...;</div><div class="line">end</div></div><!-- fragment --><p> テキストファイルを読みます。 ファイルが存在しない場合、何も返しません(0個の値を返します)。 ファイル内に1行も存在しなかった場合も同様です。 ファイルが存在しない以外の理由で失敗した場合、エラーを発生させます。 1行あたり読み取るのは1023文字までです。超過した分は捨てられます。 </p><div class="fragment"><div class="line">-- 最初の3行をそれぞれ a, b, c に代入する</div><div class="line">-- 足りない部分には nil が代入される</div><div class="line">-- 3行あったかどうかは c が nil かを見ればよい</div><div class="line">local a, b, c = <a class="code" href="structyappy_1_1lua_1_1export_1_1sys.html#acf0091e9c8d2cb26cab035cfe6d929da">sys</a>.readFile(<span class="stringliteral">&quot;savedata.txt&quot;</span>);</div><div class="line">-- リストに変換する (x[1]から始まる)</div><div class="line">local x = { <a class="code" href="structyappy_1_1lua_1_1export_1_1sys.html#acf0091e9c8d2cb26cab035cfe6d929da">sys</a>.readFile(<span class="stringliteral">&quot;savedata.txt&quot;</span>) };</div><div class="line">-- 長さ(行数)を得る</div><div class="line">local len = <span class="preprocessor">#x;</span></div><div class="line">-- 全て出力する</div><div class="line"><span class="keywordflow">for</span> i = 1, #x <span class="keywordflow">do</span></div><div class="line"> trace.write(x[i]);</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fileName</td><td>ファイル名 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>各行の内容 </dd></dl>
+
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00218">218</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a69a383b56b94fe35a8615751014dd6dd"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int yappy::lua::export::sys::writeFile </td>
+          <td>(</td>
+          <td class="paramtype">lua_State *&#160;</td>
+          <td class="paramname"><em>L</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>ファイルを書く。 </p>
+<div class="fragment"><div class="line"><span class="keyword">function</span> <a class="code" href="structyappy_1_1lua_1_1export_1_1sys.html#acf0091e9c8d2cb26cab035cfe6d929da">sys</a>.writeFile(str fileName, ...)</div><div class="line">end</div></div><!-- fragment --><p> テキストファイルを書き込みます。 ファイルのオープンや書き込みに失敗した場合、エラーを発生させます。 </p><div class="fragment"><div class="line">-- 数値は文字列に自動で変換される</div><div class="line"><a class="code" href="structyappy_1_1lua_1_1export_1_1sys.html#acf0091e9c8d2cb26cab035cfe6d929da">sys</a>.writeFile(<span class="stringliteral">&quot;savedata.txt&quot;</span>, <span class="stringliteral">&quot;NoName&quot;</span>, 1, 255);</div><div class="line">local name, stage, hp = <a class="code" href="structyappy_1_1lua_1_1export_1_1sys.html#acf0091e9c8d2cb26cab035cfe6d929da">sys</a>.readFile(<span class="stringliteral">&quot;savedata.txt&quot;</span>);</div><div class="line">-- リストを可変個の値に変換するには table.unpack() を使う</div><div class="line">local list = { <span class="stringliteral">&quot;NoName&quot;</span>, 1, 255 };</div><div class="line"><a class="code" href="structyappy_1_1lua_1_1export_1_1sys.html#acf0091e9c8d2cb26cab035cfe6d929da">sys</a>.writeFile(<span class="stringliteral">&quot;savedata.txt&quot;</span>, table.unpack(list));</div></div><!-- fragment --><dl class="section warning"><dt>Warning</dt><dd>文字列に含まれる改行をチェックしません。 <a class="el" href="structyappy_1_1lua_1_1export_1_1sys.html#a6a6ae3fbebec2aad4bca41a63227ea98">readFile()</a> との整合性が崩れるので注意してください。</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">fileName</td><td>ファイル名 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">...</td><td>各行の内容 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>なし </dd></dl>
+
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00286">286</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
 
 </div>
 </div>

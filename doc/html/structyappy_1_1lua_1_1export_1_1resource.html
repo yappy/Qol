@@ -24,7 +24,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Lib
-   &#160;<span id="projectnumber">(2413ead) 2016-04-07 22:05:11 +0900 (HEAD -&gt; master, origin/master, origin/HEAD)</span>
+   &#160;<span id="projectnumber">(2702a11) 2016-04-09 01:09:48 +0900 (HEAD -&gt; master, origin/master, origin/HEAD)</span>
    </div>
    <div id="projectbrief">QOLを高める</div>
   </td>
@@ -119,11 +119,11 @@ Static Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>使用リソース登録関数。 </p>
-<p>各関数は最初の引数に self オブジェクトが必要です。 リソースはリソースセットID(整数)とリソースID(文字列)で識別されます。 何らかの初期化関数の引数としてテーブルが渡されます(今のところ)。 その中でリソースを登録した後、C++側で framework::Application::loadResourceSet() を呼ぶとリソースが使用可能になります。 </p><dl class="section see"><dt>See also</dt><dd>framework::Application </dd>
+<p>各関数は最初の引数に self オブジェクトが必要です。 リソースはリソースセットID(整数)とリソースID(文字列)で識別されます。 リソースの登録は <a class="el" href="classyappy_1_1framework_1_1Application.html#ad13c563cd327285f8f874a9650e2568f">yappy::framework::Application::sealResource()</a> で 許可されている間にしかできません(違反するとエラーが発生します)。 リソースを登録した後、C++側で <a class="el" href="classyappy_1_1framework_1_1Application.html#a549766f52580383dd1db56e190a21017">yappy::framework::Application::loadResourceSet()</a> を呼ぶとリソースが使用可能になります。 </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classyappy_1_1framework_1_1Application.html">yappy::framework::Application</a> </dd>
 <dd>
-framework::ResourceManager </dd></dl>
+<a class="el" href="classyappy_1_1framework_1_1ResourceManager.html">yappy::framework::ResourceManager</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8h_source.html#l00068">68</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8h_source.html#l00072">72</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a19bfa109a90ef2f9697c38f3acb78101"></a>
 <div class="memitem">
@@ -158,7 +158,7 @@ framework::ResourceManager </dd></dl>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>なし </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00303">303</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00410">410</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
 
 </div>
 </div>
@@ -195,7 +195,7 @@ framework::ResourceManager </dd></dl>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>なし </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00243">243</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00350">350</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
 
 </div>
 </div>
@@ -232,7 +232,7 @@ framework::ResourceManager </dd></dl>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>なし </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00278">278</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00385">385</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
 
 </div>
 </div>
@@ -269,7 +269,7 @@ framework::ResourceManager </dd></dl>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>なし </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00218">218</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00325">325</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
 
 </div>
 </div>
