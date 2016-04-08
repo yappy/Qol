@@ -33,14 +33,15 @@ inline T *getPtrFromUpvalue(lua_State *L, int uvInd)
 }
 
 template <class F>
-inline void exceptToLuaError(lua_State *L, F proc)
+inline int exceptToLuaError(lua_State *L, F proc)
 {
 	try {
-		proc();
+		return proc();
 	}
 	catch (const std::exception &ex) {
 		// push string ex.what() and throw
-		luaL_error(L, "%s", ex.what());
+		// noreturn
+		return luaL_error(L, "%s", ex.what());
 	}
 }
 
@@ -115,11 +116,11 @@ inline float getOptFloat(lua_State *L, int arg, float def,
  * @param[in]	...	任意の型および数の出力する値
  * @return			なし
  *
- * @sa yappy::debug
+ * @sa @ref yappy::debug
  */
 int trace::write(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		int argc = lua_gettop(L);
 		for (int i = 1; i <= argc; i++) {
 			const char *str = ::lua_tostring(L, i);
@@ -130,8 +131,8 @@ int trace::write(lua_State *L)
 				debug::writef("<%s>", luaL_typename(L, i));
 			}
 		}
+		return 0;
 	});
-	return 0;
 }
 
 /** @brief メモリ上のバッファに高速なログ出力を行う。
@@ -144,11 +145,11 @@ int trace::write(lua_State *L)
  * @param[in]	...	任意の型および数の出力する値
  * @return			なし
  *
- * @sa yappy::trace
+ * @sa @ref yappy::trace
  */
 int trace::perf(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		int argc = lua_gettop(L);
 		for (int i = 1; i <= argc; i++) {
 			const char *str = ::lua_tostring(L, i);
@@ -159,8 +160,8 @@ int trace::perf(lua_State *L)
 				debug::writef("<%s>", luaL_typename(L, i));
 			}
 		}
+		return 0;
 	});
-	return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -181,11 +182,11 @@ int trace::perf(lua_State *L)
  * @param[in]	...	ファイル名
  * @return			なし
  *
- * @sa yappy::file
+ * @sa @ref yappy::file
  */
 int sys::include(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		auto *lua = getPtrFromUpvalue<Lua>(L, 1);
 
 		int argc = lua_gettop(L);
@@ -195,8 +196,129 @@ int sys::include(lua_State *L)
 
 			lua->loadFile(util::utf82wc(fileName).get(), false, false);
 		}
+		return 0;
 	});
-	return 0;
+}
+
+/** @brief ファイルを読む。
+ * @details
+ * @code
+ * function sys.readFile(str fileName)
+ * 	return ...;
+ * end
+ * @endcode
+ * テキストファイルを読みます。
+ * ファイルが存在しない場合、何も返しません(0個の値を返します)。
+ * ファイル内に1行も存在しなかった場合も同様です。
+ * ファイルが存在しない以外の理由で失敗した場合、エラーを発生させます。
+ * 1行あたり読み取るのは1023文字までです。超過した分は捨てられます。
+ * @code
+ * -- 最初の3行をそれぞれ a, b, c に代入する
+ * -- 足りない部分には nil が代入される
+ * -- 3行あったかどうかは c が nil かを見ればよい
+ * local a, b, c = sys.readFile("savedata.txt");
+ * -- リストに変換する (x[1]から始まる)
+ * local x = { sys.readFile("savedata.txt") };
+ * -- 長さ(行数)を得る
+ * local len = #x;
+ * -- 全て出力する
+ * for i = 1, #x do
+ *	trace.write(x[i]);
+ * end
+ * @endcode
+ *
+ * @param[in] fileName	ファイル名
+ * @return				各行の内容
+ */
+int sys::readFile(lua_State *L)
+{
+	return exceptToLuaError(L, [L]() {
+		const char *fileName = luaL_checkstring(L, 1);
+
+		FILE *tmpfp = nullptr;
+		errno_t err = ::fopen_s(&tmpfp, fileName, "r");
+		if (err == ENOENT) {
+			// return;
+			return 0;
+		}
+		else if (err != 0) {
+			luaL_error(L, "File open error: %s, %d", fileName, err);
+		}
+
+		// return ...;
+		int retcnt = 0;
+
+		util::FilePtr fp(tmpfp);
+		char buf[1024];
+		while (std::fgets(buf, sizeof(buf), fp.get()) != nullptr) {
+			// find new line
+			char *pnl = std::strchr(buf, '\n');
+			if (pnl != nullptr) {
+				// OK, delete '\n'
+				*pnl = '\0';
+			}
+			else {
+				// line buffer over or EOF without new line
+				// discard until NL is found or reach EOF
+				char disc[1024];
+				do {
+					if (std::fgets(disc, sizeof(disc), fp.get()) == nullptr) {
+						break;
+					}
+				} while (std::strchr(disc, '\n') == nullptr);
+			}
+			lua_pushstring(L, buf);
+			retcnt++;
+		}
+		return retcnt;
+	});
+}
+
+/** @brief ファイルを書く。
+ * @details
+ * @code
+ * function sys.writeFile(str fileName, ...)
+ * end
+ * @endcode
+ * テキストファイルを書き込みます。
+ * ファイルのオープンや書き込みに失敗した場合、エラーを発生させます。
+ * @code
+ * -- 数値は文字列に自動で変換される
+ * sys.writeFile("savedata.txt", "NoName", 1, 255);
+ * local name, stage, hp = sys.readFile("savedata.txt");
+ * -- リストを可変個の値に変換するには table.unpack() を使う
+ * local list = { "NoName", 1, 255 };
+ * sys.writeFile("savedata.txt", table.unpack(list));
+ * @endcode
+ *
+ * @warning 文字列に含まれる改行をチェックしません。
+ * @ref readFile() との整合性が崩れるので注意してください。
+ *
+ * @param[in] fileName	ファイル名
+ * @param[in] ...		各行の内容
+ * @return				なし
+ */
+int sys::writeFile(lua_State *L)
+{
+	return exceptToLuaError(L, [L]() {
+		const char *fileName = luaL_checkstring(L, 1);
+
+		FILE *tmpfp = nullptr;
+		errno_t err = ::fopen_s(&tmpfp, fileName, "w");
+		if (err != 0) {
+			luaL_error(L, "File open error: %s, %d", fileName, err);
+		}
+
+		util::FilePtr fp(tmpfp);
+		int argc = lua_gettop(L);
+		for (int i = 2; i <= argc; i++) {
+			// if lua error, destruct fp and throw
+			const char *line = luaL_checkstring(L, i);
+			std::fputs(line, fp.get());
+			std::fputc('\n', fp.get());
+		}
+		return 0;
+	});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -217,15 +339,15 @@ int sys::include(lua_State *L)
  */
 int resource::addTexture(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 		const char *path = luaL_checkstring(L, 4);
 
 		app->addTextureResource(setId, resId, util::utf82wc(path).get());
+		return 0;
 	});
-	return 0;
 }
 
 /** @brief フォントリソースを登録する。
@@ -242,7 +364,7 @@ int resource::addTexture(lua_State *L)
  */
 int resource::addFont(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
@@ -259,8 +381,8 @@ int resource::addFont(lua_State *L)
 
 		app->addFontResource(setId, resId, util::utf82wc(fontName).get(),
 			startChar, endChar, w, h);
+		return 0;
 	});
-	return 0;
 }
 
 /** @brief 効果音リソースを登録する。
@@ -277,15 +399,15 @@ int resource::addFont(lua_State *L)
  */
 int resource::addSe(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 		const char *path = luaL_checkstring(L, 4);
 
 		app->addSeResource(setId, resId, util::utf82wc(path).get());
+		return 0;
 	});
-	return 0;
 }
 
 /** @brief BGMリソースを登録する。
@@ -302,15 +424,15 @@ int resource::addSe(lua_State *L)
  */
 int resource::addBgm(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromSelf<framework::Application>(L, resource_RawFieldName);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 		const char *path = luaL_checkstring(L, 4);
 
 		app->addBgmResource(setId, resId, util::utf82wc(path).get());
+		return 0;
 	});
-	return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -332,7 +454,7 @@ int resource::addBgm(lua_State *L)
  */
 int graph::getTextureSize(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
@@ -341,8 +463,8 @@ int graph::getTextureSize(lua_State *L)
 
 		lua_pushinteger(L, pTex->w);
 		lua_pushinteger(L, pTex->h);
+		return 2;
 	});
-	return 2;
 }
 
 /** @brief テクスチャを描画する。
@@ -375,11 +497,11 @@ int graph::getTextureSize(lua_State *L)
  * @param[in]	alpha	透明度(0.0 - 1.0)
  * @return				なし
  *
- * @sa graphics::DGraphics::drawTexture()
+ * @sa @ref yappy::graphics::DGraphics::drawTexture()
  */
 int graph::drawTexture(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
@@ -402,8 +524,8 @@ int graph::drawTexture(lua_State *L)
 		const auto &pTex = app->getTexture(setId, resId);
 		app->graph().drawTexture(pTex, dx, dy, lrInv, udInv, sx, sy, sw, sh, cx, cy,
 			angle, scaleX, scaleY, alpha);
+		return 0;
 	});
-	return 0;
 }
 
 /** @brief 文字列を描画する。
@@ -427,11 +549,11 @@ int graph::drawTexture(lua_State *L)
  * @param[in]	alpha	透明度(0.0 - 1.0)
  * @return				なし
  *
- * @sa graphics::DGraphics::drawString()
+ * @sa @ref yappy::graphics::DGraphics::drawString()
  */
 int graph::drawString(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromSelf<framework::Application>(L, graph_RawFieldName);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
@@ -448,8 +570,8 @@ int graph::drawString(lua_State *L)
 		const auto &pFont = app->getFont(setId, resId);
 		app->graph().drawString(pFont, util::utf82wc(str).get(), dx, dy,
 			color, ajustX, scaleX, scaleY, alpha);
+		return 0;
 	});
-	return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -469,15 +591,15 @@ int graph::drawString(lua_State *L)
  */
 int sound::playSe(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 
 		const auto &pSoundEffect = app->getSoundEffect(setId, resId);
 		app->sound().playSoundEffect(pSoundEffect);
+		return 0;
 	});
-	return 0;
 }
 
 /** @brief BGM 再生を開始する。
@@ -493,15 +615,15 @@ int sound::playSe(lua_State *L)
  */
 int sound::playBgm(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
 		int setId = getInt(L, 2, 0);
 		const char *resId = luaL_checkstring(L, 3);
 
 		auto &pBgm = app->getBgm(setId, resId);
 		app->sound().playBgm(pBgm);
+		return 0;
 	});
-	return 0;
 }
 
 /** @brief BGM 再生を停止する。
@@ -515,12 +637,12 @@ int sound::playBgm(lua_State *L)
  */
 int sound::stopBgm(lua_State *L)
 {
-	exceptToLuaError(L, [L]() {
+	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromSelf<framework::Application>(L, sound_RawFieldName);
 
 		app->sound().stopBgm();
+		return 0;
 	});
-	return 0;
 }
 
 }

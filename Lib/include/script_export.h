@@ -15,7 +15,6 @@
 namespace yappy {
 namespace lua {
 /** @brief C++ から Lua へ公開する関数。(Lua関数仕様)
-* @sa lua::Lua
 */
 namespace export {
 
@@ -26,7 +25,7 @@ namespace export {
 	 * @endcode
 	 * デバッグ出力を本体側のロギングシステムに転送します。
 	 *
-	 * @sa debug
+	 * @sa @ref yappy::debug
 	 */
 	struct trace {
 		static int write(lua_State *L);
@@ -47,10 +46,14 @@ namespace export {
 	 */
 	struct sys {
 		static int include(lua_State *L);
+		static int readFile(lua_State *L);
+		static int writeFile(lua_State *L);
 		sys() = delete;
 	};
 	const luaL_Reg sys_RegList[] = {
-		{ "include",	sys::include },
+		{ "include",	sys::include	},
+		{ "readFile",	sys::readFile	},
+		{ "writeFile",	sys::writeFile	},
 		{ nullptr, nullptr }
 	};
 
@@ -58,12 +61,13 @@ namespace export {
 	 * @details
 	 * 各関数は最初の引数に self オブジェクトが必要です。
 	 * リソースはリソースセットID(整数)とリソースID(文字列)で識別されます。
-	 * 何らかの初期化関数の引数としてテーブルが渡されます(今のところ)。
-	 * その中でリソースを登録した後、C++側で
-	 * framework::Application::loadResourceSet()
+	 * リソースの登録は @ref yappy::framework::Application::sealResource() で
+	 * 許可されている間にしかできません(違反するとエラーが発生します)。
+	 * リソースを登録した後、C++側で
+	 * @ref yappy::framework::Application::loadResourceSet()
 	 * を呼ぶとリソースが使用可能になります。
-	 * @sa framework::Application
-	 * @sa framework::ResourceManager
+	 * @sa @ref yappy::framework::Application
+	 * @sa @ref yappy::framework::ResourceManager
 	 */
 	struct resource {
 		static int addTexture(lua_State *L);
@@ -88,8 +92,8 @@ namespace export {
 	 * 各関数は最初の引数に self オブジェクトが必要です。
 	 * 描画するテクスチャリソースはリソースセットID(整数)とリソースID(文字列)で
 	 * 指定します。
-	 * @sa lua::export::resource
-	 * @sa graphics::DGraphics
+	 * @sa @ref yappy::lua::export::resource
+	 * @sa @ref yappy::graphics::DGraphics
 	 */
 	struct graph {
 		static int getTextureSize(lua_State *L);
@@ -111,8 +115,8 @@ namespace export {
 	 * sound = {};
 	 * @endcode
 	 * 各関数は最初の引数に self オブジェクトが必要です。
-	 * @sa lua::export::resource
-	 * @sa sound::XAudio2
+	 * @sa @ref yappy::lua::export::resource
+	 * @sa @ref yappy::sound::XAudio2
 	 */
 	struct sound {
 		static int playSe(lua_State *L);
