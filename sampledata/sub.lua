@@ -11,6 +11,9 @@ trace.write("---takenoko.txt (3 lines)---");
 trace.write(a, b, c);
 trace.write("---takenoko.txt END---");
 
+local list = { "hokuto", "basuke", "fatal ko" };
+sys.writeFile("takenoko.txt", table.unpack(list));
+
 local x = { sys.readFile("takenoko.txt") };
 trace.write("---takenoko.txt (all)---");
 for i = 1, #x do

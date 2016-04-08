@@ -204,7 +204,7 @@ int sys::include(lua_State *L)
  * @details
  * @code
  * function sys.readFile(str fileName)
- * 	return str line1, str line2, ...;
+ * 	return ...;
  * end
  * @endcode
  * テキストファイルを読みます。
@@ -228,7 +228,7 @@ int sys::include(lua_State *L)
  * @endcode
  *
  * @param[in] fileName	ファイル名
- * @return				1行ごとの内容
+ * @return				各行の内容
  */
 int sys::readFile(lua_State *L)
 {
@@ -274,10 +274,51 @@ int sys::readFile(lua_State *L)
 	});
 }
 
+/** @brief ファイルを書く。
+ * @details
+ * @code
+ * function sys.writeFile(str fileName, ...)
+ * end
+ * @endcode
+ * テキストファイルを書き込みます。
+ * ファイルのオープンや書き込みに失敗した場合、エラーを発生させます。
+ * @code
+ * -- 数値は文字列に自動で変換される
+ * sys.writeFile("savedata.txt", "NoName", 1, 255);
+ * local name, stage, hp = sys.readFile("savedata.txt");
+ * -- リストを可変個の値に変換するには table.unpack() を使う
+ * local list = { "NoName", 1, 255 };
+ * sys.writeFile("savedata.txt", table.unpack(list));
+ * @endcode
+ *
+ * @warning 文字列に含まれる改行をチェックしません。
+ * @ref readFile() との整合性が崩れるので注意してください。
+ *
+ * @param[in] fileName	ファイル名
+ * @param[in] ...		各行の内容
+ * @return				なし
+ */
 int sys::writeFile(lua_State *L)
 {
-	luaL_error(L, "not implemented...");
-	return 0;
+	return exceptToLuaError(L, [L]() {
+		const char *fileName = luaL_checkstring(L, 1);
+
+		FILE *tmpfp = nullptr;
+		errno_t err = ::fopen_s(&tmpfp, fileName, "w");
+		if (err != 0) {
+			luaL_error(L, "File open error: %s, %d", fileName, err);
+		}
+
+		util::FilePtr fp(tmpfp);
+		int argc = lua_gettop(L);
+		for (int i = 2; i <= argc; i++) {
+			// if lua error, destruct fp and throw
+			const char *line = luaL_checkstring(L, i);
+			std::fputs(line, fp.get());
+			std::fputc('\n', fp.get());
+		}
+		return 0;
+	});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
