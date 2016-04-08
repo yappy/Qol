@@ -150,7 +150,7 @@ void Lua::loadSysLib()
 {
 	lua_State *L = m_lua.get();
 	luaL_newlibtable(L, export::trace_RegList);
-	// upvalue[1]: Lua *this
+	// upvalue[1]: Lua *
 	lua_pushlightuserdata(L, this);
 	luaL_setfuncs(L, export::sys_RegList, 1);
 	lua_setglobal(L, "sys");
@@ -159,30 +159,30 @@ void Lua::loadSysLib()
 void Lua::loadResourceLib(framework::Application *app)
 {
 	lua_State *L = m_lua.get();
-	luaL_newlib(L, export::resource_RegList);
-	lua_pushstring(L, export::resource_RawFieldName);
+	luaL_newlibtable(L, export::resource_RegList);
+	// upvalue[1]: Application *
 	lua_pushlightuserdata(L, app);
-	lua_settable(L, -3);
+	luaL_setfuncs(L, export::resource_RegList, 1);
 	lua_setglobal(L, "resource");
 }
 
 void Lua::loadGraphLib(framework::Application *app)
 {
 	lua_State *L = m_lua.get();
-	luaL_newlib(L, export::graph_RegList);
-	lua_pushstring(L, export::graph_RawFieldName);
+	luaL_newlibtable(L, export::graph_RegList);
+	// upvalue[1]: Application *
 	lua_pushlightuserdata(L, app);
-	lua_settable(L, -3);
+	luaL_setfuncs(L, export::graph_RegList, 1);
 	lua_setglobal(L, "graph");
 }
 
 void Lua::loadSoundLib(framework::Application *app)
 {
 	lua_State *L = m_lua.get();
-	luaL_newlib(L, export::sound_RegList);
-	lua_pushstring(L, export::sound_RawFieldName);
+	luaL_newlibtable(L, export::sound_RegList);
+	// upvalue[1]: Application *
 	lua_pushlightuserdata(L, app);
-	lua_settable(L, -3);
+	luaL_setfuncs(L, export::sound_RegList, 1);
 	lua_setglobal(L, "sound");
 }
 
