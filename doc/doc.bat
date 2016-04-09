@@ -3,5 +3,3 @@ set DOXYGEN=%TOOL_DIR%doxygen
 
 call clean.bat
 %DOXYGEN%
-
-pause
