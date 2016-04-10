@@ -4,6 +4,9 @@
 ## 公式サイトができました(笑)
 http://yappy.github.io/Qol
 
+## 公式wikiができました＾＾
+https://github.com/yappy/Qol/wiki
+
 
 ## 開発環境
 * Visual Studio 2015 Community

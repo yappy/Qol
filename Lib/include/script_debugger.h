@@ -10,7 +10,7 @@ namespace debugger {
 
 /** @brief Lua debugger.
  * @details Used in @ref Lua class.
- * @sa Lua
+ * @sa @ref yappy::lua::Lua
  */
 class LuaDebugger : private util::noncopyable {
 public:
