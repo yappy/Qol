@@ -227,9 +227,10 @@ void XAudio2::processFrameSe()
 }
 
 
-XAudio2::BgmResourcePtr XAudio2::loadBgm(const wchar_t *path)
+XAudio2::BgmResourcePtr XAudio2::loadBgm(
+	const wchar_t *path, uint64_t loopPoint)
 {
-	auto res = std::make_shared<Bgm>(file::loadFile(path));
+	auto res = std::make_shared<Bgm>(file::loadFile(path), loopPoint);
 	return res;
 }
 
@@ -312,8 +313,7 @@ void XAudio2::processFrameBgm()
 		readSum += size;
 		if (size == 0) {
 			// stream end; seek to loop point
-			// TODO: loop point
-			int ret = ::ov_time_seek(fp, 0.0);
+			int ret = ::ov_pcm_seek(fp, m_playingBgm->getLoopPoint());
 			if (ret < 0) {
 				throwTrace<OggVorbisError>("ov_time_seek() failed", ret);
 			}
@@ -332,9 +332,10 @@ void XAudio2::processFrameBgm()
 }
 
 
-Bgm::Bgm(file::Bytes &&ovFileBin) :
+Bgm::Bgm(file::Bytes &&ovFileBin, uint64_t loopPoint) :
 	m_ovFileBin(ovFileBin),
-	m_readPos(0)
+	m_readPos(0),
+	m_loopPoint(loopPoint)
 {
 	// ovfile open (set m_ovFile)
 	ov_callbacks callbacks = { read, seek, close, tell };

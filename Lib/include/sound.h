@@ -58,10 +58,11 @@ struct SoundEffect : private util::noncopyable {
 struct Bgm : private util::noncopyable {
 	using OggFilePtr = std::unique_ptr<OggVorbis_File, oggFileDeleter>;
 
-	Bgm(file::Bytes &&ovFileBin);
+	Bgm(file::Bytes &&ovFileBin, uint64_t loopPoint);
 	~Bgm() = default;
 
 	OggVorbis_File *ovFp() const { return m_ovFp.get(); }
+	uint64_t getLoopPoint() const { return m_loopPoint; }
 
 private:
 	file::Bytes m_ovFileBin;
@@ -69,6 +70,9 @@ private:
 	OggVorbis_File m_ovFile;
 	// for public interface (auto close pointer to m_ovFile)
 	OggFilePtr m_ovFp;
+
+	uint64_t m_loopPoint;
+
 	// for OggVorbis_File callback (datasource == this)
 	static size_t read(void *ptr, size_t size, size_t nmemb, void *datasource);
 	static int seek(void *datasource, int64_t offset, int whence);
@@ -129,7 +133,7 @@ public:
 	 * @return				shared_ptr to BGM resource.
 	 * @sa @ref yappy::file
 	 */
-	BgmResourcePtr loadBgm(const wchar_t *path);
+	BgmResourcePtr loadBgm(const wchar_t *path, uint64_t loopPoint = 0));
 
 	/**@brief Starts playing a BGM.
 	 * @details
