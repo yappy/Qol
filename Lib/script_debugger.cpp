@@ -553,7 +553,24 @@ int evalNewIndex(lua_State *L)
 
 int evalPairs(lua_State *L)
 {
-	return luaL_error(L, "pairs not implemented...");
+	// param[1] = eval_ENV
+	// return next, table, nil
+	// upvalue[1] = orig _ENV, upvalue[2] = lua_Debug *
+	ASSERT(lua_istable(L, lua_upvalueindex(1)));
+	ASSERT(lua_islightuserdata(L, lua_upvalueindex(2)));
+	auto *ar = static_cast<lua_Debug *>(
+		lua_touserdata(L, lua_upvalueindex(2)));
+	ASSERT(ar != nullptr);
+	
+	lua_settop(L, 0);
+	// orig_ENV["next"]
+	lua_pushliteral(L, "next");
+	lua_gettable(L, lua_upvalueindex(1));
+	// orig_ENV
+	lua_pushvalue(L, lua_upvalueindex(1));
+	// nil
+	lua_pushnil(L);
+	return 3;
 }
 }	// namespace
 
