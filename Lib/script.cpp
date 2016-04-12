@@ -251,6 +251,7 @@ std::vector<std::string> luaValueToStrList(lua_State *L, int ind, int maxDepth, 
 		str += valstr;
 		result.emplace_back(std::move(str));
 	}
+	// TODO: use __pairs()
 	if (type == LUA_TTABLE && depth < maxDepth) {
 		lua_pushnil(L);
 		while (lua_next(L, tind) != 0) {

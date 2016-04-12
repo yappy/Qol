@@ -550,6 +550,11 @@ int evalNewIndex(lua_State *L)
 {
 	return luaL_error(L, "new index");
 }
+
+int evalPairs(lua_State *L)
+{
+	return luaL_error(L, "pairs not implemented...");
+}
 }	// namespace
 
 void LuaDebugger::pushLocalEnv(lua_Debug *ar, int frameNo)
@@ -586,7 +591,15 @@ void LuaDebugger::pushLocalEnv(lua_Debug *ar, int frameNo)
 	lua_getglobal(L, "_G");
 	// upvalue[2] = lua_Debug
 	lua_pushlightuserdata(L, ar);
-	lua_pushcclosure(L, evalIndex, 2);
+	lua_pushcclosure(L, evalNewIndex, 2);
+	lua_settable(L, -3);
+
+	lua_pushliteral(L, "__pairs");
+	// upvalue[1] = orig _ENV
+	lua_getglobal(L, "_G");
+	// upvalue[2] = lua_Debug
+	lua_pushlightuserdata(L, ar);
+	lua_pushcclosure(L, evalPairs, 2);
 	lua_settable(L, -3);
 
 	lua_setmetatable(L, -2);
