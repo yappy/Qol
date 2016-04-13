@@ -218,7 +218,8 @@ void Lua::pcallInternal(int narg, int nret, bool autoBreak)
 	m_dbg->pcall(narg, nret, autoBreak);
 }
 
-std::vector<std::string> luaValueToStrList(lua_State *L, int ind, int maxDepth, int depth)
+std::vector<std::string> luaValueToStrList(lua_State *L, int ind,
+	int maxDepth, int depth, int indent, char kind, int kindIndent)
 {
 	std::vector<std::string> result;
 
@@ -242,8 +243,13 @@ std::vector<std::string> luaValueToStrList(lua_State *L, int ind, int maxDepth, 
 
 	{
 		std::string str;
-		for (int i = 0; i < depth; i++) {
-			str += "    ";
+		for (int i = 0; i < indent; i++) {
+			if (i == kindIndent) {
+				str += kind;
+			}
+			else {
+				str += ' ';
+			}
 		}
 		str += "(";
 		str += typestr;
@@ -251,18 +257,49 @@ std::vector<std::string> luaValueToStrList(lua_State *L, int ind, int maxDepth, 
 		str += valstr;
 		result.emplace_back(std::move(str));
 	}
-	// TODO: use __pairs()
+	// table recursive call
 	if (type == LUA_TTABLE && depth < maxDepth) {
-		lua_pushnil(L);
-		while (lua_next(L, tind) != 0) {
+		// call pairs(table)
+		// __pairs(table) or
+		// next, table, nil
+		lua_getglobal(L, "pairs");
+		lua_pushvalue(L, tind);
+		lua_call(L, 1, 3);
+
+		// initially: next, table, key=nil
+		// save next and table
+		int nextInd = lua_absindex(L, -3);
+		int tableInd = lua_absindex(L, -2);
+		// stack top is key=nil
+		while (1) {
+			// call next(table, key)
+			lua_pushvalue(L, nextInd);
+			lua_pushvalue(L, tableInd);
+			lua_pushvalue(L, -3);
+			// next, table, key, [next, table, key]
+			lua_call(L, 2, 2);
+			// next, table, key, [newkey, val]
+
+			// end
+			if (lua_isnil(L, -1)) {
+				lua_pop(L, 2);
+				break;
+			}
+
 			// key:-2, value:-1
-			auto key = luaValueToStrList(L, -2, maxDepth, depth + 1);
-			auto val = luaValueToStrList(L, -1, maxDepth, depth + 1);
+			auto key = luaValueToStrList(L, -2, maxDepth, depth + 1, indent + 4, 'K', indent);
+			auto val = luaValueToStrList(L, -1, maxDepth, depth + 1, indent + 4, 'V', indent);
 			result.insert(result.end(), key.begin(), key.end());
 			result.insert(result.end(), val.begin(), val.end());
-			// pop value, keep key
+			// pop value, keep key stack top
+			// next, table, key, newkey
 			lua_pop(L, 1);
+			// replace old key with new key
+			// next, table, newkey
+			lua_replace(L, -2);
 		}
+		// next, table, newkey => none
+		lua_pop(L, 3);
 	}
 	return result;
 }

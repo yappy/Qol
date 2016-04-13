@@ -563,6 +563,7 @@ int evalPairs(lua_State *L)
 	ASSERT(ar != nullptr);
 	
 	lua_settop(L, 0);
+	// return next, table, nil
 	// orig_ENV["next"]
 	lua_pushliteral(L, "next");
 	lua_gettable(L, lua_upvalueindex(1));

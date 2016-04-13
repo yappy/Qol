@@ -123,7 +123,7 @@ private:
 };
 
 std::vector<std::string> luaValueToStrList(lua_State *L, int ind,
-	int maxDepth = 0, int depth = 0);
+	int maxDepth, int depth = 0, int indent = 0, char kind = '\0', int kindIndent = 0);
 
 }
 }
