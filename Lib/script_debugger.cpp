@@ -697,7 +697,7 @@ void LuaDebugger::printEval(const std::string &expr)
 
 		int retLast = lua_gettop(L);
 		if (retBase > retLast) {
-			debug::writeLine(L"No return values");
+			debug::writeLine(L"OK (No return values)");
 		}
 		else {
 			for (int i = retBase; i <= retLast; i++) {
@@ -900,7 +900,7 @@ bool LuaDebugger::eval(const wchar_t *usage, const std::vector<std::wstring> &ar
 
 	lua_State *L = m_L;
 
-	// "return" <args...> ";"
+	// concat args[1]..[n-1]
 	std::wstring wsrc;
 	for (const auto &str : args) {
 		wsrc += str;
