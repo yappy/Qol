@@ -562,15 +562,9 @@ int evalPairs(lua_State *L)
 		lua_touserdata(L, lua_upvalueindex(2)));
 	ASSERT(ar != nullptr);
 	
-	lua_settop(L, 0);
-	// return next, table, nil
-	// orig_ENV["next"]
-	lua_pushliteral(L, "next");
-	lua_gettable(L, lua_upvalueindex(1));
-	// orig_ENV
+	lua_getglobal(L, "pairs");
 	lua_pushvalue(L, lua_upvalueindex(1));
-	// nil
-	lua_pushnil(L);
+	lua_call(L, 1, 3);
 	return 3;
 }
 }	// namespace
