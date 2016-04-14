@@ -466,7 +466,7 @@ void LuaDebugger::printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoN
 		while ((name = lua_getlocal(L, ar, n)) != nullptr) {
 			if (!skipNoName || name[0] != '(') {
 				debug::writef_nonl("[%3d] %s = ", n, name);
-				for (const auto &val : luaValueToStrList(L, -1, maxDepth, 0)) {
+				for (const auto &val : luaValueToStrList(L, -1, maxDepth)) {
 					debug::writeLine(val.c_str());
 				}
 			}
@@ -483,7 +483,7 @@ void LuaDebugger::printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoN
 		debug::writeLine(L"Upvalues:");
 		while ((name = lua_getupvalue(L, -1, n)) != nullptr) {
 			debug::writef_nonl("[%3d] %s = ", n, name);
-			for (const auto &val : luaValueToStrList(L, -1, maxDepth, 0)) {
+			for (const auto &val : luaValueToStrList(L, -1, maxDepth)) {
 				debug::writeLine(val.c_str());
 			}
 			// pop value

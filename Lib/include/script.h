@@ -122,8 +122,8 @@ private:
 	void pcallInternal(int narg, int nret, bool autoBreak);
 };
 
-std::vector<std::string> luaValueToStrList(lua_State *L, int ind,
-	int maxDepth, int depth = 0, int indent = 0, char kind = '\0', int kindIndent = 0);
+std::vector<std::string> luaValueToStrList(
+	lua_State *L, int ind, int maxDepth);
 
 }
 }

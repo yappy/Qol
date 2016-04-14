@@ -218,8 +218,13 @@ void Lua::pcallInternal(int narg, int nret, bool autoBreak)
 	m_dbg->pcall(narg, nret, autoBreak);
 }
 
-std::vector<std::string> luaValueToStrList(lua_State *L, int ind,
-	int maxDepth, int depth, int indent, char kind, int kindIndent)
+
+namespace {
+
+std::vector<std::string> luaValueToStrListInternal(
+	lua_State *L, int ind, int maxDepth,
+	int depth, int indent, char kind, int kindIndent,
+	std::vector<const void *> visitedTable)
 {
 	std::vector<std::string> result;
 
@@ -286,11 +291,25 @@ std::vector<std::string> luaValueToStrList(lua_State *L, int ind,
 				break;
 			}
 
+			auto visited = [&visitedTable, L](int ind) -> bool {
+				return std::find(visitedTable.cbegin(), visitedTable.cend(),
+					lua_topointer(L, -2)) != visitedTable.cend();
+			};
 			// key:-2, value:-1
-			auto key = luaValueToStrList(L, -2, maxDepth, depth + 1, indent + 4, 'K', indent);
-			auto val = luaValueToStrList(L, -1, maxDepth, depth + 1, indent + 4, 'V', indent);
-			result.insert(result.end(), key.begin(), key.end());
-			result.insert(result.end(), val.begin(), val.end());
+			if (!visited(-2)) {
+				visitedTable.emplace_back(lua_topointer(L, -2));
+				auto key = luaValueToStrListInternal(
+					L, -2, maxDepth, depth + 1, indent + 4, 'K', indent, visitedTable);
+				result.insert(result.end(), key.begin(), key.end());
+				visitedTable.pop_back();
+			}
+			if (!visited(-1)) {
+				visitedTable.emplace_back(lua_topointer(L, -1));
+				auto val = luaValueToStrListInternal(
+					L, -1, maxDepth, depth + 1, indent + 4, 'V', indent, visitedTable);
+				result.insert(result.end(), val.begin(), val.end());
+				visitedTable.pop_back();
+			}
 			// pop value, keep key stack top
 			// next, table, key, newkey
 			lua_pop(L, 1);
@@ -302,6 +321,15 @@ std::vector<std::string> luaValueToStrList(lua_State *L, int ind,
 		lua_pop(L, 3);
 	}
 	return result;
+}
+
+}	// namespace
+
+std::vector<std::string> luaValueToStrList(
+	lua_State *L, int ind, int maxDepth)
+{
+	return luaValueToStrListInternal(L, ind, maxDepth, 0, 0, '\0', 0,
+		std::vector<const void *>());
 }
 
 }
