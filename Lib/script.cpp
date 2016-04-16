@@ -112,7 +112,8 @@ Lua::Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize,
 	}
 	m_lua.reset(tmpLua);
 
-	m_dbg = std::make_unique<debugger::LuaDebugger>(m_lua.get(), debugEnable, instLimit);
+	m_dbg = std::make_unique<debugger::LuaDebugger>(
+		m_lua.get(), debugEnable, instLimit, maxHeapSize);
 
 	debug::writeLine("Initializing lua OK");
 

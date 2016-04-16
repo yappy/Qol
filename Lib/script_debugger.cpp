@@ -65,8 +65,8 @@ void forAllValidLines(lua_State *L, F callback)
 
 }	// namespace
 
-LuaDebugger::LuaDebugger(lua_State *L, bool debugEnable, int instLimit) :
-	m_L(L), m_debugEnable(debugEnable), m_instLimit(instLimit)
+LuaDebugger::LuaDebugger(lua_State *L, bool debugEnable, int instLimit, size_t heapSize) :
+	m_L(L), m_debugEnable(debugEnable), m_instLimit(instLimit), m_heapSize(heapSize)
 {
 	extra(L).dbg = this;
 }
