@@ -466,7 +466,7 @@ void LuaDebugger::printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoN
 		while ((name = lua_getlocal(L, ar, n)) != nullptr) {
 			if (!skipNoName || name[0] != '(') {
 				debug::writef_nonl("[%3d] %s = ", n, name);
-				for (const auto &val : luaValueToStrList(L, -1, maxDepth, 0)) {
+				for (const auto &val : luaValueToStrList(L, -1, maxDepth)) {
 					debug::writeLine(val.c_str());
 				}
 			}
@@ -483,7 +483,7 @@ void LuaDebugger::printLocalAndUpvalue(lua_Debug *ar, int maxDepth, bool skipNoN
 		debug::writeLine(L"Upvalues:");
 		while ((name = lua_getupvalue(L, -1, n)) != nullptr) {
 			debug::writef_nonl("[%3d] %s = ", n, name);
-			for (const auto &val : luaValueToStrList(L, -1, maxDepth, 0)) {
+			for (const auto &val : luaValueToStrList(L, -1, maxDepth)) {
 				debug::writeLine(val.c_str());
 			}
 			// pop value
@@ -548,7 +548,71 @@ int evalIndex(lua_State *L)
 
 int evalNewIndex(lua_State *L)
 {
-	return luaL_error(L, "new index");
+	// param[1] = table, param[2] = key, param[3] = value
+	// upvalue[1] = orig _ENV, upvalue[2] = lua_Debug *
+	ASSERT(lua_istable(L, lua_upvalueindex(1)));
+	ASSERT(lua_islightuserdata(L, lua_upvalueindex(2)));
+	auto *ar = static_cast<lua_Debug *>(
+		lua_touserdata(L, lua_upvalueindex(2)));
+	ASSERT(ar != nullptr);
+
+	if (lua_isstring(L, 2)) {
+		const char *key = lua_tostring(L, 2);
+		// (1) local variables
+		{
+			int n = 1;
+			const char *name = nullptr;
+			while ((name = lua_getlocal(L, ar, n)) != nullptr) {
+				if (name[0] != '(' && std::strcmp(key, name) == 0) {
+					lua_pushvalue(L, 3);
+					lua_setlocal(L, ar, n);
+					return 0;
+				}
+				lua_pop(L, 1);
+				n++;
+			}
+		}
+		// (2) upvalues
+		{
+			// push current frame function
+			lua_getinfo(L, "f", ar);
+			int n = 1;
+			const char *name = nullptr;
+			while ((name = lua_getupvalue(L, -1, n)) != nullptr) {
+				if (std::strcmp(key, name) == 0) {
+					lua_pushvalue(L, 3);
+					lua_setlocal(L, ar, n);
+					return 0;
+				}
+				lua_pop(L, 1);
+				n++;
+			}
+			// pop function
+			lua_pop(L, 1);
+		}
+	}
+	// (3) _ENV[key] = value
+	lua_pushvalue(L, 2);
+	lua_pushvalue(L, 3);
+	lua_settable(L, lua_upvalueindex(1));
+	return 0;
+}
+
+int evalPairs(lua_State *L)
+{
+	// param[1] = eval_ENV
+	// return next, table, nil
+	// upvalue[1] = orig _ENV, upvalue[2] = lua_Debug *
+	ASSERT(lua_istable(L, lua_upvalueindex(1)));
+	ASSERT(lua_islightuserdata(L, lua_upvalueindex(2)));
+	auto *ar = static_cast<lua_Debug *>(
+		lua_touserdata(L, lua_upvalueindex(2)));
+	ASSERT(ar != nullptr);
+	
+	lua_getglobal(L, "pairs");
+	lua_pushvalue(L, lua_upvalueindex(1));
+	lua_call(L, 1, 3);
+	return 3;
 }
 }	// namespace
 
@@ -586,7 +650,15 @@ void LuaDebugger::pushLocalEnv(lua_Debug *ar, int frameNo)
 	lua_getglobal(L, "_G");
 	// upvalue[2] = lua_Debug
 	lua_pushlightuserdata(L, ar);
-	lua_pushcclosure(L, evalIndex, 2);
+	lua_pushcclosure(L, evalNewIndex, 2);
+	lua_settable(L, -3);
+
+	lua_pushliteral(L, "__pairs");
+	// upvalue[1] = orig _ENV
+	lua_getglobal(L, "_G");
+	// upvalue[2] = lua_Debug
+	lua_pushlightuserdata(L, ar);
+	lua_pushcclosure(L, evalPairs, 2);
 	lua_settable(L, -3);
 
 	lua_setmetatable(L, -2);
@@ -597,9 +669,17 @@ void LuaDebugger::printEval(const std::string &expr)
 	lua_State *L = m_L;
 	try {
 		// load str and push function
-		int ret = luaL_loadstring(L, expr.c_str());
+		// try "return <expr>;"
+		std::string addret("return ");
+		addret += expr;
+		addret += ';';
+		int ret = luaL_loadstring(L, addret.c_str());
 		if (ret != LUA_OK) {
-			throw LuaError("load failed", L);
+			// try "<expr>"
+			ret = luaL_loadstring(L, expr.c_str());
+			if (ret != LUA_OK) {
+				throw LuaError("load failed", L);
+			}
 		}
 
 		lua_Debug ar = { 0 };
@@ -617,7 +697,7 @@ void LuaDebugger::printEval(const std::string &expr)
 
 		int retLast = lua_gettop(L);
 		if (retBase > retLast) {
-			debug::writeLine(L"No return values");
+			debug::writeLine(L"OK (No return values)");
 		}
 		else {
 			for (int i = retBase; i <= retLast; i++) {
@@ -641,10 +721,7 @@ void LuaDebugger::printWatchList()
 	int i = 0;
 	for (const auto &expr : m_watchList) {
 		debug::writef("[%d]%s", i, expr.c_str());
-		std::string src("return");
-		src += expr;
-		src += ";";
-		printEval(src);
+		printEval(expr);
 		i++;
 	}
 }
@@ -823,13 +900,12 @@ bool LuaDebugger::eval(const wchar_t *usage, const std::vector<std::wstring> &ar
 
 	lua_State *L = m_L;
 
-	// "return" <args...> ";"
-	std::wstring wsrc(L"return");
+	// concat args[1]..[n-1]
+	std::wstring wsrc;
 	for (const auto &str : args) {
-		wsrc += L' ';
 		wsrc += str;
+		wsrc += L' ';
 	}
-	wsrc += L";";
 	auto src = util::wc2utf8(wsrc.c_str());
 
 	printEval(src.get());
