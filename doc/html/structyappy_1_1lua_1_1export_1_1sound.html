@@ -121,11 +121,11 @@ Static Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>音声再生関連関数。<b>sound</b>グローバルテーブルに提供。 </p>
-<div class="fragment"><div class="line"><a class="code" href="structyappy_1_1lua_1_1export_1_1sound.html#aafdb5ee7b71bd93f020a4c432e9aea3b">sound</a> = {};</div></div><!-- fragment --><p> 各関数は最初の引数に self オブジェクトが必要です。 </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="structyappy_1_1lua_1_1export_1_1resource.html">yappy::lua::export::resource</a> </dd>
+<div class="fragment"><div class="line"><a class="code" href="structyappy_1_1lua_1_1export_1_1sound.html#aafdb5ee7b71bd93f020a4c432e9aea3b">sound</a> = {};</div></div><!-- fragment --> <dl class="section see"><dt>See also</dt><dd><a class="el" href="structyappy_1_1lua_1_1export_1_1resource.html">yappy::lua::export::resource</a> </dd>
 <dd>
 <a class="el" href="classyappy_1_1sound_1_1XAudio2.html">yappy::sound::XAudio2</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8h_source.html#l00119">119</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8h_source.html#l00116">116</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="aafdb5ee7b71bd93f020a4c432e9aea3b"></a>
 <div class="memitem">
@@ -174,7 +174,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>BGM 再生を開始する。 </p>
-<div class="fragment"><div class="line"><span class="keyword">function</span> <a class="code" href="structyappy_1_1lua_1_1export_1_1sound.html#aafdb5ee7b71bd93f020a4c432e9aea3b">sound</a>:<a class="code" href="structyappy_1_1lua_1_1export_1_1sound.html#a2221aa3761e42192a6ac041a430a23da">playBgm</a>(<span class="keywordtype">int</span> setId, str resId)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+<div class="fragment"><div class="line"><span class="keyword">function</span> <a class="code" href="structyappy_1_1lua_1_1export_1_1sound.html#aafdb5ee7b71bd93f020a4c432e9aea3b">sound</a>.playBgm(<span class="keywordtype">int</span> setId, str resId)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">setId</td><td>リソースセットID(整数値) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">resId</td><td>リソースID(文字列) </td></tr>
@@ -210,7 +210,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>効果音再生を開始する。 </p>
-<div class="fragment"><div class="line"><span class="keyword">function</span> <a class="code" href="structyappy_1_1lua_1_1export_1_1sound.html#aafdb5ee7b71bd93f020a4c432e9aea3b">sound</a>:<a class="code" href="structyappy_1_1lua_1_1export_1_1sound.html#a0f900d16f4e5ef1b65bcb846639ad3e6">playSe</a>(<span class="keywordtype">int</span> setId, str resId)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+<div class="fragment"><div class="line"><span class="keyword">function</span> <a class="code" href="structyappy_1_1lua_1_1export_1_1sound.html#aafdb5ee7b71bd93f020a4c432e9aea3b">sound</a>.playSe(<span class="keywordtype">int</span> setId, str resId)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">setId</td><td>リソースセットID(整数値) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">resId</td><td>リソースID(文字列) </td></tr>
@@ -246,7 +246,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>BGM 再生を停止する。 </p>
-<div class="fragment"><div class="line"><span class="keyword">function</span> <a class="code" href="structyappy_1_1lua_1_1export_1_1sound.html#aafdb5ee7b71bd93f020a4c432e9aea3b">sound</a>:<a class="code" href="structyappy_1_1lua_1_1export_1_1sound.html#a4247ae4887e997ef0553f0f0b8054eba">stopBgm</a>()</div><div class="line">end</div></div><!-- fragment --><dl class="section return"><dt>Returns</dt><dd>なし </dd></dl>
+<div class="fragment"><div class="line"><span class="keyword">function</span> <a class="code" href="structyappy_1_1lua_1_1export_1_1sound.html#aafdb5ee7b71bd93f020a4c432e9aea3b">sound</a>.stopBgm()</div><div class="line">end</div></div><!-- fragment --><dl class="section return"><dt>Returns</dt><dd>なし </dd></dl>
 
 <p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00623">623</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
 

@@ -118,11 +118,11 @@ Static Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>使用リソース登録関数。 </p>
-<p>各関数は最初の引数に self オブジェクトが必要です。 リソースはリソースセットID(整数)とリソースID(文字列)で識別されます。 リソースの登録は <a class="el" href="classyappy_1_1framework_1_1Application.html#ad13c563cd327285f8f874a9650e2568f">yappy::framework::Application::sealResource()</a> で 許可されている間にしかできません(違反するとエラーが発生します)。 リソースを登録した後、C++側で <a class="el" href="classyappy_1_1framework_1_1Application.html#a549766f52580383dd1db56e190a21017">yappy::framework::Application::loadResourceSet()</a> を呼ぶとリソースが使用可能になります。 </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classyappy_1_1framework_1_1Application.html">yappy::framework::Application</a> </dd>
+<p>リソースはリソースセットID(整数)とリソースID(文字列)で識別されます。 リソースの登録は <a class="el" href="classyappy_1_1framework_1_1Application.html#ad13c563cd327285f8f874a9650e2568f">yappy::framework::Application::sealResource()</a> で 許可されている間にしかできません(違反するとエラーが発生します)。 リソースを登録した後、C++側で <a class="el" href="classyappy_1_1framework_1_1Application.html#a549766f52580383dd1db56e190a21017">yappy::framework::Application::loadResourceSet()</a> を呼ぶとリソースが使用可能になります。 </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classyappy_1_1framework_1_1Application.html">yappy::framework::Application</a> </dd>
 <dd>
 <a class="el" href="classyappy_1_1framework_1_1ResourceManager.html">yappy::framework::ResourceManager</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8h_source.html#l00072">72</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8h_source.html#l00071">71</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a19bfa109a90ef2f9697c38f3acb78101"></a>
 <div class="memitem">
@@ -147,7 +147,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>BGMリソースを登録する。 </p>
-<div class="fragment"><div class="line"><span class="keyword">function</span> resource:<a class="code" href="structyappy_1_1lua_1_1export_1_1resource.html#a19bfa109a90ef2f9697c38f3acb78101">addBgm</a>(<span class="keywordtype">int</span> setId, str resId, str path)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+<div class="fragment"><div class="line"><span class="keyword">function</span> resource.addBgm(<span class="keywordtype">int</span> setId, str resId, str path)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">setId</td><td>リソースセットID(整数値) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">resId</td><td>リソースID(文字列) </td></tr>
@@ -184,7 +184,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>フォントリソースを登録する。 </p>
-<div class="fragment"><div class="line"><span class="keyword">function</span> resource:<a class="code" href="structyappy_1_1lua_1_1export_1_1resource.html#a617b74379aceeafd5eee7abc0c6db3a8">addFont</a>(<span class="keywordtype">int</span> setId, str resId, str path)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+<div class="fragment"><div class="line"><span class="keyword">function</span> resource.addFont(<span class="keywordtype">int</span> setId, str resId, str path)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">setId</td><td>リソースセットID(整数値) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">resId</td><td>リソースID(文字列) </td></tr>
@@ -221,7 +221,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>効果音リソースを登録する。 </p>
-<div class="fragment"><div class="line"><span class="keyword">function</span> resource:<a class="code" href="structyappy_1_1lua_1_1export_1_1resource.html#a17ed3050f239760dde19fd88d6a5ef49">addSe</a>(<span class="keywordtype">int</span> setId, str resId, str path)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+<div class="fragment"><div class="line"><span class="keyword">function</span> resource.addSe(<span class="keywordtype">int</span> setId, str resId, str path)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">setId</td><td>リソースセットID(整数値) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">resId</td><td>リソースID(文字列) </td></tr>
@@ -258,7 +258,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>テクスチャリソースを登録する。 </p>
-<div class="fragment"><div class="line"><span class="keyword">function</span> resource:<a class="code" href="structyappy_1_1lua_1_1export_1_1resource.html#a795078e7be813928d0553b0efd3573e3">addTexture</a>(<span class="keywordtype">int</span> setId, str resId, str path)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+<div class="fragment"><div class="line"><span class="keyword">function</span> resource.addTexture(<span class="keywordtype">int</span> setId, str resId, str path)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">setId</td><td>リソースセットID(整数値) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">resId</td><td>リソースID(文字列) </td></tr>
