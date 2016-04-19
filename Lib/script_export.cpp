@@ -326,9 +326,9 @@ int resource::addTexture(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
-		int setId = getInt(L, 2, 0);
-		const char *resId = luaL_checkstring(L, 3);
-		const char *path = luaL_checkstring(L, 4);
+		int setId = getInt(L, 1, 0);
+		const char *resId = luaL_checkstring(L, 2);
+		const char *path = luaL_checkstring(L, 3);
 
 		app->addTextureResource(setId, resId, util::utf82wc(path).get());
 		return 0;
@@ -351,13 +351,13 @@ int resource::addFont(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
-		int setId = getInt(L, 2, 0);
-		const char *resId = luaL_checkstring(L, 3);
-		const char *fontName = luaL_checkstring(L, 4);
-		const char *startCharStr = luaL_checkstring(L, 5);
-		luaL_argcheck(L, *startCharStr != '\0', 5, "empty string is NG");
-		const char *endCharStr = luaL_checkstring(L, 6);
-		luaL_argcheck(L, *endCharStr != '\0', 6, "empty string is NG");
+		int setId = getInt(L, 1, 0);
+		const char *resId = luaL_checkstring(L, 2);
+		const char *fontName = luaL_checkstring(L, 3);
+		const char *startCharStr = luaL_checkstring(L, 4);
+		luaL_argcheck(L, *startCharStr != '\0', 4, "empty string is NG");
+		const char *endCharStr = luaL_checkstring(L, 4);
+		luaL_argcheck(L, *endCharStr != '\0', 5, "empty string is NG");
 		int w = getInt(L, 7, 0);
 		int h = getInt(L, 8, 0);
 
@@ -386,9 +386,9 @@ int resource::addSe(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
-		int setId = getInt(L, 2, 0);
-		const char *resId = luaL_checkstring(L, 3);
-		const char *path = luaL_checkstring(L, 4);
+		int setId = getInt(L, 1, 0);
+		const char *resId = luaL_checkstring(L, 2);
+		const char *path = luaL_checkstring(L, 3);
 
 		app->addSeResource(setId, resId, util::utf82wc(path).get());
 		return 0;
@@ -411,9 +411,9 @@ int resource::addBgm(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
-		int setId = getInt(L, 2, 0);
-		const char *resId = luaL_checkstring(L, 3);
-		const char *path = luaL_checkstring(L, 4);
+		int setId = getInt(L, 1, 0);
+		const char *resId = luaL_checkstring(L, 2);
+		const char *path = luaL_checkstring(L, 3);
 
 		app->addBgmResource(setId, resId, util::utf82wc(path).get());
 		return 0;
@@ -441,8 +441,8 @@ int graph::getTextureSize(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
-		int setId = getInt(L, 2, 0);
-		const char *resId = luaL_checkstring(L, 3);
+		int setId = getInt(L, 1, 0);
+		const char *resId = luaL_checkstring(L, 2);
 
 		const auto &pTex = app->getTexture(setId, resId);
 
@@ -488,23 +488,23 @@ int graph::drawTexture(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
-		int setId = getInt(L, 2, 0);
-		const char *resId = luaL_checkstring(L, 3);
-		int dx = getInt(L, 4);
-		int dy = getInt(L, 5);
+		int setId = getInt(L, 1, 0);
+		const char *resId = luaL_checkstring(L, 2);
+		int dx = getInt(L, 3);
+		int dy = getInt(L, 4);
 
-		bool lrInv = lua_toboolean(L, 6) != 0;
-		bool udInv = lua_toboolean(L, 7) != 0;
-		int sx = getOptInt(L, 8, 0);
-		int sy = getOptInt(L, 9, 0);
-		int sw = getOptInt(L, 10, -1);
-		int sh = getOptInt(L, 11, -1);
-		int cx = getOptInt(L, 12, 0);
-		int cy = getOptInt(L, 13, 0);
-		float angle = getOptFloat(L, 14, 0.0f);
-		float scaleX = getOptFloat(L, 15, 1.0f);
-		float scaleY = getOptFloat(L, 16, 1.0f);
-		float alpha = getOptFloat(L, 17, 1.0f);
+		bool lrInv = lua_toboolean(L, 5) != 0;
+		bool udInv = lua_toboolean(L, 6) != 0;
+		int sx = getOptInt(L, 7, 0);
+		int sy = getOptInt(L, 8, 0);
+		int sw = getOptInt(L, 9, -1);
+		int sh = getOptInt(L, 10, -1);
+		int cx = getOptInt(L, 11, 0);
+		int cy = getOptInt(L, 12, 0);
+		float angle = getOptFloat(L, 13, 0.0f);
+		float scaleX = getOptFloat(L, 14, 1.0f);
+		float scaleY = getOptFloat(L, 15, 1.0f);
+		float alpha = getOptFloat(L, 16, 1.0f);
 
 		const auto &pTex = app->getTexture(setId, resId);
 		app->graph().drawTexture(pTex, dx, dy, lrInv, udInv, sx, sy, sw, sh, cx, cy,
@@ -540,17 +540,17 @@ int graph::drawString(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
-		int setId = getInt(L, 2, 0);
-		const char *resId = luaL_checkstring(L, 3);
-		const char *str = luaL_checkstring(L, 4);
-		int dx = getInt(L, 5);
-		int dy = getInt(L, 6);
+		int setId = getInt(L, 1, 0);
+		const char *resId = luaL_checkstring(L, 2);
+		const char *str = luaL_checkstring(L, 3);
+		int dx = getInt(L, 4);
+		int dy = getInt(L, 5);
 
-		int color = getOptInt(L, 7, 0x000000);
-		int ajustX = getOptInt(L, 8, 0);
-		float scaleX = getOptFloat(L, 9, 1.0f);
-		float scaleY = getOptFloat(L, 10, 1.0f);
-		float alpha = getOptFloat(L, 11, 1.0f);
+		int color = getOptInt(L, 6, 0x000000);
+		int ajustX = getOptInt(L, 7, 0);
+		float scaleX = getOptFloat(L, 8, 1.0f);
+		float scaleY = getOptFloat(L, 9, 1.0f);
+		float alpha = getOptFloat(L, 10, 1.0f);
 
 		const auto &pFont = app->getFont(setId, resId);
 		app->graph().drawString(pFont, util::utf82wc(str).get(), dx, dy,
@@ -578,8 +578,8 @@ int sound::playSe(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
-		int setId = getInt(L, 2, 0);
-		const char *resId = luaL_checkstring(L, 3);
+		int setId = getInt(L, 1, 0);
+		const char *resId = luaL_checkstring(L, 2);
 
 		const auto &pSoundEffect = app->getSoundEffect(setId, resId);
 		app->sound().playSoundEffect(pSoundEffect);
@@ -602,8 +602,8 @@ int sound::playBgm(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
 		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
-		int setId = getInt(L, 2, 0);
-		const char *resId = luaL_checkstring(L, 3);
+		int setId = getInt(L, 1, 0);
+		const char *resId = luaL_checkstring(L, 2);
 
 		auto &pBgm = app->getBgm(setId, resId);
 		app->sound().playBgm(pBgm);

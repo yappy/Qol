@@ -18,8 +18,9 @@ public:
 	 * @param[in] L				Lua state.
 	 * @param[in] debugEnable	Debug hook enabled switch.
 	 * @param[in] instLimit		Lua bytecode instruction count limit. (no limit if 0)
+	 * @param[in] heapSize		Heap size for mem command.
 	 */
-	LuaDebugger(lua_State *L, bool debugEnable, int instLimit);
+	LuaDebugger(lua_State *L, bool debugEnable, int instLimit, size_t heapSize);
 
 	/** @brief Get Lua state.
 	 * @return Lua state.
@@ -83,6 +84,7 @@ private:
 	lua_State *m_L;
 	bool m_debugEnable;
 	int m_instLimit;
+	size_t m_heapSize;
 
 	std::unordered_map<std::string, ChunkDebugInfo> m_debugInfo;
 	std::string m_fileNameStr;
