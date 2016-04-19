@@ -313,7 +313,7 @@ int sys::writeFile(lua_State *L)
 /** @brief テクスチャリソースを登録する。
  * @details
  * @code
- * function resource:addTexture(int setId, str resId, str path)
+ * function resource.addTexture(int setId, str resId, str path)
  * end
  * @endcode
  *
@@ -338,7 +338,7 @@ int resource::addTexture(lua_State *L)
 /** @brief フォントリソースを登録する。
  * @details
  * @code
- * function resource:addFont(int setId, str resId, str path)
+ * function resource.addFont(int setId, str resId, str path)
  * end
  * @endcode
  *
@@ -373,7 +373,7 @@ int resource::addFont(lua_State *L)
 /** @brief 効果音リソースを登録する。
  * @details
  * @code
- * function resource:addSe(int setId, str resId, str path)
+ * function resource.addSe(int setId, str resId, str path)
  * end
  * @endcode
  *
@@ -398,7 +398,7 @@ int resource::addSe(lua_State *L)
 /** @brief BGMリソースを登録する。
  * @details
  * @code
- * function resource:addBgm(int setId, str resId, str path)
+ * function resource.addBgm(int setId, str resId, str path)
  * end
  * @endcode
  *
@@ -427,7 +427,7 @@ int resource::addBgm(lua_State *L)
 /** @brief テクスチャのサイズを得る。
  * @details
  * @code
- * function graph:getTextureSize(int setId, str resId)
+ * function graph.getTextureSize(int setId, str resId)
  * 	return w, h;
  * end
  * @endcode
@@ -455,7 +455,7 @@ int graph::getTextureSize(lua_State *L)
 /** @brief テクスチャを描画する。
  * @details
  * @code
- * function graph:drawTexture(int setId, str resId,
+ * function graph.drawTexture(int setId, str resId,
  * 	int dx, int dy, bool lrInv = false, bool udInv = false,
  * 	int sx = 0, int sy = 0, int sw = -1, int sh = -1,
  * 	int cx = 0, int cy = 0, float angle = 0.0f,
@@ -516,7 +516,7 @@ int graph::drawTexture(lua_State *L)
 /** @brief 文字列を描画する。
  * @details
  * @code
- * function graph:drawString(int setId, str resId, str str, int dx, int dy,
+ * function graph.drawString(int setId, str resId, str str, int dx, int dy,
  * 	int color = 0x000000, int ajustX = 0, 
  * 	float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f)
  * end
@@ -566,7 +566,7 @@ int graph::drawString(lua_State *L)
 /** @brief 効果音再生を開始する。
  * @details
  * @code
- * function sound:playSe(int setId, str resId)
+ * function sound.playSe(int setId, str resId)
  * end
  * @endcode
  *
@@ -590,7 +590,7 @@ int sound::playSe(lua_State *L)
 /** @brief BGM 再生を開始する。
  * @details
  * @code
- * function sound:playBgm(int setId, str resId)
+ * function sound.playBgm(int setId, str resId)
  * end
  * @endcode
  *
@@ -614,7 +614,7 @@ int sound::playBgm(lua_State *L)
 /** @brief BGM 再生を停止する。
  * @details
  * @code
- * function sound:stopBgm()
+ * function sound.stopBgm()
  * end
  * @endcode
  *

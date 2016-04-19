@@ -59,7 +59,6 @@ namespace export {
 
 	/** @brief 使用リソース登録関数。
 	 * @details
-	 * 各関数は最初の引数に self オブジェクトが必要です。
 	 * リソースはリソースセットID(整数)とリソースID(文字列)で識別されます。
 	 * リソースの登録は @ref yappy::framework::Application::sealResource() で
 	 * 許可されている間にしかできません(違反するとエラーが発生します)。
@@ -88,7 +87,6 @@ namespace export {
 	 * @code
 	 * graph = {};
 	 * @endcode
-	 * 各関数は最初の引数に self オブジェクトが必要です。
 	 * 描画するテクスチャリソースはリソースセットID(整数)とリソースID(文字列)で
 	 * 指定します。
 	 * @sa @ref yappy::lua::export::resource
@@ -112,7 +110,6 @@ namespace export {
 	 * @code
 	 * sound = {};
 	 * @endcode
-	 * 各関数は最初の引数に self オブジェクトが必要です。
 	 * @sa @ref yappy::lua::export::resource
 	 * @sa @ref yappy::sound::XAudio2
 	 */
