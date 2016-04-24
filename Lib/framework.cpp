@@ -9,6 +9,42 @@ namespace framework {
 
 using error::checkWin32Result;
 
+namespace random {
+
+namespace {
+std::random_device s_randomDevice;
+std::mt19937 s_mt;
+}	// namespace
+
+unsigned int generateRandomSeed()
+{
+	return s_randomDevice();
+}
+
+void setSeed(unsigned int seed)
+{
+	s_mt.seed(seed);
+}
+
+unsigned int nextRawUInt32()
+{
+	return s_mt();
+}
+
+int nextInt(int a, int b)
+{
+	std::uniform_int_distribution<int> dist(a, b);
+	return dist(s_mt);
+}
+
+double nextDouble(double a, double b)
+{
+	std::uniform_real_distribution<double> dist(a, b);
+	return dist(s_mt);
+}
+
+}	// namespace random
+
 std::vector<std::wstring> parseCommandLine()
 {
 	// get as const pointer
@@ -28,14 +64,6 @@ std::vector<std::wstring> parseCommandLine()
 
 	std::vector<std::wstring> result(&argv[0], &argv[argc]);
 	return result;
-}
-
-namespace {
-std::random_device s_randomDevice;
-}	// namespace
-unsigned int generateRandomSeed()
-{
-	return s_randomDevice();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
