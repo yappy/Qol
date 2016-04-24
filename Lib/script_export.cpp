@@ -341,7 +341,7 @@ int rand::generateSeed(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
 		unsigned int seed = framework::random::generateRandomSeed();
-		lua_pushinteger(L, seed);
+		lua_pushinteger(L, static_cast<int>(seed));
 		return 1;
 	});
 }
