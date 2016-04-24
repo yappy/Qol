@@ -20,3 +20,24 @@ for i = 1, #x do
 	trace.write(x[i]);
 end
 trace.write("---takenoko.txt END---");
+
+-- random test
+print("Random Test");
+print("Generate seed");
+for i = 1, 5 do
+	print(rand.generateSeed());
+end
+
+-- fixed seed
+local seed = rand.generateSeed();
+for i = 1, 2 do
+	rand.setSeed(seed);
+	print("random int [1, 5]");
+	for i = 1, 10 do
+		print(rand.nextInt(1, 5));
+	end
+	print("random double [0.0, 1.0)");
+	for i = 1, 5 do
+		print(rand.nextDouble());
+	end
+end

@@ -69,6 +69,14 @@ inline float luanumToFloat(lua_State *L, int arg,
 	return static_cast<float>(val);
 }
 
+inline double luanumToDouble(lua_State *L, int arg,
+	lua_Number val, double min, double max)
+{
+	luaL_argcheck(L, val >= min, arg, "number too small or NaN");
+	luaL_argcheck(L, val <= max, arg, "number too large or NaN");
+	return static_cast<double>(val);
+}
+
 inline float getFloat(lua_State *L, int arg,
 	float min = std::numeric_limits<float>::lowest(),
 	float max = std::numeric_limits<float>::max())
@@ -83,6 +91,22 @@ inline float getOptFloat(lua_State *L, int arg, float def,
 {
 	lua_Number val = luaL_optnumber(L, arg, def);
 	return luanumToFloat(L, arg, val, min, max);
+}
+
+inline double getDouble(lua_State *L, int arg,
+	double min = std::numeric_limits<double>::lowest(),
+	double max = std::numeric_limits<double>::max())
+{
+	lua_Number val = luaL_checknumber(L, arg);
+	return luanumToDouble(L, arg, val, min, max);
+}
+
+inline double getOptDouble(lua_State *L, int arg, double def,
+	double min = std::numeric_limits<double>::lowest(),
+	double max = std::numeric_limits<double>::max())
+{
+	lua_Number val = luaL_optnumber(L, arg, def);
+	return luanumToDouble(L, arg, val, min, max);
 }
 
 }	// namespace
@@ -306,6 +330,108 @@ int sys::writeFile(lua_State *L)
 			std::fputc('\n', fp.get());
 		}
 		return 0;
+	});
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// "rand" table
+///////////////////////////////////////////////////////////////////////////////
+
+/** @brief 乱数シード用の値を生成する。
+ * @details
+ * @code
+ * function rand.generateSeed()
+ * end
+ * @endcode
+ *
+ * @return	シード用の整数乱数
+ *
+ * @sa @ref framework::random::generateRandomSeed()
+ */
+int rand::generateSeed(lua_State *L)
+{
+	return exceptToLuaError(L, [L]() {
+		unsigned int seed = framework::random::generateRandomSeed();
+		lua_pushinteger(L, seed);
+		return 1;
+	});
+}
+
+/** @brief 乱数のシード値を設定する。
+ * @details
+ * @code
+ * function rand.setSeed(int seed)
+ * end
+ * @endcode
+ * シード値を設定しないと毎回同じ乱数が出てきてしまいます。
+ * 初めに @ref generateSeed() で生成した乱数値をシードに設定してください。
+ * 逆に同じシードを設定すると同じ乱数列を再現できます。
+ *
+ * @param[in]	seed	設定するシード値
+ * @return				なし
+ *
+ * @sa @ref framework::random::setSeed()
+ */
+int rand::setSeed(lua_State *L)
+{
+	return exceptToLuaError(L, [L]() {
+		auto seed = static_cast<unsigned int>(luaL_checkinteger(L, 1));
+		framework::random::setSeed(seed);
+		return 0;
+	});
+}
+
+/** @brief 次の整数乱数を生成する。
+ * @details
+ * @code
+ * function rand.nextInt(int a = 0, int b = 0x7fffffff)
+ * end
+ * @endcode
+ *
+ * @param[in]	a	最小値(含む)
+ * @param[in]	b	最大値(含む)
+ * @return		[a, b] のランダムな値
+ *
+ * @sa @ref framework::random::nextInt()
+ */
+int rand::nextInt(lua_State *L)
+{
+	return exceptToLuaError(L, [L]() {
+		int a = getOptInt(L, 1, 0);
+		int b = getOptInt(L, 2, std::numeric_limits<int>::max());
+		luaL_argcheck(L, a <= b, 1, "Must be a <= b");
+
+		int rnum = framework::random::nextInt(a, b);
+
+		lua_pushinteger(L, rnum);
+		return 1;
+	});
+}
+
+/** @brief 次の浮動小数点乱数を生成する。
+ * @details
+ * @code
+ * function rand.nextDouble(double a = 0.0, double b = 1.0)
+ * end
+ * @endcode
+ *
+ * @param[in]	a	最小値(含む)
+ * @param[in]	b	最大値(含まない)
+ * @return		[a, b) のランダムな値
+ *
+ * @sa @ref framework::random::nextInt()
+ */
+int rand::nextDouble(lua_State *L)
+{
+	return exceptToLuaError(L, [L]() {
+		double a = getOptDouble(L, 1, 0.0);
+		double b = getOptDouble(L, 2, 1.0);
+		luaL_argcheck(L, a <= b, 1, "Must be a <= b");
+
+		double rnum = framework::random::nextDouble(a, b);
+
+		lua_pushnumber(L, rnum);
+		return 1;
 	});
 }
 

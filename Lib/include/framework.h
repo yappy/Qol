@@ -28,6 +28,45 @@ namespace yappy {
 /// Game application main framework.
 namespace framework {
 
+/// Random number framework.
+namespace random {
+
+/** @brief Generate nondeterministic random number for seed.
+ * @details
+ * Uses std::random_device.
+ * Probably uses win32 CryptGenRandom().
+ * This function will be slow.
+ * @return random number
+ */
+unsigned int generateRandomSeed();
+
+/** @brief Set random seed.
+ * @param[in]	seed	Random seed.
+ * @sa @ref generateRandomSeed()
+ */
+void setSeed(unsigned int seed);
+
+/** @brief Get next uint32 random number.
+ * @return [0x00000000, 0xffffffff]
+ */
+unsigned int nextRawUInt32();
+
+/** @brief Get next int random number.
+ * @param[in]	a	min value (inclusive)
+ * @param[in]	b	max value (inclusive)
+ * @return [a, b]
+ */
+int nextInt(int a = 0, int b = std::numeric_limits<int>::max());
+
+/** @brief Get next double random number.
+ * @param[in]	a	min value (inclusive)
+ * @param[in]	b	max value (exclusive)
+ * @return [a, b)
+ */
+double nextDouble(double a = 0.0, double max = 1.0);
+
+}	// namespace random
+
 /** @brief Command line utility.
  * @return Parsed result vector. (argc-argv compatible)
  */
