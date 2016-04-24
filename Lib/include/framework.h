@@ -33,6 +33,15 @@ namespace framework {
  */
 std::vector<std::wstring> parseCommandLine();
 
+/** @brief Generate nondeterministic random number for seed.
+ * @details
+ * Uses std::random_device.
+ * Probably uses win32 CryptGenRandom().
+ * This function will be slow.
+ * @return random number
+ */
+unsigned int generateRandomSeed();
+
 /** @brief Get key state by GetAsyncKeyState().
  * @param[in]	vKey	VK_XXX
  * @return		true if the key is pressed.

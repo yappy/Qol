@@ -2,6 +2,7 @@
 #include "include/framework.h"
 #include "include/debug.h"
 #include "include/exceptions.h"
+#include <random>
 
 namespace yappy {
 namespace framework {
@@ -27,6 +28,14 @@ std::vector<std::wstring> parseCommandLine()
 
 	std::vector<std::wstring> result(&argv[0], &argv[argc]);
 	return result;
+}
+
+namespace {
+std::random_device s_randomDevice;
+}	// namespace
+unsigned int generateRandomSeed()
+{
+	return s_randomDevice();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
