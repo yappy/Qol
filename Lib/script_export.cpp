@@ -93,8 +93,11 @@ inline float getOptFloat(lua_State *L, int arg, float def,
 
 /** @brief デバッグ出力する。
  * @details
+ * 標準 print 関数は削除され、この関数で置き換えられます。
  * @code
  * function trace.write(...)
+ * end
+ * function print(...)
  * end
  * @endcode
  *
