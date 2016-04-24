@@ -341,7 +341,7 @@ int rand::generateSeed(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
 		unsigned int seed = framework::random::generateRandomSeed();
-		lua_pushinteger(L, static_cast<int>(seed));
+		lua_pushinteger(L, seed);
 		return 1;
 	});
 }
@@ -349,8 +349,8 @@ int rand::generateSeed(lua_State *L)
 int rand::setSeed(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
-		int seed = getInt(L, 1);
-		framework::random::setSeed(static_cast<unsigned int>(seed));
+		auto seed = static_cast<unsigned int>(luaL_checkinteger(L, 1));
+		framework::random::setSeed(seed);
 		return 0;
 	});
 }
@@ -360,6 +360,7 @@ int rand::nextInt(lua_State *L)
 	return exceptToLuaError(L, [L]() {
 		int a = getOptInt(L, 1, 0);
 		int b = getOptInt(L, 2, std::numeric_limits<int>::max());
+		luaL_argcheck(L, a <= b, 1, "Must be a <= b");
 
 		int rnum = framework::random::nextInt(a, b);
 
@@ -373,6 +374,7 @@ int rand::nextDouble(lua_State *L)
 	return exceptToLuaError(L, [L]() {
 		double a = getOptDouble(L, 1, 0.0);
 		double b = getOptDouble(L, 2, 1.0);
+		luaL_argcheck(L, a <= b, 1, "Must be a <= b");
 
 		double rnum = framework::random::nextDouble(a, b);
 
