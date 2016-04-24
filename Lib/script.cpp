@@ -148,6 +148,10 @@ void Lua::loadTraceLib()
 	lua_State *L = m_lua.get();
 	luaL_newlib(L, export::trace_RegList);
 	lua_setglobal(L, "trace");
+
+	// print <- trace.write
+	lua_pushcfunction(L, export::trace::write);
+	lua_setglobal(L, "print");
 }
 
 void Lua::loadSysLib()
