@@ -39,6 +39,7 @@ echo %date% %time% > %DIST_TIMESTAMP%
 
 rem copy
 xcopy %SRC_X86_RELEASE%App.exe %DIST_SAMPLE_DIR%App
+xcopy %SRC_X86_RELEASE%App.pdb %DIST_SAMPLE_DIR%App
 xcopy %SRC_X86_RELEASE%*.cso %DIST_SAMPLE_DIR%App
 xcopy /S %SRC_SAMPLE_DATA%* %DIST_SAMPLE_DIR%sampledata\
 xcopy /S %DOC_DIR%html %DIST_DOC_DIR%html
