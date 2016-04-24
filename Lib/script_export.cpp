@@ -69,6 +69,14 @@ inline float luanumToFloat(lua_State *L, int arg,
 	return static_cast<float>(val);
 }
 
+inline double luanumToDouble(lua_State *L, int arg,
+	lua_Number val, double min, double max)
+{
+	luaL_argcheck(L, val >= min, arg, "number too small or NaN");
+	luaL_argcheck(L, val <= max, arg, "number too large or NaN");
+	return static_cast<double>(val);
+}
+
 inline float getFloat(lua_State *L, int arg,
 	float min = std::numeric_limits<float>::lowest(),
 	float max = std::numeric_limits<float>::max())
@@ -83,6 +91,22 @@ inline float getOptFloat(lua_State *L, int arg, float def,
 {
 	lua_Number val = luaL_optnumber(L, arg, def);
 	return luanumToFloat(L, arg, val, min, max);
+}
+
+inline double getDouble(lua_State *L, int arg,
+	double min = std::numeric_limits<double>::lowest(),
+	double max = std::numeric_limits<double>::max())
+{
+	lua_Number val = luaL_checknumber(L, arg);
+	return luanumToDouble(L, arg, val, min, max);
+}
+
+inline double getOptDouble(lua_State *L, int arg, double def,
+	double min = std::numeric_limits<double>::lowest(),
+	double max = std::numeric_limits<double>::max())
+{
+	lua_Number val = luaL_optnumber(L, arg, def);
+	return luanumToDouble(L, arg, val, min, max);
 }
 
 }	// namespace
@@ -306,6 +330,54 @@ int sys::writeFile(lua_State *L)
 			std::fputc('\n', fp.get());
 		}
 		return 0;
+	});
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// "rand" table
+///////////////////////////////////////////////////////////////////////////////
+
+int rand::generateSeed(lua_State *L)
+{
+	return exceptToLuaError(L, [L]() {
+		unsigned int seed = framework::random::generateRandomSeed();
+		lua_pushinteger(L, seed);
+		return 1;
+	});
+}
+
+int rand::setSeed(lua_State *L)
+{
+	return exceptToLuaError(L, [L]() {
+		int seed = getInt(L, 1);
+		framework::random::setSeed(static_cast<unsigned int>(seed));
+		return 0;
+	});
+}
+
+int rand::nextInt(lua_State *L)
+{
+	return exceptToLuaError(L, [L]() {
+		int a = getOptInt(L, 1, 0);
+		int b = getOptInt(L, 2, std::numeric_limits<int>::max());
+
+		int rnum = framework::random::nextInt(a, b);
+
+		lua_pushinteger(L, rnum);
+		return 1;
+	});
+}
+
+int rand::nextDouble(lua_State *L)
+{
+	return exceptToLuaError(L, [L]() {
+		double a = getOptDouble(L, 1, 0.0);
+		double b = getOptDouble(L, 2, 1.0);
+
+		double rnum = framework::random::nextDouble(a, b);
+
+		lua_pushnumber(L, rnum);
+		return 1;
 	});
 }
 

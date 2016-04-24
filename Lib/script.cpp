@@ -164,6 +164,13 @@ void Lua::loadSysLib()
 	lua_setglobal(L, "sys");
 }
 
+void Lua::loadRandLib()
+{
+	lua_State *L = m_lua.get();
+	luaL_newlib(L, export::rand_RegList);
+	lua_setglobal(L, "rand");
+}
+
 void Lua::loadResourceLib(framework::Application *app)
 {
 	lua_State *L = m_lua.get();

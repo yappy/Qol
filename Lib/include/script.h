@@ -52,6 +52,7 @@ public:
 
 	void loadTraceLib();
 	void loadSysLib();
+	void loadRandLib();
 	void loadResourceLib(framework::Application *app);
 	void loadGraphLib(framework::Application *app);
 	void loadSoundLib(framework::Application *app);
