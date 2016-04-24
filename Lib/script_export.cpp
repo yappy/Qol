@@ -337,6 +337,17 @@ int sys::writeFile(lua_State *L)
 // "rand" table
 ///////////////////////////////////////////////////////////////////////////////
 
+/** @brief 乱数シード用の値を生成する。
+ * @details
+ * @code
+ * function rand.generateSeed()
+ * end
+ * @endcode
+ *
+ * @return	シード用の整数乱数
+ *
+ * @sa @ref framework::random::generateRandomSeed()
+ */
 int rand::generateSeed(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
@@ -346,6 +357,21 @@ int rand::generateSeed(lua_State *L)
 	});
 }
 
+/** @brief 乱数のシード値を設定する。
+ * @details
+ * @code
+ * function rand.setSeed(int seed)
+ * end
+ * @endcode
+ * シード値を設定しないと毎回同じ乱数が出てきてしまいます。
+ * 初めに @ref generateSeed() で生成した乱数値をシードに設定してください。
+ * 逆に同じシードを設定すると同じ乱数列を再現できます。
+ *
+ * @param[in]	seed	設定するシード値
+ * @return				なし
+ *
+ * @sa @ref framework::random::setSeed()
+ */
 int rand::setSeed(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
@@ -355,6 +381,19 @@ int rand::setSeed(lua_State *L)
 	});
 }
 
+/** @brief 次の整数乱数を生成する。
+ * @details
+ * @code
+ * function rand.nextInt(int a = 0, int b = 0x7fffffff)
+ * end
+ * @endcode
+ *
+ * @param[in]	a	最小値(含む)
+ * @param[in]	b	最大値(含む)
+ * @return		[a, b] のランダムな値
+ *
+ * @sa @ref framework::random::nextInt()
+ */
 int rand::nextInt(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
@@ -369,6 +408,19 @@ int rand::nextInt(lua_State *L)
 	});
 }
 
+/** @brief 次の浮動小数点乱数を生成する。
+ * @details
+ * @code
+ * function rand.nextDouble(double a = 0.0, double b = 1.0)
+ * end
+ * @endcode
+ *
+ * @param[in]	a	最小値(含む)
+ * @param[in]	b	最大値(含まない)
+ * @return		[a, b) のランダムな値
+ *
+ * @sa @ref framework::random::nextInt()
+ */
 int rand::nextDouble(lua_State *L)
 {
 	return exceptToLuaError(L, [L]() {
