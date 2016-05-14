@@ -120,8 +120,11 @@ Lua::Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize,
 	::lua_atpanic(m_lua.get(), atpanic);
 	my_luaL_openlibs(m_lua.get());
 
-	// delete load function
 	lua_State *L = m_lua.get();
+	// delete print function
+	lua_pushnil(L);
+	lua_setglobal(L, "print");
+	// delete load function
 	lua_pushnil(L);
 	lua_setglobal(L, "dofile");
 	lua_pushnil(L);
@@ -145,6 +148,10 @@ void Lua::loadTraceLib()
 	lua_State *L = m_lua.get();
 	luaL_newlib(L, export::trace_RegList);
 	lua_setglobal(L, "trace");
+
+	// print <- trace.write
+	lua_pushcfunction(L, export::trace::write);
+	lua_setglobal(L, "print");
 }
 
 void Lua::loadSysLib()
@@ -155,6 +162,13 @@ void Lua::loadSysLib()
 	lua_pushlightuserdata(L, this);
 	luaL_setfuncs(L, export::sys_RegList, 1);
 	lua_setglobal(L, "sys");
+}
+
+void Lua::loadRandLib()
+{
+	lua_State *L = m_lua.get();
+	luaL_newlib(L, export::rand_RegList);
+	lua_setglobal(L, "rand");
 }
 
 void Lua::loadResourceLib(framework::Application *app)

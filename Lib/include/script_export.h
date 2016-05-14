@@ -57,6 +57,27 @@ namespace export {
 		{ nullptr, nullptr }
 	};
 
+	/** @brief 乱数関連関数。<b>rand</b>グローバルテーブルに提供。
+	 * @details
+	 * @code
+	 * rand = {};
+	 * @endcode
+	 */
+	struct rand {
+		static int generateSeed(lua_State *L);
+		static int setSeed(lua_State *L);
+		static int nextInt(lua_State *L);
+		static int nextDouble(lua_State *L);
+		rand() = delete;
+	};
+	const luaL_Reg rand_RegList[] = {
+		{ "generateSeed",	rand::generateSeed },
+		{ "setSeed",		rand::setSeed		},
+		{ "nextInt",		rand::nextInt		},
+		{ "nextDouble",		rand::nextDouble	},
+		{ nullptr, nullptr }
+	};
+
 	/** @brief 使用リソース登録関数。
 	 * @details
 	 * リソースはリソースセットID(整数)とリソースID(文字列)で識別されます。
