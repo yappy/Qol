@@ -15,6 +15,7 @@ void drawString(resourceSetId, resourceId,
 sys.include("../sampledata/sub.lua");
 
 trace.write("sinki", "sinki", "return", "sinki", "sinki", "gg");
+trace.write(nil);
 
 local dbg_x, dbg_y = 3, 5;
 local function dbg_test(t)

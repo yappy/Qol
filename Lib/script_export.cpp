@@ -135,9 +135,13 @@ int trace::write(lua_State *L)
 	return exceptToLuaError(L, [L]() {
 		int argc = lua_gettop(L);
 		for (int i = 1; i <= argc; i++) {
-			const char *str = ::lua_tostring(L, i);
+			const char *str = lua_tostring(L, i);
 			if (str != nullptr) {
 				debug::writeLine(str);
+			}
+			else if (lua_type(L, i) == LUA_TBOOLEAN) {
+				int b = lua_toboolean(L, i);
+				debug::writeLine(b ? "true" : "false");
 			}
 			else {
 				debug::writef("<%s>", luaL_typename(L, i));
