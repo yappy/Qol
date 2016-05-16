@@ -556,6 +556,35 @@ int resource::addBgm(lua_State *L)
 /** @brief テクスチャのサイズを得る。
  * @details
  * @code
+ * function graph.getParam()
+ * 	return int w, int h, int refreshRate, bool vsync;
+ * end
+ * @endcode
+ *
+ * @retval	1	ディスプレイサイズ横
+ * @retval	2	ディスプレイサイズ縦
+ * @retval	3	リフレッシュレート(Hz)
+ * @retval	4	vsync 待ちが有効なら true
+ */
+int graph::getParam(lua_State *L)
+{
+	return exceptToLuaError(L, [L]() {
+		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
+
+		graphics::GraphicsParam param;
+		app->getGraphicsParam(&param);
+
+		lua_pushinteger(L, param.w);
+		lua_pushinteger(L, param.h);
+		lua_pushinteger(L, param.refreshRate);
+		lua_pushboolean(L, param.vsync);
+		return 4;
+	});
+}
+
+/** @brief テクスチャのサイズを得る。
+ * @details
+ * @code
  * function graph.getTextureSize(int setId, str resId)
  * 	return w, h;
  * end

@@ -31,6 +31,8 @@ local unyopos = {
 	x = 500,
 	y = 350
 };
+local dispw, disph, refrate, vsync = graph.getParam();
+trace.write(dispw, disph, refrate, vsync);
 -- coroutine (wrap function) list
 local colist = {};
 
