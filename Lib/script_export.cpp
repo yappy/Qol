@@ -135,9 +135,13 @@ int trace::write(lua_State *L)
 	return exceptToLuaError(L, [L]() {
 		int argc = lua_gettop(L);
 		for (int i = 1; i <= argc; i++) {
-			const char *str = ::lua_tostring(L, i);
+			const char *str = lua_tostring(L, i);
 			if (str != nullptr) {
 				debug::writeLine(str);
+			}
+			else if (lua_type(L, i) == LUA_TBOOLEAN) {
+				int b = lua_toboolean(L, i);
+				debug::writeLine(b ? "true" : "false");
 			}
 			else {
 				debug::writef("<%s>", luaL_typename(L, i));
@@ -552,6 +556,35 @@ int resource::addBgm(lua_State *L)
 ///////////////////////////////////////////////////////////////////////////////
 // "graph" table
 ///////////////////////////////////////////////////////////////////////////////
+
+/** @brief テクスチャのサイズを得る。
+ * @details
+ * @code
+ * function graph.getParam()
+ * 	return int w, int h, int refreshRate, bool vsync;
+ * end
+ * @endcode
+ *
+ * @retval	1	ディスプレイサイズ横
+ * @retval	2	ディスプレイサイズ縦
+ * @retval	3	リフレッシュレート(Hz)
+ * @retval	4	vsync 待ちが有効なら true
+ */
+int graph::getParam(lua_State *L)
+{
+	return exceptToLuaError(L, [L]() {
+		auto *app = getPtrFromUpvalue<framework::Application>(L, 1);
+
+		graphics::GraphicsParam param;
+		app->getGraphicsParam(&param);
+
+		lua_pushinteger(L, param.w);
+		lua_pushinteger(L, param.h);
+		lua_pushinteger(L, param.refreshRate);
+		lua_pushboolean(L, param.vsync);
+		return 4;
+	});
+}
 
 /** @brief テクスチャのサイズを得る。
  * @details

@@ -114,12 +114,14 @@ namespace export {
 	 * @sa @ref yappy::graphics::DGraphics
 	 */
 	struct graph {
+		static int getParam(lua_State *L);
 		static int getTextureSize(lua_State *L);
 		static int drawTexture(lua_State *L);
 		static int drawString(lua_State *L);
 		graph() = delete;
 	};
 	const luaL_Reg graph_RegList[] = {
+		{ "getParam",		graph::getParam			},
 		{ "getTextureSize",	graph::getTextureSize	},
 		{ "drawTexture",	graph::drawTexture		},
 		{ "drawString",		graph::drawString		},

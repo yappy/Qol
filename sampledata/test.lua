@@ -15,6 +15,7 @@ void drawString(resourceSetId, resourceId,
 sys.include("../sampledata/sub.lua");
 
 trace.write("sinki", "sinki", "return", "sinki", "sinki", "gg");
+trace.write(nil);
 
 local dbg_x, dbg_y = 3, 5;
 local function dbg_test(t)
@@ -31,6 +32,8 @@ local unyopos = {
 	x = 500,
 	y = 350
 };
+local dispw, disph, refrate, vsync = graph.getParam();
+trace.write(dispw, disph, refrate, vsync);
 -- coroutine (wrap function) list
 local colist = {};
 

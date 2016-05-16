@@ -286,6 +286,9 @@ public:
 	/** @brief Get HWND of the window managed by this class.
 	 */
 	HWND getHWnd() { return m_hWnd.get(); }
+	/** @brief Get graphics parameters.
+	 */
+	void getGraphicsParam(graphics::GraphicsParam *param) { *param = m_graphParam; }
 	/** @brief Get DirectGraphics manager.
 	 */
 	graphics::DGraphics &graph() { return *m_dg.get(); }
