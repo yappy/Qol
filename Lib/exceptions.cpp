@@ -8,9 +8,16 @@
 namespace yappy {
 namespace error {
 
-std::string formatStackTrace(void *(&stackTrace)[MaxStackTrace], uint32_t count)
+std::string createStackTraceMsg(const std::string &msg)
 {
-	std::string result;
+	std::string result = msg;
+	result += '\n';
+
+	// Max count of stack trace
+	const DWORD MaxStackTrace = 62;
+	// Capture current back trace
+	void *stackTrace[MaxStackTrace];
+	USHORT numStackTrace = ::CaptureStackBackTrace(0, 62, stackTrace, nullptr);
 
 	// Get module list of the current process
 	BOOL bret = FALSE;
@@ -48,7 +55,7 @@ std::string formatStackTrace(void *(&stackTrace)[MaxStackTrace], uint32_t count)
 
 	// Create string
 	// [address] +diff [module base]
-	for (uint32_t i = 0; i < count; i++) {
+	for (uint32_t i = 0; i < numStackTrace; i++) {
 		char str[32];
 		sprintf_s(str, "%p", stackTrace[i]);
 		result += str;
