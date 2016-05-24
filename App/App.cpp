@@ -121,6 +121,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		// open with notepad
 		// trace::output();
 	}
+	// error test
+	{
+		debug::writeLine(error::createStackTraceMsg("error test").c_str());
+	}
 
 	int result = 0;
 	try {

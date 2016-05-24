@@ -28,6 +28,9 @@ namespace yappy {
 /// Game application main framework.
 namespace framework {
 
+using error::throwTrace;
+using error::FrameworkError;
+
 /// Random number framework.
 namespace random {
 
@@ -99,7 +102,7 @@ public:
 	{
 		std::lock_guard<std::mutex> lock(m_lock);
 		if (m_resPtr == nullptr) {
-			throw std::runtime_error("Resource not loaded");
+			throwTrace<FrameworkError>("Resource not loaded");
 		}
 		return m_resPtr;
 	}
@@ -116,7 +119,7 @@ public:
 		{
 			std::lock_guard<std::mutex> lock(m_lock);
 			if (!m_loading) {
-				throw std::runtime_error("Multiple load async detected");
+				throwTrace<FrameworkError>("Multiple load async detected");
 			}
 			m_loading = false;
 			m_resPtr = res;
@@ -124,8 +127,8 @@ public:
 	}
 	void unload() {
 		std::lock_guard<std::mutex> lock(m_lock);
-		if (m_loading) {
-			throw std::runtime_error("Unload resource while loading");
+		if (!m_loading) {
+			throwTrace<FrameworkError>("Unload resource while loading");
 		}
 		m_resPtr.reset();
 	}
