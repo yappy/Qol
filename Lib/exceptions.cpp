@@ -1,11 +1,81 @@
 ﻿#include "stdafx.h"
 #include "include/exceptions.h"
 #include "include/util.h"
+#include <psapi.h>
 #include <sstream>
 #include <iomanip>
 
 namespace yappy {
 namespace error {
+
+std::string formatStackTrace(void *(&stackTrace)[MaxStackTrace], uint32_t count)
+{
+	std::string result;
+
+	// Get module list of the current process
+	BOOL bret = FALSE;
+	HANDLE hProc = ::GetCurrentProcess();
+	DWORD neededSize = 0;
+	bret = ::EnumProcessModules(hProc, nullptr, 0, &neededSize);
+	if (!bret) {
+		return std::string("<???>");
+	}
+	DWORD modCount = neededSize / sizeof(HMODULE);
+	std::vector<HMODULE> hMods(modCount);
+	bret = ::EnumProcessModules(hProc, hMods.data(), neededSize, &neededSize);
+	if (!bret) {
+		return std::string("<???>");
+	}
+	hMods.resize(neededSize / sizeof(HMODULE));
+
+	// Sort modules by load address
+	auto hmoduleComp = [](HMODULE a, HMODULE b) {
+		return reinterpret_cast<uintptr_t>(a) < reinterpret_cast<uintptr_t>(b);
+	};
+	std::sort(hMods.begin(), hMods.end(), hmoduleComp);
+
+	// Get module name list
+	std::vector<std::string> modNames;
+	modNames.reserve(hMods.size());
+	for (DWORD i = 0; i < modCount; i++) {
+		char baseName[256];
+		DWORD ret = ::GetModuleBaseNameA(hProc, hMods[i], baseName, sizeof(baseName));
+		if (ret == 0) {
+			::strcpy_s(baseName, "???");
+		}
+		modNames.emplace_back(baseName);
+	}
+
+	// Create string
+	// [address] +diff [module base]
+	for (uint32_t i = 0; i < count; i++) {
+		char str[32];
+		sprintf_s(str, "%p", stackTrace[i]);
+		result += str;
+		result += ' ';
+
+		// Binary search trace_element[i] from module list
+		auto it = std::upper_bound(hMods.begin(), hMods.end(),
+			(HMODULE)stackTrace[i], hmoduleComp);
+		size_t ind = std::distance(hMods.begin(), it);
+		if (ind > 0) {
+			uintptr_t diff = reinterpret_cast<uintptr_t>(stackTrace[i])
+				- reinterpret_cast<uintptr_t>(hMods.at(ind - 1));
+			sprintf_s(str, "%p", reinterpret_cast<void *>(diff));
+			result += '+';
+			result += str;
+			result += ' ';
+			result += modNames.at(ind - 1);
+		}
+		else {
+			result += "???";
+		}
+		result += "\n";
+	}
+
+	return result;
+}
+
 
 Win32Error::Win32Error(const std::string &msg, DWORD code) :
 	runtime_error("")

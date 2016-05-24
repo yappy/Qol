@@ -5,7 +5,36 @@
 #include <windows.h>
 
 namespace yappy {
+/// Exceptions and utilities.
 namespace error {
+
+/// Max count of stack trace.
+const DWORD MaxStackTrace = 62;
+
+/** @brief Internal use.
+ * @details Convert (pointer array) to (string).
+ * @param[in]	stackTrace	Pointer array.
+ * @param[in]	count		Array size.
+ * @return					String.
+ */
+std::string formatStackTrace(void *(&stackTrace)[MaxStackTrace], uint32_t count);
+
+/** @brief Returns (msg + stacktrace) string.
+ * @param[in]	msg	Original string.
+ * @return			msg + stacktrace.
+ */
+__forceinline std::string createStackTraceMsg(const std::string &msg)
+{
+	// [inline] Capture current back trace
+	void *stackTrace[MaxStackTrace];
+	USHORT num = ::CaptureStackBackTrace(0, 62, stackTrace, nullptr);
+
+	std::string result = msg;
+	result += '\n';
+	result += formatStackTrace(stackTrace, num);
+	return result;
+}
+
 
 class Win32Error : public std::runtime_error {
 public:
