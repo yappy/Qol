@@ -27,10 +27,17 @@ std::string createStackTraceMsg(const std::string &msg);
  * @param[in]	args	Additional parameters for constructor call.
  */
 template <class E, class... Args>
+__declspec(noreturn)
 inline void throwTrace(const std::string &msg, Args&&... args)
 {
 	throw E(createStackTraceMsg(msg), std::forward<Args>(args)...);
 }
+
+
+class FrameworkError : public std::runtime_error {
+public:
+	FrameworkError(const std::string &msg) : runtime_error(msg) {}
+};
 
 class Win32Error : public std::runtime_error {
 public:
@@ -43,7 +50,6 @@ private:
 inline void checkWin32Result(bool cond, const std::string &msg)
 {
 	if (!cond) {
-		//throw Win32Error(msg, ::GetLastError());
 		throwTrace<Win32Error>(msg, ::GetLastError());
 	}
 }
@@ -78,7 +84,7 @@ inline void checkDXResult(HRESULT hr, const std::string &msg)
 {
 	static_assert(std::is_base_of<DXError, T>::value, "T must inherit DXError");
 	if (FAILED(hr)) {
-		throw T(msg, hr);
+		throwTrace<T>(msg, hr);
 	}
 }
 
@@ -118,5 +124,5 @@ public:
 	{}
 };
 
-}
-}
+}	// namespace error
+}	// namespace yappy

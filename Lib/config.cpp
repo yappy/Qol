@@ -6,6 +6,10 @@
 namespace yappy {
 namespace config {
 
+
+using error::throwTrace;
+using error::FrameworkError;
+
 ConfigFile::ConfigFile(const wchar_t *fileName, InitList keyAndDefaults) :
 	m_fileName(fileName),
 	m_defaults(keyAndDefaults),
@@ -26,7 +30,7 @@ void ConfigFile::load()
 	if (::_wfopen_s(&tmpfp, m_fileName, L"r") != 0) {
 		save();
 		if (::_wfopen_s(&tmpfp, m_fileName, L"r") != 0) {
-			throw std::runtime_error("Load config file failed");
+			throwTrace<FrameworkError>("Load config file failed");
 		}
 	}
 	util::FilePtr fp(tmpfp);
@@ -65,7 +69,7 @@ void ConfigFile::save()
 
 	FILE *tmpfp = nullptr;
 	if (::_wfopen_s(&tmpfp, m_fileName, L"w") != 0) {
-		throw std::runtime_error("Save config file failed");
+		throwTrace<FrameworkError>("Save config file failed");
 	}
 	util::FilePtr fp(tmpfp);
 
@@ -79,7 +83,7 @@ void ConfigFile::save()
 void ConfigFile::setString(const std::string &key, const std::string &value)
 {
 	if (m_defaults.find(key) == m_defaults.end()) {
-		throw std::invalid_argument("Key not found: " + key);
+		throwTrace<std::invalid_argument>("Key not found: " + key);
 	}
 	m_map[key] = value;
 }
@@ -90,7 +94,7 @@ const std::string &ConfigFile::getString(const std::string &key) const
 	if (res == m_map.end()) {
 		res = m_defaults.find(key);
 		if (res == m_defaults.end()) {
-			throw std::invalid_argument("Key not found: " + key);
+			throwTrace<std::invalid_argument>("Key not found: " + key);
 		}
 	}
 	return res->second;
@@ -117,7 +121,7 @@ bool ConfigFile::getBool(const std::string &key)
 			return false;
 		}
 		else {
-			throw std::logic_error("Invalid default bool: " + value);
+			throwTrace<std::logic_error>("Invalid default bool: " + value);
 		}
 	}
 	
@@ -130,9 +134,8 @@ int ConfigFile::getInt(const std::string &key)
 		try {
 			size_t idx = 0;
 			int ivalue = std::stoi(value, &idx, 0);
-			if (idx != value.size()) {
-				throw std::invalid_argument(value);
-			}
+			if (idx != value.size())
+			throwTrace<std::invalid_argument>(value);
 			return ivalue;
 		}
 		catch (const std::logic_error &) {
@@ -146,12 +149,12 @@ int ConfigFile::getInt(const std::string &key)
 			size_t idx = 0;
 			int ivalue = std::stoi(value, &idx, 0);
 			if (idx != value.size()) {
-				throw std::invalid_argument(value);
+				throwTrace<std::invalid_argument>(value);
 			}
 			return ivalue;
 		}
 		catch (const std::logic_error &) {
-			throw std::logic_error("Invalid default int: " + value);
+			throwTrace<std::logic_error>("Invalid default int: " + value);
 		}
 	}
 }

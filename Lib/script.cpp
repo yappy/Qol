@@ -7,6 +7,8 @@
 namespace yappy {
 namespace lua {
 
+using error::throwTrace;
+
 LuaError::LuaError(const std::string &msg, lua_State *L) :
 	runtime_error("")
 {
@@ -26,8 +28,9 @@ namespace {
 // This is fatal and exit application
 int atpanic(lua_State *L)
 {
-	throw std::runtime_error("Lua panic");
+	error::throwTrace<std::runtime_error>("Lua panic");
 	// Don't return
+	return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -214,7 +217,7 @@ void Lua::loadFile(const wchar_t *fileName, bool autoBreak, bool prot)
 		reinterpret_cast<const char *>(buf.data()), buf.size(),
 		chunkName.c_str(), "t");
 	if (ret != LUA_OK) {
-		throw LuaError("Load script failed", L);
+		throwTrace<LuaError>("Load script failed", L);
 	}
 	// prepare debug info
 	m_dbg->loadDebugInfo(chunkName.c_str(),
@@ -247,7 +250,7 @@ std::vector<std::string> luaValueToStrListInternal(
 
 	int type = lua_type(L, ind);
 	if (type == LUA_TNONE) {
-		throw std::logic_error("invalid index: " + std::to_string(ind));
+		throwTrace<std::logic_error>("invalid index: " + std::to_string(ind));
 	}
 	const char *typestr = lua_typename(L, type);
 	// copy and tostring it
