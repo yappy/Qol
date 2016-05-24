@@ -40,7 +40,8 @@ template <size_t N>
 inline void createFixedString(std::array<char, N> *out, const char *src) {
 	size_t len = std::strlen(src);
 	if (len >= N) {
-		throw std::invalid_argument(std::string("String size too long: ") + src);
+		error::throwTrace<std::invalid_argument>(
+			std::string("String size is too long: ") + src);
 	}
 	// copy non-'\0' part
 	std::memcpy(out->data(), src, len);

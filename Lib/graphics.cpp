@@ -15,6 +15,7 @@
 namespace yappy {
 namespace graphics {
 
+using error::throwTrace;
 using error::checkWin32Result;
 using error::D3DError;
 using error::checkDXResult;
@@ -95,7 +96,7 @@ void DGraphics::initializeD3D()
 	HRESULT hr = S_OK;
 
 	if (!::XMVerifyCPUSupport()) {
-		throw D3DError("XMVerifyCPUSupport() failed", 0);
+		throwTrace<D3DError>("XMVerifyCPUSupport() failed", 0);
 	}
 
 	// Create device etc.
@@ -488,7 +489,7 @@ DGraphics::TextureResourcePtr DGraphics::loadTexture(const wchar_t *path)
 		&imageInfo, nullptr);
 	checkDXResult<D3DError>(hr, "D3DX11GetImageInfoFromMemory() failed");
 	if (imageInfo.ResourceDimension != D3D11_RESOURCE_DIMENSION_TEXTURE2D) {
-		throw std::runtime_error("Not 2D Texture");
+		throwTrace<D3DError>("Not 2D Texture", S_OK);
 	}
 
 	ID3D11ShaderResourceView *ptmpRV = nullptr;
