@@ -8,6 +8,7 @@
 #include <vector>
 
 namespace yappy {
+/// Input library.
 namespace input {
 
 class DInput : private util::noncopyable {
@@ -38,5 +39,5 @@ private:
 const char *dikToString(int dik);
 const wchar_t *dikToWString(int dik);
 
-}
-}
+}	// namespace input
+}	// namespace yappy

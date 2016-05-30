@@ -432,5 +432,5 @@ private:
 	Application &m_app;
 };
 
-}
-}
+}	// namespace framework
+}	// namespace yappy

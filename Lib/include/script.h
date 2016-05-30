@@ -126,5 +126,5 @@ private:
 std::vector<std::string> luaValueToStrList(
 	lua_State *L, int ind, int maxDepth);
 
-}
-}
+}	// namespace lua
+}	// namespace yappy

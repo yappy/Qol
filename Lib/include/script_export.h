@@ -14,8 +14,7 @@
 
 namespace yappy {
 namespace lua {
-/** @brief C++ から Lua へ公開する関数。(Lua関数仕様)
-*/
+/// C++ から Lua へ公開する関数。(Lua関数仕様)
 namespace export {
 
 	/** @brief デバッグ出力関数。<b>trace</b>グローバルテーブルに提供。
@@ -149,6 +148,6 @@ namespace export {
 		{ nullptr, nullptr }
 	};
 
-}
-}
-}
+}	// namespace export
+}	// namespace lua
+}	// namespace yappy

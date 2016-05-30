@@ -126,9 +126,9 @@ private:
 	LARGE_INTEGER m_begin;
 };
 
-}	// debug
+}	// namespace debug
 
-/// On memory fast logging
+/// On memory fast logging.
 namespace trace {
 
 /** @brief Initialize trace buffer.
@@ -145,5 +145,5 @@ void output();
  */
 void write(const char *str);
 
-}	// trace
-}
+}	// namespace trace
+}	// namespace yappy

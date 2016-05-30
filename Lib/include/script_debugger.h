@@ -5,7 +5,7 @@
 
 namespace yappy {
 namespace lua {
-/// Lua script debugger
+/// Lua script debugger.
 namespace debugger {
 
 /** @brief Lua debugger.
@@ -109,6 +109,6 @@ private:
 	void printWatchList();
 };
 
-}
-}
-}
+}	// namespace debugger
+}	// namespace lua
+}	// namespace yappy

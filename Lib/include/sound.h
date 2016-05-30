@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 namespace yappy {
+/// Sound effect and BGM library.
 namespace sound {
 
 // 3MiB
@@ -121,5 +122,5 @@ private:
 	void processFrameBgm();
 };
 
-}
-}
+}	// namespace sound
+}	// namespace yappy
