@@ -1054,6 +1054,6 @@ bool LuaDebugger::bp(const wchar_t *usage, const std::vector<std::wstring> &args
 	return false;
 }
 
-}
-}
-}
+}	// namespace debugger
+}	// namespace lua
+}	// namespace yappy

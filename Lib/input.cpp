@@ -301,5 +301,5 @@ const wchar_t *dikToWString(int dik)
 	return DikConvTable[dik].wstr;
 }
 
-}
-}
+}	// namespace input
+}	// namespace yappy

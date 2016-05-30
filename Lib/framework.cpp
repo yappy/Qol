@@ -607,5 +607,5 @@ const sound::XAudio2::BgmResourcePtr Application::getBgm(
 
 #pragma endregion
 
-}
-}
+}	// namespace framework
+}	// namespace yappy

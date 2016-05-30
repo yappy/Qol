@@ -108,4 +108,4 @@ std::vector<uint8_t> loadFile(const wchar_t *fileName)
 }
 
 }	// namespace file
-}	// namespace test
+}	// namespace yappy

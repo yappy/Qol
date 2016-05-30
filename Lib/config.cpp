@@ -159,5 +159,5 @@ int ConfigFile::getInt(const std::string &key)
 	}
 }
 
-}
-}
+}	// namespace config
+}	// namespace yappy
