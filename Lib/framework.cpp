@@ -377,6 +377,7 @@ double FrameControl::getFramePerSec() const
 Application::Application(const AppParam &appParam,
 	const graphics::GraphicsParam &graphParam,
 	size_t resSetCount) :
+	m_hWnd(nullptr),
 	m_resMgr(resSetCount),
 	m_param(appParam),
 	m_graphParam(graphParam),
@@ -384,7 +385,7 @@ Application::Application(const AppParam &appParam,
 {
 	// window
 	initializeWindow();
-	m_graphParam.hWnd = m_hWnd.get();
+	m_graphParam.hWnd = m_hWnd;
 
 	// DirectGraphics
 	auto *tmpDg = new graphics::DGraphics(m_graphParam);
@@ -393,7 +394,7 @@ Application::Application(const AppParam &appParam,
 	auto *tmpXa2 = new sound::XAudio2();
 	m_ds.reset(tmpXa2);
 	// DirectInput
-	auto *tmpDi = new input::DInput(m_param.hInstance, m_hWnd.get());
+	auto *tmpDi = new input::DInput(m_param.hInstance, m_hWnd);
 	m_di.reset(tmpDi);
 }
 
@@ -423,14 +424,13 @@ void Application::initializeWindow()
 	checkWin32Result(::AdjustWindowRect(&rc, wndStyle, FALSE) != FALSE,
 		"AdjustWindowRect() failed");
 
-	HWND hWnd = ::CreateWindow(m_param.wndClsName, m_param.title, wndStyle,
+	m_hWnd = ::CreateWindow(m_param.wndClsName, m_param.title, wndStyle,
 		CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top,
 		nullptr, nullptr, m_param.hInstance, this);
-	checkWin32Result(hWnd != nullptr, "CreateWindow() failed");
-	m_hWnd.reset(hWnd);
+	checkWin32Result(m_hWnd != nullptr, "CreateWindow() failed");
 
 	// for frame processing while window drugging etc.
-	::SetTimer(m_hWnd.get(), TimerEventId, 1, nullptr);
+	::SetTimer(m_hWnd, TimerEventId, 1, nullptr);
 
 	// Show cursor
 	if (m_param.showCursor) {
@@ -446,6 +446,10 @@ void Application::initializeWindow()
 Application::~Application()
 {
 	debug::writeLine(L"Finalize Application Window");
+	if (m_hWnd != nullptr) {
+		::DestroyWindow(m_hWnd);
+		m_hWnd = nullptr;
+	}
 }
 
 LRESULT CALLBACK Application::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -465,10 +469,8 @@ LRESULT CALLBACK Application::wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		return 0;
 	case WM_SIZE:
 		return self->onSize(hWnd, msg, wParam, lParam);
-	case WM_CLOSE:
-		self->m_hWnd.reset();
-		return 0;
 	case WM_DESTROY:
+		self->m_hWnd = nullptr;
 		PostQuitMessage(0);
 		return 0;
 	}
@@ -494,7 +496,7 @@ void Application::onIdle()
 	wchar_t buf[256] = { 0 };
 	swprintf_s(buf, L"%s fps=%.2f (%d)", m_param.title,
 		m_frameCtrl.getFramePerSec(), m_param.frameSkip);
-	::SetWindowText(m_hWnd.get(), buf);
+	::SetWindowText(m_hWnd, buf);
 }
 
 void Application::updateInternal()
@@ -524,8 +526,8 @@ int Application::run()
 	// Call user code
 	init();
 
-	::ShowWindow(m_hWnd.get(), m_param.nCmdShow);
-	::UpdateWindow(m_hWnd.get());
+	::ShowWindow(m_hWnd, m_param.nCmdShow);
+	::UpdateWindow(m_hWnd);
 
 	MSG msg = { 0 };
 	while (msg.message != WM_QUIT) {

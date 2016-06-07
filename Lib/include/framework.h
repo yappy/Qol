@@ -250,14 +250,6 @@ private:
 	ResMapVec<sound::XAudio2::BgmResource>			m_bgmMapVec;
 };
 
-struct hwndDeleter {
-	using pointer = HWND;
-	void operator()(HWND hwnd)
-	{
-		::DestroyWindow(hwnd);
-	}
-};
-
 class FrameControl : private util::noncopyable {
 public:
 	FrameControl(uint32_t fps, uint32_t skipCount);
@@ -327,7 +319,7 @@ public:
 
 	/** @brief Get HWND of the window managed by this class.
 	 */
-	HWND getHWnd() { return m_hWnd.get(); }
+	HWND getHWnd() { return m_hWnd; }
 	/** @brief Get graphics parameters.
 	 */
 	void getGraphicsParam(graphics::GraphicsParam *param) { *param = m_graphParam; }
@@ -433,8 +425,7 @@ protected:
 private:
 	const UINT_PTR TimerEventId = 0xffff0001;
 
-	using HWndPtr = std::unique_ptr<HWND, hwndDeleter>;
-	HWndPtr m_hWnd;
+	HWND m_hWnd;
 	std::unique_ptr<graphics::DGraphics> m_dg;
 	std::unique_ptr<sound::XAudio2> m_ds;
 	std::unique_ptr<input::DInput> m_di;
