@@ -14,7 +14,7 @@ bool s_fileOut = false;
 
 HANDLE s_hFile = INVALID_HANDLE_VALUE;
 
-}
+}	// namespace
 
 bool enableDebugOutput() noexcept
 {
@@ -144,7 +144,7 @@ void writef_nonl(const char *fmt, ...) noexcept
 	write(buf, false);
 }
 
-}	// debug
+}	// namespace debug
 
 namespace trace {
 
@@ -247,5 +247,5 @@ void write(const char *str)
 	s_number++;
 }
 
-}	// trace
-}
+}	// namespace trace
+}	// namespace yappy

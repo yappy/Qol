@@ -657,5 +657,5 @@ void DGraphics::drawString(const FontResourcePtr &font, const wchar_t *str, int 
 
 #pragma endregion
 
-}
-}
+}	// namespace graphics
+}	// namespace yappy

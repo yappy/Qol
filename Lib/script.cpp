@@ -350,5 +350,5 @@ std::vector<std::string> luaValueToStrList(
 		std::vector<const void *>());
 }
 
-}
-}
+}	// namespace lua
+}	// namespace yappy

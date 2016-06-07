@@ -185,9 +185,9 @@ int DInput::getPadCount() const
 	return static_cast<int>(m_pPadDevs.size());
 }
 
-void DInput::getPadState(DIJOYSTATE *out, int index) const
+void DInput::getPadState(DIJOYSTATE *state, int index) const
 {
-	*out = m_pad.at(index);
+	*state = m_pad.at(index);
 }
 
 
@@ -301,5 +301,5 @@ const wchar_t *dikToWString(int dik)
 	return DikConvTable[dik].wstr;
 }
 
-}
-}
+}	// namespace input
+}	// namespace yappy

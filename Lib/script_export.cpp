@@ -792,6 +792,6 @@ int sound::stopBgm(lua_State *L)
 	});
 }
 
-}
-}
-}
+}	// namespace export
+}	// namespace lua
+}	// namespace yappy

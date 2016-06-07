@@ -9,6 +9,7 @@
 namespace yappy {
 namespace file {
 
+using error::throwTrace;
 using error::checkWin32Result;
 
 namespace {
@@ -96,16 +97,16 @@ void initWithFileSystem(const wchar_t *rootDir)
 void initWithArchiveFile(const wchar_t *archiveFile)
 {
 	// TODO
-	throw std::logic_error("Not implemented");
+	throwTrace<std::logic_error>("Not implemented");
 }
 
 std::vector<uint8_t> loadFile(const wchar_t *fileName)
 {
 	if (s_fileLoader == nullptr) {
-		throw std::logic_error("FileLoader is not initialized.");
+		throwTrace<std::logic_error>("FileLoader is not initialized.");
 	}
 	return s_fileLoader->loadFile(fileName);
 }
 
 }	// namespace file
-}	// namespace test
+}	// namespace yappy

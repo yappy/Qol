@@ -30,7 +30,7 @@ public:
 		const graphics::GraphicsParam &graphParam);
 	~MyApp() = default;
 
-	std::unique_ptr<framework::SceneBase> &getScene(SceneId id);
+	std::unique_ptr<framework::scene::SceneBase> &getScene(SceneId id);
 	template <class T>
 	T *getSceneAs(SceneId id)
 	{
@@ -45,20 +45,20 @@ protected:
 
 private:
 	// scene instance array
-	std::array<std::unique_ptr<framework::SceneBase>,
+	std::array<std::unique_ptr<framework::scene::SceneBase>,
 		static_cast<size_t>(SceneId::Count)> m_scenes;
 	// current scene
-	framework::SceneBase *m_pCurrentScene = nullptr;
+	framework::scene::SceneBase *m_pCurrentScene = nullptr;
 };
 
-class MainScene : public framework::AsyncLoadScene {
+class MainScene : public framework::scene::AsyncLoadScene {
 public:
 	MainScene(MyApp *app, bool debugEnable);
 	~MainScene() = default;
 
 	// Scene specific initialization at scene start
 	void setup();
-	void update() override;
+	void updateOnMainThread() override;
 	void render() override;
 
 protected:
@@ -75,7 +75,7 @@ private:
 	lua::Lua m_lua;
 };
 
-class SubScene : public framework::SceneBase {
+class SubScene : public framework::scene::SceneBase {
 public:
 	explicit SubScene(MyApp *app);
 	~SubScene() = default;

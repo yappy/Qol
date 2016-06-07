@@ -8,6 +8,7 @@
 #include <unordered_map>
 
 namespace yappy {
+/// Graphics library.
 namespace graphics {
 
 struct Texture : private util::noncopyable {
@@ -176,5 +177,5 @@ private:
 	void initBackBuffer();
 };
 
-}
-}
+}	// namespace graphics
+}	// namespace yappy

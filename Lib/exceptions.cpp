@@ -154,5 +154,5 @@ const char *DXError::what() const
 	return m_what.c_str();
 }
 
-}
-}
+}	// namespace error
+}	// namespace yappy

@@ -5,6 +5,7 @@
 #include <map>
 
 namespace yappy {
+/// Config file.
 namespace config {
 
 class ConfigFile : private util::noncopyable

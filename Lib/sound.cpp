@@ -401,5 +401,5 @@ int Bgm::close(void *datasource)
 	return 0;
 }
 
-}
-}
+}	// namespace sound
+}	// namespace yappy
