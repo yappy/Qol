@@ -39,12 +39,11 @@ void MainScene::loadOnSubThread(std::atomic_bool &cancel)
 	debug::writeLine(L"sub thread complete!");
 }
 
-void MainScene::update()
+void MainScene::updateOnMainThread()
 {
 	bool dbg = keyPressedAsync(VK_F12);
 
 	if (m_loading) {
-		updateLoadStatus();
 		if (!isLoading()) {
 			m_loading = false;
 			m_lua.callGlobal("start", dbg);

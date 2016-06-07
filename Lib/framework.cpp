@@ -59,6 +59,12 @@ AsyncLoadScene::~AsyncLoadScene()
 	// m_future destructor will wait for sub thread
 }
 
+void AsyncLoadScene::update()
+{
+	updateLoadStatus();
+	updateOnMainThread();
+}
+
 void AsyncLoadScene::startLoadThread()
 {
 	if (m_future.valid()) {

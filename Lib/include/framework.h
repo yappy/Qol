@@ -73,8 +73,8 @@ double nextDouble(double a = 0.0, double max = 1.0);
 namespace scene {
 
 /** @brief Simple scene class base.
-* @details Noncopyable, and has common functions.
-*/
+ * @details Noncopyable, and has common functions.
+ */
 class SceneBase : private util::noncopyable {
 public:
 	/// Constructor (default).
@@ -95,39 +95,43 @@ public:
 	/// Constructor (default).
 	AsyncLoadScene() = default;
 	/** @brief Destructor.
-	* @details
-	* If async task is being processed, sets cancel flag to true and
-	* blocks until task function will return.
-	*/
+	 * @details
+	 * If async task is being processed, sets cancel flag to true and
+	 * blocks until task function will return.
+	 */
 	virtual ~AsyncLoadScene() override;
+	/** @brief Check the state of sub thread and then call @ref updateOnMainThread().
+	 */
+	virtual void update() final override;
 
 protected:
 	/** @brief User-defined async task.
-	* @details
-	* This function will run on a separated thread and
-	* can take a long time to complete.
-	* If this class object is destructed while running,
-	* cancel flag which is passed by parameter will set to be true.
-	* @param[in]	cancel	Cancel signal.
-	*/
+	 * @details
+	 * This function will run on a separated thread and
+	 * can take a long time to complete.
+	 * If this class object is destructed while running,
+	 * cancel flag which is passed by parameter will set to be true.
+	 * @param[in]	cancel	Cancel signal.
+	 */
 	virtual void loadOnSubThread(std::atomic_bool &cancel) = 0;
+	/** @brief Called in @ref update()
+	 */
+	virtual void updateOnMainThread() = 0;
 
 	/** @brief Starts async load task on another thread.
-	* @pre Async task is not running. (@ref isLoadCompleted() returns true.)
-	*/
+	 * @pre Async task is not running. (@ref isLoading() returns false.)
+	 */
 	void startLoadThread();
-	/** @brief Update status. This function must be called in every frames.
-	* @details Do nothing if load task is not being processed.
-	*/
-	void updateLoadStatus();
 	/** @brief Poll the state of the async task.
-	* @ref updateLoadStatus() is needed.
-	*/
+	 * @ref updateLoadStatus() is needed.
+	 */
 	bool isLoading() const;
 
 private:
 	std::atomic_bool m_cancel = false;
 	std::future<void> m_future;
+
+	void updateLoadStatus();
 };
 
 }	// namespace scene

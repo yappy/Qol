@@ -58,7 +58,7 @@ public:
 
 	// Scene specific initialization at scene start
 	void setup();
-	void update() override;
+	void updateOnMainThread() override;
 	void render() override;
 
 protected:
