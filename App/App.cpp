@@ -22,7 +22,7 @@ MyApp::MyApp(const framework::AppParam &appParam,
 	: Application(appParam, graphParam, ResSetId::Count)
 {}
 
-std::unique_ptr<framework::SceneBase> &MyApp::getScene(SceneId id)
+std::unique_ptr<framework::scene::SceneBase> &MyApp::getScene(SceneId id)
 {
 	return m_scenes[static_cast<uint32_t>(id)];
 }

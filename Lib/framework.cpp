@@ -45,6 +45,61 @@ double nextDouble(double a, double b)
 
 }	// namespace random
 
+namespace scene {
+
+///////////////////////////////////////////////////////////////////////////////
+// class AsyncLoadScene impl
+///////////////////////////////////////////////////////////////////////////////
+#pragma region AsyncLoadScene
+
+AsyncLoadScene::~AsyncLoadScene()
+{
+	// set cancel flag
+	m_cancel.store(true);
+	// m_future destructor will wait for sub thread
+}
+
+void AsyncLoadScene::startLoadThread()
+{
+	if (m_future.valid()) {
+		throwTrace<std::logic_error>("Async task is already running");
+	}
+	// move assign
+	m_future = std::async(std::launch::async, [this]() {
+		// can throw an exception
+		loadOnSubThread(m_cancel);
+	});
+}
+
+void AsyncLoadScene::updateLoadStatus()
+{
+	if (m_future.valid()) {
+		auto status = m_future.wait_for(std::chrono::seconds(0));
+		switch (status) {
+		case std::future_status::ready:
+			// complete or exception
+			// make m_future invalid
+			// if an exception is thrown in sub thread, throw it
+			m_future.get();
+			break;
+		case std::future_status::timeout:
+			// not yet
+			break;
+		default:
+			ASSERT(false);
+		}
+	}
+}
+
+bool AsyncLoadScene::isLoading() const
+{
+	return m_future.valid();
+}
+
+}	// namespace scene
+
+#pragma endregion
+
 std::vector<std::wstring> parseCommandLine()
 {
 	// get as const pointer
@@ -217,54 +272,6 @@ const sound::XAudio2::BgmResourcePtr ResourceManager::getBgm(
 	size_t setId, const char *resId) const
 {
 	return getResource(m_bgmMapVec, setId, resId);
-}
-
-#pragma endregion
-
-///////////////////////////////////////////////////////////////////////////////
-// class AsyncLoadScene impl
-///////////////////////////////////////////////////////////////////////////////
-#pragma region AsyncLoadScene
-
-AsyncLoadScene::~AsyncLoadScene()
-{
-	// set cancel flag
-	m_cancel.store(true);
-	// m_future destructor will wait for sub thread
-}
-
-void AsyncLoadScene::startLoadThread()
-{
-	// move assign
-	m_future = std::async(std::launch::async, [this]() {
-		// can throw an exception
-		loadOnSubThread(m_cancel);
-	});
-}
-
-void AsyncLoadScene::updateLoadStatus()
-{
-	if (m_future.valid()) {
-		auto status = m_future.wait_for(std::chrono::seconds(0));
-		switch (status) {
-		case std::future_status::ready:
-			// complete or exception
-			// make m_future invalid
-			// if an exception is thrown in sub thread, throw it
-			m_future.get();
-			break;
-		case std::future_status::timeout:
-			// not yet
-			break;
-		default:
-			ASSERT(false);
-		}
-	}
-}
-
-bool AsyncLoadScene::isLoadCompleted() const
-{
-	return !m_future.valid();
 }
 
 #pragma endregion

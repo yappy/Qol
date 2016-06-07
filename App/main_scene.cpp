@@ -45,7 +45,7 @@ void MainScene::update()
 
 	if (m_loading) {
 		updateLoadStatus();
-		if (isLoadCompleted()) {
+		if (!isLoading()) {
 			m_loading = false;
 			m_lua.callGlobal("start", dbg);
 		}
@@ -81,7 +81,7 @@ void MainScene::update()
 
 void MainScene::render()
 {
-	if (!isLoadCompleted()) {
+	if (isLoading()) {
 		// Loading screen
 		return;
 	}

@@ -70,6 +70,69 @@ double nextDouble(double a = 0.0, double max = 1.0);
 
 }	// namespace random
 
+namespace scene {
+
+/** @brief Simple scene class base.
+* @details Noncopyable, and has common functions.
+*/
+class SceneBase : private util::noncopyable {
+public:
+	/// Constructor (default).
+	SceneBase() = default;
+	/// Virtual Destructor (default).
+	virtual ~SceneBase() = default;
+
+	/// Frame update.
+	virtual void update() = 0;
+	/// Rendering.
+	virtual void render() = 0;
+};
+
+/** @brief Scene class with an async loading task.
+*/
+class AsyncLoadScene : public SceneBase {
+public:
+	/// Constructor (default).
+	AsyncLoadScene() = default;
+	/** @brief Destructor.
+	* @details
+	* If async task is being processed, sets cancel flag to true and
+	* blocks until task function will return.
+	*/
+	virtual ~AsyncLoadScene() override;
+
+protected:
+	/** @brief User-defined async task.
+	* @details
+	* This function will run on a separated thread and
+	* can take a long time to complete.
+	* If this class object is destructed while running,
+	* cancel flag which is passed by parameter will set to be true.
+	* @param[in]	cancel	Cancel signal.
+	*/
+	virtual void loadOnSubThread(std::atomic_bool &cancel) = 0;
+
+	/** @brief Starts async load task on another thread.
+	* @pre Async task is not running. (@ref isLoadCompleted() returns true.)
+	*/
+	void startLoadThread();
+	/** @brief Update status. This function must be called in every frames.
+	* @details Do nothing if load task is not being processed.
+	*/
+	void updateLoadStatus();
+	/** @brief Poll the state of the async task.
+	* @ref updateLoadStatus() is needed.
+	*/
+	bool isLoading() const;
+
+private:
+	std::atomic_bool m_cancel = false;
+	std::future<void> m_future;
+};
+
+}	// namespace scene
+
+
 /** @brief Command line utility.
  * @return Parsed result vector. (argc-argv compatible)
  */
@@ -182,66 +245,6 @@ private:
 	ResMapVec<sound::XAudio2::SeResource>			m_seMapVec;
 	ResMapVec<sound::XAudio2::BgmResource>			m_bgmMapVec;
 };
-
-
-/** @brief Simple scene class base.
- * @details Noncopyable, and has common functions.
- */
-class SceneBase : private util::noncopyable {
-public:
-	/// Constructor (default).
-	SceneBase() = default;
-	/// Virtual Destructor (default).
-	virtual ~SceneBase() = default;
-
-	/// Frame update.
-	virtual void update() = 0;
-	/// Rendering.
-	virtual void render() = 0;
-};
-
-/** @brief Scene class with an async loading task.
- */
-class AsyncLoadScene : public SceneBase {
-public:
-	/// Constructor (default).
-	AsyncLoadScene() = default;
-	/** @brief Destructor.
-	 * @details
-	 * If async task is being processed, sets cancel flag to true and
-	 * blocks until task function will return.
-	 */
-	virtual ~AsyncLoadScene() override;
-
-protected:
-	/** @brief User-defined async task.
-	 * @details
-	 * This function will run on a separated thread and
-	 * can take a long time to complete.
-	 * If this class object is destructed while running,
-	 * cancel flag which is passed by parameter will set to be true.
-	 * @param[in]	cancel	Cancel signal.
-	 */
-	virtual void loadOnSubThread(std::atomic_bool &cancel) = 0;
-
-	/** @brief Starts async load task on another thread.
-	 * @pre Async task is not running. (@ref isLoadCompleted() returns true.)
-	 */
-	void startLoadThread();
-	/** @brief Update status. This function must be called in every frames.
-	 * @details Do nothing if load task is not being processed.
-	 */
-	void updateLoadStatus();
-	/** @brief Poll the state of the async task.
-	 * @ref updateLoadStatus() is needed.
-	 */
-	bool isLoadCompleted() const;
-
-private:
-	std::atomic_bool m_cancel = false;
-	std::future<void> m_future;
-};
-
 
 struct hwndDeleter {
 	using pointer = HWND;
