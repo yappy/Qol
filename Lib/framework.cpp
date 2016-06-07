@@ -85,7 +85,7 @@ void addResource(ResourceManager::ResMapVec<T> *targetMapVec, bool locked,
 	size_t setId, const char * resId, std::function<U> loadFunc)
 {
 	if (locked) {
-		throw std::logic_error("Resource is not allowed to be added now");
+		throwTrace<std::logic_error>("Resource is not allowed to be added now");
 	}
 
 	IdString fixedResId;
@@ -93,7 +93,7 @@ void addResource(ResourceManager::ResMapVec<T> *targetMapVec, bool locked,
 	std::unordered_map<IdString, Resource<T>> &map =
 		targetMapVec->at(setId);
 	if (map.count(fixedResId) != 0) {
-		throw std::invalid_argument(std::string("Resource ID already exists: ") + resId);
+		throwTrace<std::invalid_argument>(std::string("Resource ID already exists: ") + resId);
 	}
 	// key = IdString(fixedResId)
 	// value = Resource<T>(loadfunc)
@@ -188,7 +188,7 @@ const typename Resource<T>::PtrType getResource(
 	util::createFixedString(&fixedResId, resId);
 	auto &map = mapVec.at(setId);
 	if (map.count(fixedResId) == 0) {
-		throw std::invalid_argument(std::string("Resource ID not found: ") + resId);
+		throwTrace<std::invalid_argument>(std::string("Resource ID not found: ") + resId);
 	}
 	return map.at(fixedResId).getPtr();
 }
