@@ -184,25 +184,57 @@ private:
 };
 
 
+/** @brief Simple scene class base.
+ * @details Noncopyable, and has common functions.
+ */
 class SceneBase : private util::noncopyable {
 public:
+	/// Constructor (default).
 	SceneBase() = default;
+	/// Virtual Destructor (default).
 	virtual ~SceneBase() = default;
 
+	/// Frame update.
 	virtual void update() = 0;
+	/// Rendering.
 	virtual void render() = 0;
 };
 
+/** @brief Scene class with an async loading task.
+ */
 class AsyncLoadScene : public SceneBase {
 public:
+	/// Constructor (default).
 	AsyncLoadScene() = default;
+	/** @brief Destructor.
+	 * @details
+	 * If async task is being processed, sets cancel flag to true and
+	 * blocks until task function will return.
+	 */
 	virtual ~AsyncLoadScene() override;
 
 protected:
+	/** @brief User-defined async task.
+	 * @details
+	 * This function will run on a separated thread and
+	 * can take a long time to complete.
+	 * If this class object is destructed while running,
+	 * cancel flag which is passed by parameter will set to be true.
+	 * @param[in]	cancel	Cancel signal.
+	 */
 	virtual void loadOnSubThread(std::atomic_bool &cancel) = 0;
 
+	/** @brief Starts async load task on another thread.
+	 * @pre Async task is not running. (@ref isLoadCompleted() returns true.)
+	 */
 	void startLoadThread();
+	/** @brief Update status. This function must be called in every frames.
+	 * @details Do nothing if load task is not being processed.
+	 */
 	void updateLoadStatus();
+	/** @brief Poll the state of the async task.
+	 * @ref updateLoadStatus() is needed.
+	 */
 	bool isLoadCompleted() const;
 
 private:
@@ -264,8 +296,8 @@ struct AppParam {
 };
 
 /** @brief User application base, which manages a window and DirectX objects.
-* @details Please inherit this class and override protected methods.
-*/
+ * @details Please inherit this class and override protected methods.
+ */
 class Application : private util::noncopyable {
 public:
 	/** @brief Constructor.
