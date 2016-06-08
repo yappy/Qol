@@ -20,6 +20,7 @@ struct ResSetId {
 	enum {
 		Common,
 		Main,
+		Sub,
 		Count
 	};
 };
@@ -71,6 +72,8 @@ private:
 	static const int LuaInstLimit = 100000;
 
 	MyApp *m_app;
+	// The first update() call after setup()
+	bool m_luaStartCalled = false;
 	// nullptr indicates lua error state
 	std::unique_ptr<lua::Lua> m_lua;
 	bool m_luaDebug;

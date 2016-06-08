@@ -50,34 +50,31 @@ void MainScene::reloadLua()
 
 void MainScene::luaErrorHandler(const lua::LuaError &err, const wchar_t *msg)
 {
-	debug::writef("Lua error: %s", msg);
-	debug::writeLine(err.what());
 	// go to lua error state (m_lua == nullptr)
 	m_lua.reset();
+
+	debug::writeLine(err.what());
+	debug::writef(L"Lua error: %s", msg);
+	debug::writeLine(L"Press F5 to reload");
 }
 
 void MainScene::setup()
 {
-	bool dbg = keyPressedAsync(VK_F12);
-	// exec start()
-	if (m_lua != nullptr) {
-		try {
-			m_lua->callGlobal("start", dbg);
-		}
-		catch(lua::LuaError &err) {
-			luaErrorHandler(err, L"exec start()");
-		}
-	}
+	m_luaStartCalled = false;
 	startLoadThread();
 }
 
 void MainScene::loadOnSubThread(std::atomic_bool &cancel)
 {
-	m_app->loadResourceSet(0, cancel);
 	// dummy 1000ms load time
 	for (int i = 0; i < 1000; i++) {
+		if (cancel.load()) {
+			debug::writeLine("cancel");
+			break;
+		}
 		Sleep(1);
 	}
+	m_app->loadResourceSet(ResSetId::Main, cancel);
 	debug::writeLine(L"sub thread complete!");
 }
 
@@ -98,6 +95,18 @@ void MainScene::updateOnMainThread()
 		return;
 	}
 
+	// exec start() (Only once)
+	if (!m_luaStartCalled) {
+		try {
+			m_lua->callGlobal("start", dbg);
+		}
+		catch (lua::LuaError &err) {
+			luaErrorHandler(err, L"exec start()");
+			return;
+		}
+		m_luaStartCalled = true;
+	}
+
 	auto keys = m_app->input().getKeys();
 	try {
 		m_lua->callGlobal("update", dbg,
@@ -115,11 +124,18 @@ void MainScene::updateOnMainThread()
 	}
 	catch(lua::LuaError &err) {
 		luaErrorHandler(err, L"exec update()");
+		return;
 	}
 
 	if (keys[DIK_SPACE]) {
 		// SPACE to sub scene
-		m_lua->callGlobal("exit", dbg);
+		try {
+			m_lua->callGlobal("exit", dbg);
+		}
+		catch (lua::LuaError &err) {
+			luaErrorHandler(err, L"exec update()");
+			return;
+		}
 		auto *next = m_app->getSceneAs<SubScene>(SceneId::Sub);
 		next->setup();
 		next->update();
