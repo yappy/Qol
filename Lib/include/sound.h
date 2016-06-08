@@ -10,12 +10,16 @@ namespace yappy {
 /// Sound effect and BGM library.
 namespace sound {
 
-// 3MiB
-const uint32_t SoundFileSizeMax = 3 * 1024 * 1024;
+/// SE file size limit (wave data part): 3MiB
+const uint32_t SoundEffectSizeMax = 3 * 1024 * 1024;
+/// Playing SE at the same time limit.
 const uint32_t SoundEffectPlayMax = 64;
 
+/// BGM ov_read unit.
 const uint32_t BgmOvReadSize = 4096;
+/// BGM one buffer size. (Consumes @ref BgmBufferSize * @ref BgmBufferCount bytes)
 const uint32_t BgmBufferSize = 4096 * 16;
+/// BGM buffer count.
 const uint32_t BgmBufferCount = 2;
 
 #pragma region Deleters
@@ -42,6 +46,7 @@ struct oggFileDeleter {
 };
 #pragma endregion
 
+/// Sound effect resource.
 struct SoundEffect : private util::noncopyable {
 	WAVEFORMATEX format;
 	file::Bytes samples;
@@ -49,6 +54,7 @@ struct SoundEffect : private util::noncopyable {
 	~SoundEffect() = default;
 };
 
+/// BGM resource.
 struct Bgm : private util::noncopyable {
 	using OggFilePtr = std::unique_ptr<OggVorbis_File, oggFileDeleter>;
 
@@ -70,6 +76,7 @@ private:
 	static int close(void *datasource);
 };
 
+/// XAudio2 manager.
 class XAudio2 : private util::noncopyable {
 public:
 	using SeResource = const SoundEffect;
@@ -77,21 +84,65 @@ public:
 	using BgmResource = Bgm;
 	using BgmResourcePtr = std::shared_ptr<BgmResource>;
 
+	/// Initialize XAudio2.
 	XAudio2();
+	/// Finalize XAudio2.
 	~XAudio2();
 
+	/** @brief Application must call this function every frames.
+	 * @details
+	 * @li Free SE entry which has done.
+	 * @li Decode ogg partly and write to BGM buffer.
+	 */
 	void processFrame();
 
-	// Sound Effect
+	/// @name Sound Effect
+	//@{
+	/** @brief Load a sound effect resource.
+	 * @details This function may take time.
+	 * @param[in]	path	(abstract file layer) File path.
+	 * @return				shared_ptr to sound effect resource.
+	 * @sa @ref yappy::file
+	 */
 	SeResourcePtr loadSoundEffect(const wchar_t *path);
-	void playSoundEffect(const SeResourcePtr &se);
-	bool isPlayingAnySoundEffect() const;
-	void stopAllSoundEffect();
 
-	// BGM
+	/** @brief Starts playing a sound effect.
+	 * @param[in]	se	Sound effect resource.
+	 */
+	void playSoundEffect(const SeResourcePtr &se);
+
+	/** @brief Returns whether any sound effects are playing.
+	 * @return true if one or more sound effects are playing.
+	 */
+	bool isPlayingAnySoundEffect() const;
+
+	/** @brief Stops all sound effects.
+	 */
+	void stopAllSoundEffect();
+	//@}
+
+	/// @name BGM
+	//@{
+	/** @brief Load a BGM resource.
+	 * @details This function may take time.
+	 * @param[in]	path	(abstract file layer) File path.
+	 * @return				shared_ptr to BGM resource.
+	 * @sa @ref yappy::file
+	 */
 	BgmResourcePtr loadBgm(const wchar_t *path);
+
+	/** @brief Starts playing a BGM.
+	 * @details
+	 * Only one BGM can be played at the same time.
+	 * This function will stop the current BGM and then start the new BGM.
+	 * @param[in]	se	Sound effect resource.
+	 */
 	void playBgm(const BgmResourcePtr &bgm);
+
+	/** @brief Stops playing a BGM.
+	 */
 	void stopBgm();
+	//@}
 
 private:
 	using IXAudio2Ptr = util::ComPtr<IXAudio2>;

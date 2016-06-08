@@ -68,7 +68,7 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 		throwTrace<MmioError>("mmioDescend() failed", mmRes);
 	}
 	// read "data"
-	if (dataChunk.cksize > SoundFileSizeMax) {
+	if (dataChunk.cksize > SoundEffectSizeMax) {
 		throwTrace<MmioError>("data size too large", 0);
 	}
 	out->samples.resize(dataChunk.cksize);
