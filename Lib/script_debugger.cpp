@@ -17,6 +17,8 @@ extern "C" {
 namespace yappy {
 namespace lua {
 namespace debugger {
+	
+using error::throwTrace;
 
 namespace {
 
@@ -99,7 +101,7 @@ void LuaDebugger::loadDebugInfo(const char *name, const char *src, size_t size)
 	// get valid lines
 	info.validLines.resize(info.srcLines.size(), 0);
 	if (!lua_isfunction(L, -1)) {
-		throw std::logic_error("stack top must be chunk");
+		throwTrace<std::logic_error>("stack top must be chunk");
 	}
 #ifdef ENABLE_LUAIMPL_DEPENDENT
 	impldep::forAllValidLines(L, [&info](int line) {
@@ -138,7 +140,7 @@ void LuaDebugger::pcall(int narg, int nret, bool autoBreak)
 		int ret = lua_pcall(L, narg, nret, base);
 		lua_remove(L, base);				// remove message handler
 		if (ret != LUA_OK) {
-			throw LuaError("Call global function failed", L);
+			throwTrace<LuaError>("Call global function failed", L);
 		}
 	} // unhook
 }

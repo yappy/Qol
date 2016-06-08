@@ -9,6 +9,7 @@
 namespace yappy {
 namespace input {
 
+using error::throwTrace;
 using error::checkDXResult;
 using error::DIError;
 
@@ -288,7 +289,7 @@ const DikConvEntry DikConvTable[DInput::KEY_NUM] = {
 const char *dikToString(int dik)
 {
 	if (dik < 0 || dik >= 256) {
-		throw std::logic_error("invalid DIK");
+		throwTrace<std::logic_error>("invalid DIK");
 	}
 	return DikConvTable[dik].str;
 }
@@ -296,7 +297,7 @@ const char *dikToString(int dik)
 const wchar_t *dikToWString(int dik)
 {
 	if (dik < 0 || dik >= 256) {
-		throw std::logic_error("invalid DIK");
+		throwTrace<std::logic_error>("invalid DIK");
 	}
 	return DikConvTable[dik].wstr;
 }

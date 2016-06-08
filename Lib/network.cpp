@@ -9,6 +9,7 @@
 namespace yappy {
 namespace network {
 
+using error::throwTrace;
 using error::WinSockError;
 
 void initialize()
@@ -18,12 +19,12 @@ void initialize()
 
 	ret = ::WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (ret != 0) {
-		throw WinSockError("WSAStartup() failed", ret);
+		throwTrace<WinSockError>("WSAStartup() failed", ret);
 	}
 
 	if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2) {
 		finalize();
-		throw WinSockError("WSAStartup() failed", ret);
+		throwTrace<WinSockError>("WSAStartup() failed", ret);
 	}
 
 	debug::writef(L"WinSock2 initialized");

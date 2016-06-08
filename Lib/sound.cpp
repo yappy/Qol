@@ -10,6 +10,7 @@
 namespace yappy {
 namespace sound {
 
+using error::throwTrace;
 using error::MmioError;
 using error::OggVorbisError;
 using error::checkDXResult;
@@ -28,7 +29,7 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 
 	HMMIO tmpHMmio = mmioOpen(0, &mmioInfo, MMIO_READ);
 	if (tmpHMmio == nullptr) {
-		throw MmioError("mmioOpen() failed", mmioInfo.wErrorRet);
+		throwTrace<MmioError>("mmioOpen() failed", mmioInfo.wErrorRet);
 	}
 	std::unique_ptr<HMMIO, hmmioDeleter> hMmio(tmpHMmio);
 
@@ -38,42 +39,42 @@ void loadWaveFile(SoundEffect *out, const wchar_t *path)
 	riffChunk.fccType = mmioFOURCC('W', 'A', 'V', 'E');
 	mmRes = mmioDescend(hMmio.get(), &riffChunk, nullptr, MMIO_FINDRIFF);
 	if (mmRes != MMSYSERR_NOERROR) {
-		throw MmioError("mmioDescend() failed", mmRes);
+		throwTrace<MmioError>("mmioDescend() failed", mmRes);
 	}
 	// enter "fmt "
 	MMCKINFO formatChunk = { 0 };
 	formatChunk.ckid = mmioFOURCC('f', 'm', 't', ' ');
 	mmRes = mmioDescend(hMmio.get(), &formatChunk, &riffChunk, MMIO_FINDCHUNK);
 	if (mmRes != MMSYSERR_NOERROR) {
-		throw MmioError("mmioDescend() failed", mmRes);
+		throwTrace<MmioError>("mmioDescend() failed", mmRes);
 	}
 	// read "fmt "
 	::ZeroMemory(&out->format, sizeof(out->format));
 	DWORD fmtSize = std::min(formatChunk.cksize, static_cast<DWORD>(sizeof(out->format)));
 	DWORD size = mmioRead(hMmio.get(), reinterpret_cast<HPSTR>(&out->format), fmtSize);
 	if (size != fmtSize) {
-		throw MmioError("mmioRead() failed", size);
+		throwTrace<MmioError>("mmioRead() failed", size);
 	}
 	// leave "fmt "
 	mmRes = mmioAscend(hMmio.get(), &formatChunk, 0);
 	if (mmRes != MMSYSERR_NOERROR) {
-		throw MmioError("mmioAscend() failed", mmRes);
+		throwTrace<MmioError>("mmioAscend() failed", mmRes);
 	}
 	// enter "data"
 	MMCKINFO dataChunk = { 0 };
 	dataChunk.ckid = mmioFOURCC('d', 'a', 't', 'a');
 	mmRes = mmioDescend(hMmio.get(), &dataChunk, &riffChunk, MMIO_FINDCHUNK);
 	if (mmRes != MMSYSERR_NOERROR) {
-		throw MmioError("mmioDescend() failed", mmRes);
+		throwTrace<MmioError>("mmioDescend() failed", mmRes);
 	}
 	// read "data"
 	if (dataChunk.cksize > SoundFileSizeMax) {
-		throw MmioError("data size too large", 0);
+		throwTrace<MmioError>("data size too large", 0);
 	}
 	out->samples.resize(dataChunk.cksize);
 	size = mmioRead(hMmio.get(), reinterpret_cast<HPSTR>(out->samples.data()), dataChunk.cksize);
 	if (size != dataChunk.cksize) {
-		throw MmioError("mmioRead() failed", size);
+		throwTrace<MmioError>("mmioRead() failed", size);
 	}
 }
 
@@ -242,7 +243,7 @@ void XAudio2::playBgm(const BgmResourcePtr &bgm)
 	// ovinfo
 	vorbis_info *info = ov_info(bgm->ovFp(), -1);
 	if (info == nullptr) {
-		throw OggVorbisError("ov_info() failed", 0);
+		throwTrace<OggVorbisError>("ov_info() failed", 0);
 	}
 	debug::writef(L"ov_info: channels=%d, rate=%ld", info->channels, info->rate);
 	// WAVEFORMAT from ovinfo
@@ -306,7 +307,7 @@ void XAudio2::processFrameBgm()
 			&m_pBgmBuffer[base + readSum],
 			BgmOvReadSize, 0, 2, 1, nullptr);
 		if (size < 0) {
-			throw OggVorbisError("ov_read() failed", size);
+			throwTrace<OggVorbisError>("ov_read() failed", size);
 		}
 		readSum += size;
 		if (size == 0) {
@@ -314,7 +315,7 @@ void XAudio2::processFrameBgm()
 			// TODO: loop point
 			int ret = ::ov_time_seek(fp, 0.0);
 			if (ret < 0) {
-				throw OggVorbisError("ov_time_seek() failed", ret);
+				throwTrace<OggVorbisError>("ov_time_seek() failed", ret);
 			}
 		}
 	}
@@ -339,7 +340,7 @@ Bgm::Bgm(file::Bytes &&ovFileBin) :
 	ov_callbacks callbacks = { read, seek, close, tell };
 	int ret = ::ov_open_callbacks(this, &m_ovFile, nullptr, 0, callbacks);
 	if (ret != 0) {
-		throw OggVorbisError("ov_open_callbacks() failed", ret);
+		throwTrace<OggVorbisError>("ov_open_callbacks() failed", ret);
 	}
 	// auto close at destructor
 	m_ovFp.reset(&m_ovFile);
