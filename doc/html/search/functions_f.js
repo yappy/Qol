@@ -1,8 +1,10 @@
 var searchData=
 [
-  ['readfile',['readFile',['../structyappy_1_1lua_1_1export_1_1sys.html#a6a6ae3fbebec2aad4bca41a63227ea98',1,'yappy::lua::export::sys']]],
-  ['render',['render',['../classyappy_1_1framework_1_1SceneBase.html#a228632a5eeed080d67d400c623f91705',1,'yappy::framework::SceneBase::render()'],['../classyappy_1_1framework_1_1Application.html#abebce0c0af3332b2b4de830a74da25af',1,'yappy::framework::Application::render()'],['../classyappy_1_1graphics_1_1DGraphics.html#a459572c49c65c4f5cde72aa171f0a744',1,'yappy::graphics::DGraphics::render()']]],
-  ['resource',['Resource',['../classyappy_1_1framework_1_1Resource.html#a4af111e17400dc9b70e991d39e5b233f',1,'yappy::framework::Resource']]],
-  ['resourcemanager',['ResourceManager',['../classyappy_1_1framework_1_1ResourceManager.html#ad52d2cb4be593853632fccac1bb31274',1,'yappy::framework::ResourceManager']]],
-  ['run',['run',['../classyappy_1_1framework_1_1Application.html#ac5d9321e4dedb79a391b43048e8d97c6',1,'yappy::framework::Application']]]
+  ['parsecommandline',['parseCommandLine',['../namespaceyappy_1_1framework.html#a8d09d79567815e29b0fce6646619c5c1',1,'yappy::framework']]],
+  ['pcall',['pcall',['../classyappy_1_1lua_1_1debugger_1_1LuaDebugger.html#a13898f54d9be4b5ac4b42b628e08029c',1,'yappy::lua::debugger::LuaDebugger']]],
+  ['perf',['perf',['../structyappy_1_1lua_1_1export_1_1trace.html#a2c563dfd19cbf69bdd684799b58caf5d',1,'yappy::lua::export::trace']]],
+  ['playbgm',['playBgm',['../structyappy_1_1lua_1_1export_1_1sound.html#a2221aa3761e42192a6ac041a430a23da',1,'yappy::lua::export::sound::playBgm()'],['../classyappy_1_1sound_1_1XAudio2.html#a976e51981b1ad2a1b20972242fdcb1a4',1,'yappy::sound::XAudio2::playBgm()']]],
+  ['playse',['playSe',['../structyappy_1_1lua_1_1export_1_1sound.html#a0f900d16f4e5ef1b65bcb846639ad3e6',1,'yappy::lua::export::sound']]],
+  ['playsoundeffect',['playSoundEffect',['../classyappy_1_1sound_1_1XAudio2.html#a821d293d6272aeb02f4a28414ecdd5e0',1,'yappy::sound::XAudio2']]],
+  ['processframe',['processFrame',['../classyappy_1_1input_1_1DInput.html#a135f70139a145e8a4a015572ac9ab464',1,'yappy::input::DInput::processFrame()'],['../classyappy_1_1sound_1_1XAudio2.html#a9e8d2fffaa218f12dbff074af17bf83f',1,'yappy::sound::XAudio2::processFrame()']]]
 ];

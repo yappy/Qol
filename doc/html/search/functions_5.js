@@ -1,7 +1,8 @@
 var searchData=
 [
-  ['finalize',['finalize',['../namespaceyappy_1_1network.html#ab2fa8e5c18b90bf6ce21d53dce93a2ab',1,'yappy::network']]],
-  ['fonttexture',['FontTexture',['../structyappy_1_1graphics_1_1FontTexture.html#a0b6f265ec0bcdb12d0772ec64bc8e8d9',1,'yappy::graphics::FontTexture']]],
-  ['fr',['fr',['../classyappy_1_1lua_1_1debugger_1_1LuaDebugger.html#aa9a1d4612cb131ff183904963fbb556e',1,'yappy::lua::debugger::LuaDebugger']]],
-  ['framecontrol',['FrameControl',['../classyappy_1_1framework_1_1FrameControl.html#a05403f3d858dc29dbc4985b772cc4e22',1,'yappy::framework::FrameControl']]]
+  ['enableconsoleoutput',['enableConsoleOutput',['../namespaceyappy_1_1debug.html#a0add3b08978677800968746611d196ed',1,'yappy::debug']]],
+  ['enabledebugoutput',['enableDebugOutput',['../namespaceyappy_1_1debug.html#ad36f7dc338b3ec5d4bc17139b72a218b',1,'yappy::debug']]],
+  ['enablefileoutput',['enableFileOutput',['../namespaceyappy_1_1debug.html#afff3e88cdb1955f6be9fbf970d77ebcf',1,'yappy::debug']]],
+  ['endframe',['endFrame',['../classyappy_1_1framework_1_1FrameControl.html#abdb85a5af462594241e8f930bf0667a9',1,'yappy::framework::FrameControl']]],
+  ['eval',['eval',['../classyappy_1_1lua_1_1debugger_1_1LuaDebugger.html#af4b109f3b33586243b79acebe430da52',1,'yappy::lua::debugger::LuaDebugger']]]
 ];

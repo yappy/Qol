@@ -93,6 +93,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">yappy::error Namespace Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Exceptions and utilities.  
+<a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
@@ -103,6 +106,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1error_1_1DSError.html">DSError</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1error_1_1DXError.html">DXError</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1error_1_1FrameworkError.html">FrameworkError</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1error_1_1MmioError.html">MmioError</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -117,13 +122,58 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ab5d8f44136585ac0b76093196b68fb8a"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1error.html#ab5d8f44136585ac0b76093196b68fb8a">createStackTraceMsg</a> (const std::string &amp;<a class="el" href="debug_8cpp.html#ad52d57719771a49198e71ab84c352001">msg</a>)</td></tr>
+<tr class="memdesc:ab5d8f44136585ac0b76093196b68fb8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns (msg + stacktrace) string.  <a href="#ab5d8f44136585ac0b76093196b68fb8a">More...</a><br /></td></tr>
+<tr class="separator:ab5d8f44136585ac0b76093196b68fb8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a036059d4263709ae4bbced57a61170e5"><td class="memTemplParams" colspan="2">template&lt;class E , class... Args&gt; </td></tr>
+<tr class="memitem:a036059d4263709ae4bbced57a61170e5"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1error.html#a036059d4263709ae4bbced57a61170e5">__declspec</a> (noreturn) inline void throwTrace(const std</td></tr>
+<tr class="memdesc:a036059d4263709ae4bbced57a61170e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Throw exception with (msg + stacktrace) message.  <a href="#a036059d4263709ae4bbced57a61170e5">More...</a><br /></td></tr>
+<tr class="separator:a036059d4263709ae4bbced57a61170e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9eb1e0d7c297408269164fa87f24b302"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1error.html#a9eb1e0d7c297408269164fa87f24b302">checkWin32Result</a> (bool cond, const std::string &amp;<a class="el" href="debug_8cpp.html#ad52d57719771a49198e71ab84c352001">msg</a>)</td></tr>
 <tr class="separator:a9eb1e0d7c297408269164fa87f24b302"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac568edf99f3166acb48d86be2921fe24"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:ac568edf99f3166acb48d86be2921fe24"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1error.html#ac568edf99f3166acb48d86be2921fe24">checkDXResult</a> (HRESULT hr, const std::string &amp;<a class="el" href="debug_8cpp.html#ad52d57719771a49198e71ab84c352001">msg</a>)</td></tr>
 <tr class="separator:ac568edf99f3166acb48d86be2921fe24"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Function Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Exceptions and utilities. </p>
+</div><h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="a036059d4263709ae4bbced57a61170e5"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class E , class... Args&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">yappy::error::__declspec </td>
+          <td>(</td>
+          <td class="paramtype">noreturn&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Throw exception with (msg + stacktrace) message. </p>
+<p>This function calls the constructor of exception class E as: </p><div class="fragment"><div class="line"><span class="keywordflow">throw</span> E(<a class="code" href="debug_8cpp.html#ad52d57719771a49198e71ab84c352001">msg</a> + stacktrace, args...);</div></div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">E</td><td>Exception class to be thrown. </td></tr>
+    <tr><td class="paramname">Args</td><td>Additional parameters for constructor call. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">msg</td><td>Exception message. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">args</td><td>Additional parameters for constructor call. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="exceptions_8h_source.html#l00030">30</a> of file <a class="el" href="exceptions_8h_source.html">exceptions.h</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="ac568edf99f3166acb48d86be2921fe24"></a>
 <div class="memitem">
 <div class="memproto">
@@ -158,7 +208,7 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="exceptions_8h_source.html#l00051">51</a> of file <a class="el" href="exceptions_8h_source.html">exceptions.h</a>.</p>
+<p>Definition at line <a class="el" href="exceptions_8h_source.html#l00083">83</a> of file <a class="el" href="exceptions_8h_source.html">exceptions.h</a>.</p>
 
 </div>
 </div>
@@ -194,7 +244,34 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="exceptions_8h_source.html#l00018">18</a> of file <a class="el" href="exceptions_8h_source.html">exceptions.h</a>.</p>
+<p>Definition at line <a class="el" href="exceptions_8h_source.html#l00050">50</a> of file <a class="el" href="exceptions_8h_source.html">exceptions.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab5d8f44136585ac0b76093196b68fb8a"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string yappy::error::createStackTraceMsg </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>msg</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns (msg + stacktrace) string. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">msg</td><td>Original string. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>msg + stacktrace. </dd></dl>
+
+<p>Definition at line <a class="el" href="exceptions_8cpp_source.html#l00011">11</a> of file <a class="el" href="exceptions_8cpp_source.html">exceptions.cpp</a>.</p>
 
 </div>
 </div>

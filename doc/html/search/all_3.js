@@ -18,6 +18,7 @@ var searchData=
   ['configurations',['configurations',['../ReadMe_8txt.html#aab1e9a0b414d106b6d4a67a9a9bbd024',1,'ReadMe.txt']]],
   ['counter',['counter',['../debug_8cpp.html#a8742da7ae3653aac68563214f4571aea',1,'debug.cpp']]],
   ['createfixedstring',['createFixedString',['../namespaceyappy_1_1util.html#a40109b676fbe6d04a3bcc3e2102a203d',1,'yappy::util']]],
+  ['createstacktracemsg',['createStackTraceMsg',['../namespaceyappy_1_1error.html#ab5d8f44136585ac0b76093196b68fb8a',1,'yappy::error']]],
   ['cx',['cx',['../structyappy_1_1graphics_1_1DrawTask.html#aa2fb8967d38e057f81264ac910225bff',1,'yappy::graphics::DrawTask']]],
   ['cy',['cy',['../structyappy_1_1graphics_1_1DrawTask.html#a6b68377cd74fddc8fa0cdcb9750a9f63',1,'yappy::graphics::DrawTask']]]
 ];

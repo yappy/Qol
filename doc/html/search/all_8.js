@@ -11,6 +11,5 @@ var searchData=
   ['hiconsm',['hIconSm',['../structyappy_1_1framework_1_1AppParam.html#a572329ddfc018e022c7d5706abcbdeb4',1,'yappy::framework::AppParam']]],
   ['hinstance',['hInstance',['../structyappy_1_1framework_1_1AppParam.html#a6424d168beef626a73f027a1b039bdde',1,'yappy::framework::AppParam']]],
   ['hmmiodeleter',['hmmioDeleter',['../structyappy_1_1sound_1_1hmmioDeleter.html',1,'yappy::sound']]],
-  ['hwnd',['hWnd',['../structyappy_1_1graphics_1_1GraphicsParam.html#ae815a94e3fbfa9125aae354b20baecfa',1,'yappy::graphics::GraphicsParam']]],
-  ['hwnddeleter',['hwndDeleter',['../structyappy_1_1framework_1_1hwndDeleter.html',1,'yappy::framework']]]
+  ['hwnd',['hWnd',['../structyappy_1_1graphics_1_1GraphicsParam.html#ae815a94e3fbfa9125aae354b20baecfa',1,'yappy::graphics::GraphicsParam']]]
 ];

@@ -93,6 +93,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <code>#include &quot;<a class="el" href="framework_8h_source.html">include/framework.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="debug_8h_source.html">include/debug.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="exceptions_8h_source.html">include/exceptions.h</a>&quot;</code><br />
+<code>#include &lt;random&gt;</code><br />
 </div>
 <p><a href="framework_8cpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -103,9 +104,29 @@ Namespaces</h2></td></tr>
 <tr class="memitem:namespaceyappy_1_1framework"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1framework.html">yappy::framework</a></td></tr>
 <tr class="memdesc:namespaceyappy_1_1framework"><td class="mdescLeft">&#160;</td><td class="mdescRight">Game application main framework. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespaceyappy_1_1framework_1_1random"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1framework_1_1random.html">yappy::framework::random</a></td></tr>
+<tr class="memdesc:namespaceyappy_1_1framework_1_1random"><td class="mdescLeft">&#160;</td><td class="mdescRight">Random number framework. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespaceyappy_1_1framework_1_1scene"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1framework_1_1scene.html">yappy::framework::scene</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:acb25b2359b0373ccdd036bb233cebc20"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1framework_1_1random.html#acb25b2359b0373ccdd036bb233cebc20">yappy::framework::random::generateRandomSeed</a> ()</td></tr>
+<tr class="memdesc:acb25b2359b0373ccdd036bb233cebc20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate nondeterministic random number for seed.  <a href="namespaceyappy_1_1framework_1_1random.html#acb25b2359b0373ccdd036bb233cebc20">More...</a><br /></td></tr>
+<tr class="separator:acb25b2359b0373ccdd036bb233cebc20"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a787e868167fdd10ad8277023355e7bcc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1framework_1_1random.html#a787e868167fdd10ad8277023355e7bcc">yappy::framework::random::setSeed</a> (unsigned int seed)</td></tr>
+<tr class="memdesc:a787e868167fdd10ad8277023355e7bcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set random seed.  <a href="namespaceyappy_1_1framework_1_1random.html#a787e868167fdd10ad8277023355e7bcc">More...</a><br /></td></tr>
+<tr class="separator:a787e868167fdd10ad8277023355e7bcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac864124f018c2342f915685bacae8f7d"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1framework_1_1random.html#ac864124f018c2342f915685bacae8f7d">yappy::framework::random::nextRawUInt32</a> ()</td></tr>
+<tr class="memdesc:ac864124f018c2342f915685bacae8f7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get next uint32 random number.  <a href="namespaceyappy_1_1framework_1_1random.html#ac864124f018c2342f915685bacae8f7d">More...</a><br /></td></tr>
+<tr class="separator:ac864124f018c2342f915685bacae8f7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9b1cf72550fd53f8a1a6c22e1155356"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1framework_1_1random.html#aa9b1cf72550fd53f8a1a6c22e1155356">yappy::framework::random::nextInt</a> (int a=0, int b=std::numeric_limits&lt; int &gt;::max())</td></tr>
+<tr class="memdesc:aa9b1cf72550fd53f8a1a6c22e1155356"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get next int random number.  <a href="namespaceyappy_1_1framework_1_1random.html#aa9b1cf72550fd53f8a1a6c22e1155356">More...</a><br /></td></tr>
+<tr class="separator:aa9b1cf72550fd53f8a1a6c22e1155356"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3dc658c6a56009dda7a2c363d5461d9"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1framework_1_1random.html#ab3dc658c6a56009dda7a2c363d5461d9">yappy::framework::random::nextDouble</a> (double a=0.0, double max=1.0)</td></tr>
+<tr class="memdesc:ab3dc658c6a56009dda7a2c363d5461d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get next double random number.  <a href="namespaceyappy_1_1framework_1_1random.html#ab3dc658c6a56009dda7a2c363d5461d9">More...</a><br /></td></tr>
+<tr class="separator:ab3dc658c6a56009dda7a2c363d5461d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d09d79567815e29b0fce6646619c5c1"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::wstring &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1framework.html#a8d09d79567815e29b0fce6646619c5c1">yappy::framework::parseCommandLine</a> ()</td></tr>
 <tr class="memdesc:a8d09d79567815e29b0fce6646619c5c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Command line utility.  <a href="namespaceyappy_1_1framework.html#a8d09d79567815e29b0fce6646619c5c1">More...</a><br /></td></tr>
 <tr class="separator:a8d09d79567815e29b0fce6646619c5c1"><td class="memSeparator" colspan="2">&#160;</td></tr>

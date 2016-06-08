@@ -109,6 +109,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
+<tr class="memitem:abc14c1135a37b55217b5f4c7b7f9b7a7"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structyappy_1_1lua_1_1export_1_1graph.html#abc14c1135a37b55217b5f4c7b7f9b7a7">getParam</a> (lua_State *L)</td></tr>
+<tr class="memdesc:abc14c1135a37b55217b5f4c7b7f9b7a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">テクスチャのサイズを得る。  <a href="#abc14c1135a37b55217b5f4c7b7f9b7a7">More...</a><br /></td></tr>
+<tr class="separator:abc14c1135a37b55217b5f4c7b7f9b7a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30c47ede30085e0780b773ef30ac1716"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structyappy_1_1lua_1_1export_1_1graph.html#a30c47ede30085e0780b773ef30ac1716">getTextureSize</a> (lua_State *L)</td></tr>
 <tr class="memdesc:a30c47ede30085e0780b773ef30ac1716"><td class="mdescLeft">&#160;</td><td class="mdescRight">テクスチャのサイズを得る。  <a href="#a30c47ede30085e0780b773ef30ac1716">More...</a><br /></td></tr>
 <tr class="separator:a30c47ede30085e0780b773ef30ac1716"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -125,7 +128,7 @@ Static Public Member Functions</h2></td></tr>
 <dd>
 <a class="el" href="classyappy_1_1graphics_1_1DGraphics.html">yappy::graphics::DGraphics</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8h_source.html#l00095">95</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8h_source.html#l00115">115</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a704bc933192d461e901bf327f079ce78"></a>
 <div class="memitem">
@@ -192,7 +195,7 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>なし</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classyappy_1_1graphics_1_1DGraphics.html#aa9a2227a91fe41d842a51e98d6fe601d">yappy::graphics::DGraphics::drawString()</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00539">539</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00701">701</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
 
 </div>
 </div>
@@ -244,7 +247,44 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>なし</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classyappy_1_1graphics_1_1DGraphics.html#a9acc35d2009e35154a076a70c22030cf">yappy::graphics::DGraphics::drawTexture()</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00487">487</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00649">649</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="abc14c1135a37b55217b5f4c7b7f9b7a7"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int yappy::lua::export::graph::getParam </td>
+          <td>(</td>
+          <td class="paramtype">lua_State *&#160;</td>
+          <td class="paramname"><em>L</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>テクスチャのサイズを得る。 </p>
+<div class="fragment"><div class="line"><span class="keyword">function</span> <a class="code" href="structyappy_1_1lua_1_1export_1_1graph.html#a704bc933192d461e901bf327f079ce78">graph</a>.getParam()</div><div class="line">    <span class="keywordflow">return</span> <span class="keywordtype">int</span> w, <span class="keywordtype">int</span> h, <span class="keywordtype">int</span> refreshRate, <span class="keywordtype">bool</span> vsync;</div><div class="line">end</div></div><!-- fragment --><dl class="retval"><dt>Return values</dt><dd>
+  <table class="retval">
+    <tr><td class="paramname">1</td><td>ディスプレイサイズ横 </td></tr>
+    <tr><td class="paramname">2</td><td>ディスプレイサイズ縦 </td></tr>
+    <tr><td class="paramname">3</td><td>リフレッシュレート(Hz) </td></tr>
+    <tr><td class="paramname">4</td><td>vsync 待ちが有効なら true </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00573">573</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
 
 </div>
 </div>
@@ -286,7 +326,7 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00440">440</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00602">602</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
 
 </div>
 </div>

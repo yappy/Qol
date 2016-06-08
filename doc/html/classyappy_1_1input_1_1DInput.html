@@ -98,6 +98,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 
+<p>DirectInput8 wrapper.  
+ <a href="classyappy_1_1input_1_1DInput.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="input_8h_source.html">input.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for yappy::input::DInput:</div>
@@ -112,37 +115,49 @@ Inheritance diagram for yappy::input::DInput:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a7a7e46c7667cf142242882de3dc78403"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1input_1_1DInput.html#a7a7e46c7667cf142242882de3dc78403">KeyData</a> = std::array&lt; bool, <a class="el" href="classyappy_1_1input_1_1DInput.html#a04c118a8a04a0be7b887db14e74aec9c">KEY_NUM</a> &gt;</td></tr>
+<tr class="memdesc:a7a7e46c7667cf142242882de3dc78403"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keyboard data: array[<a class="el" href="classyappy_1_1input_1_1DInput.html#a04c118a8a04a0be7b887db14e74aec9c">KEY_NUM</a>] of bool.  <a href="#a7a7e46c7667cf142242882de3dc78403">More...</a><br /></td></tr>
 <tr class="separator:a7a7e46c7667cf142242882de3dc78403"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a74f3f57e2169d97e747f56cf1b834a03"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1input_1_1DInput.html#a74f3f57e2169d97e747f56cf1b834a03">DInput</a> (HINSTANCE hInst, HWND hWnd, bool foreground=true, bool exclusive=false)</td></tr>
+<tr class="memdesc:a74f3f57e2169d97e747f56cf1b834a03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize DirectInput8.  <a href="#a74f3f57e2169d97e747f56cf1b834a03">More...</a><br /></td></tr>
 <tr class="separator:a74f3f57e2169d97e747f56cf1b834a03"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abf5a46667ebab1b210281ae1901f0863"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1input_1_1DInput.html#abf5a46667ebab1b210281ae1901f0863">~DInput</a> ()</td></tr>
+<tr class="memdesc:abf5a46667ebab1b210281ae1901f0863"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finalize DirectInput8.  <a href="#abf5a46667ebab1b210281ae1901f0863">More...</a><br /></td></tr>
 <tr class="separator:abf5a46667ebab1b210281ae1901f0863"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0dba198f0150334f202fd5f6e1c6359f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1input_1_1DInput.html#a0dba198f0150334f202fd5f6e1c6359f">updateControllers</a> (HWND hwnd, bool foreground=true, bool exclusive=false)</td></tr>
+<tr class="memdesc:a0dba198f0150334f202fd5f6e1c6359f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update pad list.  <a href="#a0dba198f0150334f202fd5f6e1c6359f">More...</a><br /></td></tr>
 <tr class="separator:a0dba198f0150334f202fd5f6e1c6359f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a135f70139a145e8a4a015572ac9ab464"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1input_1_1DInput.html#a135f70139a145e8a4a015572ac9ab464">processFrame</a> ()</td></tr>
+<tr class="memdesc:a135f70139a145e8a4a015572ac9ab464"><td class="mdescLeft">&#160;</td><td class="mdescRight">Must be called at every frame.  <a href="#a135f70139a145e8a4a015572ac9ab464">More...</a><br /></td></tr>
 <tr class="separator:a135f70139a145e8a4a015572ac9ab464"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a243080a4c56f525a299d6c8a9ee657f3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classyappy_1_1input_1_1DInput.html#a7a7e46c7667cf142242882de3dc78403">KeyData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1input_1_1DInput.html#a243080a4c56f525a299d6c8a9ee657f3">getKeys</a> () const </td></tr>
+<tr class="memdesc:a243080a4c56f525a299d6c8a9ee657f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get keyboard input data.  <a href="#a243080a4c56f525a299d6c8a9ee657f3">More...</a><br /></td></tr>
 <tr class="separator:a243080a4c56f525a299d6c8a9ee657f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3cff0ec65c97bd3e3ff4f3f43299483c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1input_1_1DInput.html#a3cff0ec65c97bd3e3ff4f3f43299483c">getPadCount</a> () const </td></tr>
+<tr class="memdesc:a3cff0ec65c97bd3e3ff4f3f43299483c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get connected pad count.  <a href="#a3cff0ec65c97bd3e3ff4f3f43299483c">More...</a><br /></td></tr>
 <tr class="separator:a3cff0ec65c97bd3e3ff4f3f43299483c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a67e97a5509fbba3ee67a5c4d3e005c7f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1input_1_1DInput.html#a67e97a5509fbba3ee67a5c4d3e005c7f">getPadState</a> (DIJOYSTATE *out, int index) const </td></tr>
-<tr class="separator:a67e97a5509fbba3ee67a5c4d3e005c7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02f4e487fd0da9b6fe801d3af06c9354"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1input_1_1DInput.html#a02f4e487fd0da9b6fe801d3af06c9354">getPadState</a> (DIJOYSTATE *state, int index) const </td></tr>
+<tr class="memdesc:a02f4e487fd0da9b6fe801d3af06c9354"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get pad input data.  <a href="#a02f4e487fd0da9b6fe801d3af06c9354">More...</a><br /></td></tr>
+<tr class="separator:a02f4e487fd0da9b6fe801d3af06c9354"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
 <tr class="memitem:a04c118a8a04a0be7b887db14e74aec9c"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1input_1_1DInput.html#a04c118a8a04a0be7b887db14e74aec9c">KEY_NUM</a> = 256</td></tr>
+<tr class="memdesc:a04c118a8a04a0be7b887db14e74aec9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keyboard array count.  <a href="#a04c118a8a04a0be7b887db14e74aec9c">More...</a><br /></td></tr>
 <tr class="separator:a04c118a8a04a0be7b887db14e74aec9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2bdbd70354f23eedf0e66f98b76bba64"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1input_1_1DInput.html#a2bdbd70354f23eedf0e66f98b76bba64">AXIS_RANGE</a> = 1000</td></tr>
+<tr class="memdesc:a2bdbd70354f23eedf0e66f98b76bba64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pad analog value max.  <a href="#a2bdbd70354f23eedf0e66f98b76bba64">More...</a><br /></td></tr>
 <tr class="separator:a2bdbd70354f23eedf0e66f98b76bba64"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e77d74982991bb89b27e6d06c4ef955"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classyappy_1_1input_1_1DInput.html#a1e77d74982991bb89b27e6d06c4ef955">AXIS_THRESHOLD</a> = <a class="el" href="classyappy_1_1input_1_1DInput.html#a2bdbd70354f23eedf0e66f98b76bba64">AXIS_RANGE</a> / 2</td></tr>
+<tr class="memdesc:a1e77d74982991bb89b27e6d06c4ef955"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pad analog value threshold.  <a href="#a1e77d74982991bb89b27e6d06c4ef955">More...</a><br /></td></tr>
 <tr class="separator:a1e77d74982991bb89b27e6d06c4ef955"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p>Definition at line <a class="el" href="input_8h_source.html#l00013">13</a> of file <a class="el" href="input_8h_source.html">input.h</a>.</p>
+<div class="textblock"><p>DirectInput8 wrapper. </p>
+
+<p>Definition at line <a class="el" href="input_8h_source.html#l00016">16</a> of file <a class="el" href="input_8h_source.html">input.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a class="anchor" id="a7a7e46c7667cf142242882de3dc78403"></a>
 <div class="memitem">
@@ -154,7 +169,10 @@ Static Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="input_8h_source.html#l00019">19</a> of file <a class="el" href="input_8h_source.html">input.h</a>.</p>
+<p>Keyboard data: array[<a class="el" href="classyappy_1_1input_1_1DInput.html#a04c118a8a04a0be7b887db14e74aec9c">KEY_NUM</a>] of bool. </p>
+<p>Index is DIK_XXX in dinput.h. </p>
+
+<p>Definition at line <a class="el" href="input_8h_source.html#l00028">28</a> of file <a class="el" href="input_8h_source.html">input.h</a>.</p>
 
 </div>
 </div>
@@ -195,6 +213,17 @@ Static Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Initialize DirectInput8. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">hInst</td><td>Instance handle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hWnd</td><td>Window handle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">foreground</td><td>Can obtain input data only when the window is active. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">exclusive</td><td>Obtain exclusive access to the device. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p>Definition at line <a class="el" href="input_8cpp_source.html#l00015">15</a> of file <a class="el" href="input_8cpp_source.html">input.cpp</a>.</p>
 
 </div>
@@ -211,6 +240,8 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Finalize DirectInput8. </p>
 
 <p>Definition at line <a class="el" href="input_8cpp_source.html#l00052">52</a> of file <a class="el" href="input_8cpp_source.html">input.cpp</a>.</p>
 
@@ -230,6 +261,9 @@ Static Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Get keyboard input data. </p>
+<dl class="section return"><dt>Returns</dt><dd>Keyboard input data. </dd></dl>
+
 <p>Definition at line <a class="el" href="input_8cpp_source.html#l00177">177</a> of file <a class="el" href="input_8cpp_source.html">input.cpp</a>.</p>
 
 </div>
@@ -247,11 +281,13 @@ Static Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Get connected pad count. </p>
+
 <p>Definition at line <a class="el" href="input_8cpp_source.html#l00182">182</a> of file <a class="el" href="input_8cpp_source.html">input.cpp</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a67e97a5509fbba3ee67a5c4d3e005c7f"></a>
+<a class="anchor" id="a02f4e487fd0da9b6fe801d3af06c9354"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -259,7 +295,7 @@ Static Public Attributes</h2></td></tr>
           <td class="memname">void yappy::input::DInput::getPadState </td>
           <td>(</td>
           <td class="paramtype">DIJOYSTATE *&#160;</td>
-          <td class="paramname"><em>out</em>, </td>
+          <td class="paramname"><em>state</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -274,6 +310,16 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Get pad input data. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">state</td><td>Current input state. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>Pad index. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section pre"><dt>Precondition</dt><dd>0 &lt;= index &lt; <a class="el" href="classyappy_1_1input_1_1DInput.html#a3cff0ec65c97bd3e3ff4f3f43299483c">getPadCount()</a> </dd></dl>
 
 <p>Definition at line <a class="el" href="input_8cpp_source.html#l00188">188</a> of file <a class="el" href="input_8cpp_source.html">input.cpp</a>.</p>
 
@@ -291,6 +337,9 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Must be called at every frame. </p>
+<p>Update the key and pad input status. </p>
 
 <p>Definition at line <a class="el" href="input_8cpp_source.html#l00134">134</a> of file <a class="el" href="input_8cpp_source.html">input.cpp</a>.</p>
 
@@ -326,6 +375,17 @@ Static Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Update pad list. </p>
+<p>Also called in the constructor. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">hInst</td><td>Instance handle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hWnd</td><td>Window handle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">foreground</td><td>Can obtain input data only when the window is active. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">exclusive</td><td>Obtain exclusive access to the device. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p>Definition at line <a class="el" href="input_8cpp_source.html#l00088">88</a> of file <a class="el" href="input_8cpp_source.html">input.cpp</a>.</p>
 
 </div>
@@ -349,7 +409,9 @@ Static Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="input_8h_source.html#l00016">16</a> of file <a class="el" href="input_8h_source.html">input.h</a>.</p>
+<p>Pad analog value max. </p>
+
+<p>Definition at line <a class="el" href="input_8h_source.html#l00021">21</a> of file <a class="el" href="input_8h_source.html">input.h</a>.</p>
 
 </div>
 </div>
@@ -371,7 +433,9 @@ Static Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="input_8h_source.html#l00017">17</a> of file <a class="el" href="input_8h_source.html">input.h</a>.</p>
+<p>Pad analog value threshold. </p>
+
+<p>Definition at line <a class="el" href="input_8h_source.html#l00023">23</a> of file <a class="el" href="input_8h_source.html">input.h</a>.</p>
 
 </div>
 </div>
@@ -393,7 +457,9 @@ Static Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="input_8h_source.html#l00015">15</a> of file <a class="el" href="input_8h_source.html">input.h</a>.</p>
+<p>Keyboard array count. </p>
+
+<p>Definition at line <a class="el" href="input_8h_source.html#l00019">19</a> of file <a class="el" href="input_8h_source.html">input.h</a>.</p>
 
 </div>
 </div>

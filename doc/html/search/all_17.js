@@ -12,6 +12,8 @@ var searchData=
   ['input',['input',['../namespaceyappy_1_1input.html',1,'yappy']]],
   ['lua',['lua',['../namespaceyappy_1_1lua.html',1,'yappy']]],
   ['network',['network',['../namespaceyappy_1_1network.html',1,'yappy']]],
+  ['random',['random',['../namespaceyappy_1_1framework_1_1random.html',1,'yappy::framework']]],
+  ['scene',['scene',['../namespaceyappy_1_1framework_1_1scene.html',1,'yappy::framework']]],
   ['sound',['sound',['../namespaceyappy_1_1sound.html',1,'yappy']]],
   ['trace',['trace',['../namespaceyappy_1_1trace.html',1,'yappy']]],
   ['util',['util',['../namespaceyappy_1_1util.html',1,'yappy']]],

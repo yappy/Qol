@@ -121,7 +121,7 @@ Static Public Member Functions</h2></td></tr>
 <div class="fragment"><div class="line"><a class="code" href="structyappy_1_1lua_1_1export_1_1trace.html#a2866871a1584e99daf330c2a42ec69a6">trace</a> = {};</div></div><!-- fragment --><p> デバッグ出力を本体側のロギングシステムに転送します。</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="namespaceyappy_1_1debug.html">yappy::debug</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8h_source.html#l00030">30</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8h_source.html#l00029">29</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a2866871a1584e99daf330c2a42ec69a6"></a>
 <div class="memitem">
@@ -179,7 +179,7 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>なし</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="namespaceyappy_1_1trace.html">yappy::trace</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00135">135</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00166">166</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
 
 </div>
 </div>
@@ -206,7 +206,7 @@ Static Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>デバッグ出力する。 </p>
-<div class="fragment"><div class="line"><span class="keyword">function</span> <a class="code" href="structyappy_1_1lua_1_1export_1_1trace.html#a2866871a1584e99daf330c2a42ec69a6">trace</a>.write(...)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+<p>標準 print 関数は削除され、この関数で置き換えられます。 </p><div class="fragment"><div class="line"><span class="keyword">function</span> <a class="code" href="structyappy_1_1lua_1_1export_1_1trace.html#a2866871a1584e99daf330c2a42ec69a6">trace</a>.write(...)</div><div class="line">end</div><div class="line"><span class="keyword">function</span> print(...)</div><div class="line">end</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">...</td><td>任意の型および数の出力する値 </td></tr>
   </table>
@@ -215,7 +215,7 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>なし</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="namespaceyappy_1_1debug.html">yappy::debug</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00106">106</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8cpp_source.html#l00133">133</a> of file <a class="el" href="script__export_8cpp_source.html">script_export.cpp</a>.</p>
 
 </div>
 </div>

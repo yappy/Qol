@@ -16,8 +16,8 @@ var searchData=
   ['appparam',['AppParam',['../structyappy_1_1framework_1_1AppParam.html',1,'yappy::framework']]],
   ['assert',['ASSERT',['../debug_8h.html#aca68c0d4ac8df0838e209fb5300f7be3',1,'debug.h']]],
   ['assert0',['ASSERT0',['../debug_8h.html#a35cd733e9bef846847232fe7c9f84212',1,'debug.h']]],
-  ['asyncloadscene',['AsyncLoadScene',['../classyappy_1_1framework_1_1AsyncLoadScene.html#ae29bc92ee5816d8f43b363564141f682',1,'yappy::framework::AsyncLoadScene']]],
-  ['asyncloadscene',['AsyncLoadScene',['../classyappy_1_1framework_1_1AsyncLoadScene.html',1,'yappy::framework']]],
+  ['asyncloadscene',['AsyncLoadScene',['../classyappy_1_1framework_1_1scene_1_1AsyncLoadScene.html#ac5c67a0f2b832d34b4f0fd7a45bb8210',1,'yappy::framework::scene::AsyncLoadScene']]],
+  ['asyncloadscene',['AsyncLoadScene',['../classyappy_1_1framework_1_1scene_1_1AsyncLoadScene.html',1,'yappy::framework::scene']]],
   ['axis_5frange',['AXIS_RANGE',['../classyappy_1_1input_1_1DInput.html#a2bdbd70354f23eedf0e66f98b76bba64',1,'yappy::input::DInput']]],
   ['axis_5fthreshold',['AXIS_THRESHOLD',['../classyappy_1_1input_1_1DInput.html#a1e77d74982991bb89b27e6d06c4ef955',1,'yappy::input::DInput']]]
 ];

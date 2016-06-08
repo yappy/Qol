@@ -10,7 +10,7 @@ var searchData=
   ['input',['input',['../classyappy_1_1framework_1_1Application.html#a463e3ba262e6b146573c20edeb1f63d8',1,'yappy::framework::Application']]],
   ['input_2ecpp',['input.cpp',['../input_8cpp.html',1,'']]],
   ['input_2eh',['input.h',['../input_8h.html',1,'']]],
-  ['isloadcompleted',['isLoadCompleted',['../classyappy_1_1framework_1_1AsyncLoadScene.html#a2c428992421dfb39209f23c5c3eeda89',1,'yappy::framework::AsyncLoadScene']]],
+  ['isloading',['isLoading',['../classyappy_1_1framework_1_1scene_1_1AsyncLoadScene.html#a2546915c1f2cf9a955a650062d957c4c',1,'yappy::framework::scene::AsyncLoadScene']]],
   ['isplayinganysoundeffect',['isPlayingAnySoundEffect',['../classyappy_1_1sound_1_1XAudio2.html#ab99e4a7bb499cf0ae32acda6dadcbc98',1,'yappy::sound::XAudio2']]],
   ['issealed',['isSealed',['../classyappy_1_1framework_1_1ResourceManager.html#adaf92b8f415d219b3f4f64d8c8555896',1,'yappy::framework::ResourceManager']]]
 ];

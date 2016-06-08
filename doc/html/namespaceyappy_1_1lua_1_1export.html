@@ -102,6 +102,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structyappy_1_1lua_1_1export_1_1graph.html">graph</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">グラフィックス描画関連関数。<b>graph</b>グローバルテーブルに提供。  <a href="structyappy_1_1lua_1_1export_1_1graph.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structyappy_1_1lua_1_1export_1_1rand.html">rand</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">乱数関連関数。<b>rand</b>グローバルテーブルに提供。  <a href="structyappy_1_1lua_1_1export_1_1rand.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structyappy_1_1lua_1_1export_1_1resource.html">resource</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">使用リソース登録関数。  <a href="structyappy_1_1lua_1_1export_1_1resource.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -121,6 +124,8 @@ Variables</h2></td></tr>
 <tr class="separator:aa10920a91e952fa73dc05f411d4a6835"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a33bf105bbaf0d8a9010f10291af8681a"><td class="memItemLeft" align="right" valign="top">const luaL_Reg&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1lua_1_1export.html#a33bf105bbaf0d8a9010f10291af8681a">sys_RegList</a> []</td></tr>
 <tr class="separator:a33bf105bbaf0d8a9010f10291af8681a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab588b261f6f1fd1d8f13f9a4eafc890d"><td class="memItemLeft" align="right" valign="top">const luaL_Reg&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1lua_1_1export.html#ab588b261f6f1fd1d8f13f9a4eafc890d">rand_RegList</a> []</td></tr>
+<tr class="separator:ab588b261f6f1fd1d8f13f9a4eafc890d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89391c83be9461753dcdabd305358354"><td class="memItemLeft" align="right" valign="top">const luaL_Reg&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1lua_1_1export.html#a89391c83be9461753dcdabd305358354">resource_RegList</a> []</td></tr>
 <tr class="separator:a89391c83be9461753dcdabd305358354"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b45ed3dbad7035be0a6009a22ca504d"><td class="memItemLeft" align="right" valign="top">const luaL_Reg&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceyappy_1_1lua_1_1export.html#a4b45ed3dbad7035be0a6009a22ca504d">graph_RegList</a> []</td></tr>
@@ -140,8 +145,25 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">        { <span class="stringliteral">&quot;getTextureSize&quot;</span>, graph::getTextureSize   },</div><div class="line">        { <span class="stringliteral">&quot;drawTexture&quot;</span>,    graph::drawTexture      },</div><div class="line">        { <span class="stringliteral">&quot;drawString&quot;</span>,     graph::drawString       },</div><div class="line">        { <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span> }</div><div class="line">    }</div></div><!-- fragment -->
-<p>Definition at line <a class="el" href="script__export_8h_source.html#l00101">101</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
+<b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">        { <span class="stringliteral">&quot;getParam&quot;</span>,       graph::getParam         },</div><div class="line">        { <span class="stringliteral">&quot;getTextureSize&quot;</span>, graph::getTextureSize   },</div><div class="line">        { <span class="stringliteral">&quot;drawTexture&quot;</span>,    graph::drawTexture      },</div><div class="line">        { <span class="stringliteral">&quot;drawString&quot;</span>,     graph::drawString       },</div><div class="line">        { <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span> }</div><div class="line">    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="script__export_8h_source.html#l00122">122</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab588b261f6f1fd1d8f13f9a4eafc890d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const luaL_Reg yappy::lua::export::rand_RegList[]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">        { <span class="stringliteral">&quot;generateSeed&quot;</span>,   rand::generateSeed },</div><div class="line">        { <span class="stringliteral">&quot;setSeed&quot;</span>,        <a class="code" href="namespaceyappy_1_1framework_1_1random.html#a787e868167fdd10ad8277023355e7bcc">rand::setSeed</a>       },</div><div class="line">        { <span class="stringliteral">&quot;nextInt&quot;</span>,        <a class="code" href="namespaceyappy_1_1framework_1_1random.html#aa9b1cf72550fd53f8a1a6c22e1155356">rand::nextInt</a>       },</div><div class="line">        { <span class="stringliteral">&quot;nextDouble&quot;</span>,     <a class="code" href="namespaceyappy_1_1framework_1_1random.html#ab3dc658c6a56009dda7a2c363d5461d9">rand::nextDouble</a>    },</div><div class="line">        { <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span> }</div><div class="line">    }</div><div class="ttc" id="namespaceyappy_1_1framework_1_1random_html_aa9b1cf72550fd53f8a1a6c22e1155356"><div class="ttname"><a href="namespaceyappy_1_1framework_1_1random.html#aa9b1cf72550fd53f8a1a6c22e1155356">yappy::framework::random::nextInt</a></div><div class="ttdeci">int nextInt(int a, int b)</div><div class="ttdoc">Get next int random number. </div><div class="ttdef"><b>Definition:</b> <a href="framework_8cpp_source.html#l00034">framework.cpp:34</a></div></div>
+<div class="ttc" id="namespaceyappy_1_1framework_1_1random_html_ab3dc658c6a56009dda7a2c363d5461d9"><div class="ttname"><a href="namespaceyappy_1_1framework_1_1random.html#ab3dc658c6a56009dda7a2c363d5461d9">yappy::framework::random::nextDouble</a></div><div class="ttdeci">double nextDouble(double a, double b)</div><div class="ttdoc">Get next double random number. </div><div class="ttdef"><b>Definition:</b> <a href="framework_8cpp_source.html#l00040">framework.cpp:40</a></div></div>
+<div class="ttc" id="namespaceyappy_1_1framework_1_1random_html_a787e868167fdd10ad8277023355e7bcc"><div class="ttname"><a href="namespaceyappy_1_1framework_1_1random.html#a787e868167fdd10ad8277023355e7bcc">yappy::framework::random::setSeed</a></div><div class="ttdeci">void setSeed(unsigned int seed)</div><div class="ttdoc">Set random seed. </div><div class="ttdef"><b>Definition:</b> <a href="framework_8cpp_source.html#l00024">framework.cpp:24</a></div></div>
+</div><!-- fragment -->
+<p>Definition at line <a class="el" href="script__export_8h_source.html#l00072">72</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
 
 </div>
 </div>
@@ -155,7 +177,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">        { <span class="stringliteral">&quot;addTexture&quot;</span>, resource::addTexture    },</div><div class="line">        { <span class="stringliteral">&quot;addFont&quot;</span>,    resource::addFont       },</div><div class="line">        { <span class="stringliteral">&quot;addSe&quot;</span>,      resource::addSe         },</div><div class="line">        { <span class="stringliteral">&quot;addBgm&quot;</span>,     resource::addBgm        },</div><div class="line">        { <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span> }</div><div class="line">    }</div></div><!-- fragment -->
-<p>Definition at line <a class="el" href="script__export_8h_source.html#l00077">77</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8h_source.html#l00097">97</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
 
 </div>
 </div>
@@ -169,7 +191,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">        { <span class="stringliteral">&quot;playSe&quot;</span>,     sound::playSe   },</div><div class="line">        { <span class="stringliteral">&quot;playBgm&quot;</span>,    sound::playBgm  },</div><div class="line">        { <span class="stringliteral">&quot;stopBgm&quot;</span>,    sound::stopBgm  },</div><div class="line">        { <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span> }</div><div class="line">    }</div></div><!-- fragment -->
-<p>Definition at line <a class="el" href="script__export_8h_source.html#l00122">122</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8h_source.html#l00144">144</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
 
 </div>
 </div>
@@ -183,7 +205,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">        { <span class="stringliteral">&quot;include&quot;</span>,    sys::include    },</div><div class="line">        { <span class="stringliteral">&quot;readFile&quot;</span>,   sys::readFile   },</div><div class="line">        { <span class="stringliteral">&quot;writeFile&quot;</span>,  sys::writeFile  },</div><div class="line">        { <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span> }</div><div class="line">    }</div></div><!-- fragment -->
-<p>Definition at line <a class="el" href="script__export_8h_source.html#l00053">53</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8h_source.html#l00052">52</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
 
 </div>
 </div>
@@ -198,7 +220,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line">= {</div><div class="line">        { <span class="stringliteral">&quot;write&quot;</span>,  <a class="code" href="namespaceyappy_1_1debug.html#a1eb446364d207eb060b83740b73b4bac">trace::write</a>    },</div><div class="line">        { <span class="stringliteral">&quot;perf&quot;</span>,   trace::perf     },</div><div class="line">        { <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>          }</div><div class="line">    }</div><div class="ttc" id="namespaceyappy_1_1debug_html_a1eb446364d207eb060b83740b73b4bac"><div class="ttname"><a href="namespaceyappy_1_1debug.html#a1eb446364d207eb060b83740b73b4bac">yappy::debug::write</a></div><div class="ttdeci">void write(const wchar_t *str, bool newline) noexcept</div><div class="ttdoc">Write debug string. </div><div class="ttdef"><b>Definition:</b> <a href="debug_8cpp_source.html#l00073">debug.cpp:73</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="script__export_8h_source.html#l00035">35</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
+<p>Definition at line <a class="el" href="script__export_8h_source.html#l00034">34</a> of file <a class="el" href="script__export_8h_source.html">script_export.h</a>.</p>
 
 </div>
 </div>
