@@ -10,14 +10,14 @@
  * 基本的にC++クラス名をLuaグローバルテーブル変数名に対応させています。
  */
 
- // Each function is documented in script_export.cpp
+// Each function is documented in script_export.cpp
 
 namespace yappy {
 namespace lua {
 /// C++ から Lua へ公開する関数。(Lua関数仕様)
 namespace export {
 
-	/** @brief デバッグ出力関数。<b>trace</b>グローバルテーブルに提供。
+	/**@brief デバッグ出力関数。<b>trace</b>グローバルテーブルに提供。
 	 * @details
 	 * @code
 	 * trace = {};
@@ -37,7 +37,7 @@ namespace export {
 		{ nullptr, nullptr			}
 	};
 
-	/** @brief システム関連関数。<b>sys</b>グローバルテーブルに提供。
+	/**@brief システム関連関数。<b>sys</b>グローバルテーブルに提供。
 	 * @details
 	 * @code
 	 * sys = {};
@@ -56,7 +56,7 @@ namespace export {
 		{ nullptr, nullptr }
 	};
 
-	/** @brief 乱数関連関数。<b>rand</b>グローバルテーブルに提供。
+	/**@brief 乱数関連関数。<b>rand</b>グローバルテーブルに提供。
 	 * @details
 	 * @code
 	 * rand = {};
@@ -77,7 +77,7 @@ namespace export {
 		{ nullptr, nullptr }
 	};
 
-	/** @brief 使用リソース登録関数。
+	/**@brief 使用リソース登録関数。
 	 * @details
 	 * リソースはリソースセットID(整数)とリソースID(文字列)で識別されます。
 	 * リソースの登録は @ref yappy::framework::Application::sealResource() で
@@ -85,6 +85,7 @@ namespace export {
 	 * リソースを登録した後、C++側で
 	 * @ref yappy::framework::Application::loadResourceSet()
 	 * を呼ぶとリソースが使用可能になります。
+	 *
 	 * @sa @ref yappy::framework::Application
 	 * @sa @ref yappy::framework::ResourceManager
 	 */
@@ -102,13 +103,14 @@ namespace export {
 		{ nullptr, nullptr }
 	};
 
-	/** @brief グラフィックス描画関連関数。<b>graph</b>グローバルテーブルに提供。
+	/**@brief グラフィックス描画関連関数。<b>graph</b>グローバルテーブルに提供。
 	 * @details
 	 * @code
 	 * graph = {};
 	 * @endcode
 	 * 描画するテクスチャリソースはリソースセットID(整数)とリソースID(文字列)で
 	 * 指定します。
+	 *
 	 * @sa @ref yappy::lua::export::resource
 	 * @sa @ref yappy::graphics::DGraphics
 	 */
@@ -127,11 +129,12 @@ namespace export {
 		{ nullptr, nullptr }
 	};
 
-	/** @brief 音声再生関連関数。<b>sound</b>グローバルテーブルに提供。
+	/**@brief 音声再生関連関数。<b>sound</b>グローバルテーブルに提供。
 	 * @details
 	 * @code
 	 * sound = {};
 	 * @endcode
+	 *
 	 * @sa @ref yappy::lua::export::resource
 	 * @sa @ref yappy::sound::XAudio2
 	 */

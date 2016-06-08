@@ -89,7 +89,7 @@ public:
 	/// Finalize XAudio2.
 	~XAudio2();
 
-	/** @brief Application must call this function every frames.
+	/**@brief Application must call this function every frames.
 	 * @details
 	 * @li Free SE entry which has done.
 	 * @li Decode ogg partly and write to BGM buffer.
@@ -98,7 +98,7 @@ public:
 
 	/// @name Sound Effect
 	//@{
-	/** @brief Load a sound effect resource.
+	/**@brief Load a sound effect resource.
 	 * @details This function may take time.
 	 * @param[in]	path	(abstract file layer) File path.
 	 * @return				shared_ptr to sound effect resource.
@@ -106,24 +106,24 @@ public:
 	 */
 	SeResourcePtr loadSoundEffect(const wchar_t *path);
 
-	/** @brief Starts playing a sound effect.
+	/**@brief Starts playing a sound effect.
 	 * @param[in]	se	Sound effect resource.
 	 */
 	void playSoundEffect(const SeResourcePtr &se);
 
-	/** @brief Returns whether any sound effects are playing.
+	/**@brief Returns whether any sound effects are playing.
 	 * @return true if one or more sound effects are playing.
 	 */
 	bool isPlayingAnySoundEffect() const;
 
-	/** @brief Stops all sound effects.
+	/**@brief Stops all sound effects.
 	 */
 	void stopAllSoundEffect();
 	//@}
 
 	/// @name BGM
 	//@{
-	/** @brief Load a BGM resource.
+	/**@brief Load a BGM resource.
 	 * @details This function may take time.
 	 * @param[in]	path	(abstract file layer) File path.
 	 * @return				shared_ptr to BGM resource.
@@ -131,7 +131,7 @@ public:
 	 */
 	BgmResourcePtr loadBgm(const wchar_t *path);
 
-	/** @brief Starts playing a BGM.
+	/**@brief Starts playing a BGM.
 	 * @details
 	 * Only one BGM can be played at the same time.
 	 * This function will stop the current BGM and then start the new BGM.
@@ -139,7 +139,7 @@ public:
 	 */
 	void playBgm(const BgmResourcePtr &bgm);
 
-	/** @brief Stops playing a BGM.
+	/**@brief Stops playing a BGM.
 	 */
 	void stopBgm();
 	//@}

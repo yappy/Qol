@@ -115,7 +115,7 @@ inline double getOptDouble(lua_State *L, int arg, double def,
 // "trace" table
 ///////////////////////////////////////////////////////////////////////////////
 
-/** @brief デバッグ出力する。
+/**@brief デバッグ出力する。
  * @details
  * 標準 print 関数は削除され、この関数で置き換えられます。
  * @code
@@ -151,7 +151,7 @@ int trace::write(lua_State *L)
 	});
 }
 
-/** @brief メモリ上のバッファに高速なログ出力を行う。
+/**@brief メモリ上のバッファに高速なログ出力を行う。
  * @details
  * @code
  * function trace.perf(...)
@@ -184,7 +184,7 @@ int trace::perf(lua_State *L)
 // "sys" table
 ///////////////////////////////////////////////////////////////////////////////
 
-/** @brief 別の Lua ソースファイルを実行する。
+/**@brief 別の Lua ソースファイルを実行する。
  * @details
  * @code
  * function sys.include(...)
@@ -216,7 +216,7 @@ int sys::include(lua_State *L)
 	});
 }
 
-/** @brief ファイルを読む。
+/**@brief ファイルを読む。
  * @details
  * @code
  * function sys.readFile(str fileName)
@@ -243,7 +243,7 @@ int sys::include(lua_State *L)
  * end
  * @endcode
  *
- * @param[in] fileName	ファイル名
+ * @param[in]	fileName	ファイル名
  * @return				各行の内容
  */
 int sys::readFile(lua_State *L)
@@ -290,7 +290,7 @@ int sys::readFile(lua_State *L)
 	});
 }
 
-/** @brief ファイルを書く。
+/**@brief ファイルを書く。
  * @details
  * @code
  * function sys.writeFile(str fileName, ...)
@@ -310,9 +310,9 @@ int sys::readFile(lua_State *L)
  * @warning 文字列に含まれる改行をチェックしません。
  * @ref readFile() との整合性が崩れるので注意してください。
  *
- * @param[in] fileName	ファイル名
- * @param[in] ...		各行の内容
- * @return				なし
+ * @param[in]	fileName	ファイル名
+ * @param[in]	...			各行の内容
+ * @return					なし
  */
 int sys::writeFile(lua_State *L)
 {
@@ -341,7 +341,7 @@ int sys::writeFile(lua_State *L)
 // "rand" table
 ///////////////////////////////////////////////////////////////////////////////
 
-/** @brief 乱数シード用の値を生成する。
+/**@brief 乱数シード用の値を生成する。
  * @details
  * @code
  * function rand.generateSeed()
@@ -361,7 +361,7 @@ int rand::generateSeed(lua_State *L)
 	});
 }
 
-/** @brief 乱数のシード値を設定する。
+/**@brief 乱数のシード値を設定する。
  * @details
  * @code
  * function rand.setSeed(int seed)
@@ -385,7 +385,7 @@ int rand::setSeed(lua_State *L)
 	});
 }
 
-/** @brief 次の整数乱数を生成する。
+/**@brief 次の整数乱数を生成する。
  * @details
  * @code
  * function rand.nextInt(int a = 0, int b = 0x7fffffff)
@@ -412,7 +412,7 @@ int rand::nextInt(lua_State *L)
 	});
 }
 
-/** @brief 次の浮動小数点乱数を生成する。
+/**@brief 次の浮動小数点乱数を生成する。
  * @details
  * @code
  * function rand.nextDouble(double a = 0.0, double b = 1.0)
@@ -443,7 +443,7 @@ int rand::nextDouble(lua_State *L)
 // "resource" table
 ///////////////////////////////////////////////////////////////////////////////
 
-/** @brief テクスチャリソースを登録する。
+/**@brief テクスチャリソースを登録する。
  * @details
  * @code
  * function resource.addTexture(int setId, str resId, str path)
@@ -468,7 +468,7 @@ int resource::addTexture(lua_State *L)
 	});
 }
 
-/** @brief フォントリソースを登録する。
+/**@brief フォントリソースを登録する。
  * @details
  * @code
  * function resource.addFont(int setId, str resId, str path)
@@ -503,7 +503,7 @@ int resource::addFont(lua_State *L)
 	});
 }
 
-/** @brief 効果音リソースを登録する。
+/**@brief 効果音リソースを登録する。
  * @details
  * @code
  * function resource.addSe(int setId, str resId, str path)
@@ -528,7 +528,7 @@ int resource::addSe(lua_State *L)
 	});
 }
 
-/** @brief BGMリソースを登録する。
+/**@brief BGMリソースを登録する。
  * @details
  * @code
  * function resource.addBgm(int setId, str resId, str path)
@@ -557,7 +557,7 @@ int resource::addBgm(lua_State *L)
 // "graph" table
 ///////////////////////////////////////////////////////////////////////////////
 
-/** @brief テクスチャのサイズを得る。
+/**@brief テクスチャのサイズを得る。
  * @details
  * @code
  * function graph.getParam()
@@ -586,7 +586,7 @@ int graph::getParam(lua_State *L)
 	});
 }
 
-/** @brief テクスチャのサイズを得る。
+/**@brief テクスチャのサイズを得る。
  * @details
  * @code
  * function graph.getTextureSize(int setId, str resId)
@@ -614,7 +614,7 @@ int graph::getTextureSize(lua_State *L)
 	});
 }
 
-/** @brief テクスチャを描画する。
+/**@brief テクスチャを描画する。
  * @details
  * @code
  * function graph.drawTexture(int setId, str resId,
@@ -675,7 +675,7 @@ int graph::drawTexture(lua_State *L)
 	});
 }
 
-/** @brief 文字列を描画する。
+/**@brief 文字列を描画する。
  * @details
  * @code
  * function graph.drawString(int setId, str resId, str str, int dx, int dy,
@@ -725,7 +725,7 @@ int graph::drawString(lua_State *L)
 // "sound" table
 ///////////////////////////////////////////////////////////////////////////////
 
-/** @brief 効果音再生を開始する。
+/**@brief 効果音再生を開始する。
  * @details
  * @code
  * function sound.playSe(int setId, str resId)
@@ -749,7 +749,7 @@ int sound::playSe(lua_State *L)
 	});
 }
 
-/** @brief BGM 再生を開始する。
+/**@brief BGM 再生を開始する。
  * @details
  * @code
  * function sound.playBgm(int setId, str resId)
@@ -773,7 +773,7 @@ int sound::playBgm(lua_State *L)
 	});
 }
 
-/** @brief BGM 再生を停止する。
+/**@brief BGM 再生を停止する。
  * @details
  * @code
  * function sound.stopBgm()

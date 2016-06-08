@@ -132,21 +132,21 @@ public:
 	TextureResourcePtr loadTexture(const wchar_t *path);
 
 	/**@brief Draw a texture.
-	 * @param[in] texture	Texture resource.
-	 * @param[in] dx		Destination X. (center pos)
-	 * @param[in] dy		Destination Y. (center pos)
-	 * @param[in] lrInv		Left-right invert.
-	 * @param[in] udInv		Up-down invert.
-	 * @param[in] sx		Source X.
-	 * @param[in] sy		Source Y.
-	 * @param[in] sw		Source width. (texture size if SRC_SIZE_DEFAULT)
-	 * @param[in] sh		Source height. (texture size if SRC_SIZE_DEFAULT)
-	 * @param[in] cx		Center X from (sx, sy).
-	 * @param[in] cy		Center Y from (sx, sy).
-	 * @param[in] angle		Rotation angle [rad]. (using center pos)
-	 * @param[in] scaleX	Size scaling factor X.
-	 * @param[in] scaleY	Size scaling factor Y.
-	 * @param[in] alpha		Alpha value.
+	 * @param[in]	texture	Texture resource.
+	 * @param[in]	dx		Destination X. (center pos)
+	 * @param[in]	dy		Destination Y. (center pos)
+	 * @param[in]	lrInv	Left-right invert.
+	 * @param[in]	udInv	Up-down invert.
+	 * @param[in]	sx		Source X.
+	 * @param[in]	sy		Source Y.
+	 * @param[in]	sw		Source width. (texture size if SRC_SIZE_DEFAULT)
+	 * @param[in]	sh		Source height. (texture size if SRC_SIZE_DEFAULT)
+	 * @param[in]	cx		Center X from (sx, sy).
+	 * @param[in]	cy		Center Y from (sx, sy).
+	 * @param[in]	angle	Rotation angle [rad]. (using center pos)
+	 * @param[in]	scaleX	Size scaling factor X.
+	 * @param[in]	scaleY	Size scaling factor Y.
+	 * @param[in]	alpha	Alpha value.
 	 */
 	void drawTexture(const TextureResourcePtr &texture,
 		int dx, int dy, bool lrInv = false, bool udInv = false,

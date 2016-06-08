@@ -14,7 +14,7 @@ namespace yappy {
 /// Utilities.
 namespace util {
 
-/** @brief Noncopyable class.
+/**@brief Noncopyable class.
  * @details Delete copy constructor and assignment operator.
  * @code
  * // How to use:
@@ -29,12 +29,12 @@ public:
 };
 
 
-/** @brief Fixed size char array for string ID.
+/**@brief Fixed size char array for string ID.
  * @see std::hash<yappy::util::IdString>
  */
 using IdString = std::array<char, 16>;
 
-/** @brief Create yappy::util::IdString from C-style string.
+/**@brief Create yappy::util::IdString from C-style string.
  */
 template <size_t N>
 inline void createFixedString(std::array<char, N> *out, const char *src) {
@@ -98,9 +98,9 @@ struct FileDeleter {
 using FilePtr = std::unique_ptr<FILE, FileDeleter>;
 
 
-/** @brief Wide char to UTF-8.
- * @param[in] in	Wide string.
- * @return UTF-8 string.
+/**@brief Wide char to UTF-8.
+ * @param[in]	in	Wide string.
+ * @return			UTF-8 string.
  */
 inline std::unique_ptr<char[]> wc2utf8(const wchar_t *in)
 {
@@ -110,9 +110,9 @@ inline std::unique_ptr<char[]> wc2utf8(const wchar_t *in)
 	return pBuf;
 }
 
-/** @brief UTF-8 to wide char.
- * @param[in] in	UTF-8 string.
- * @return Wide char string.
+/**@brief UTF-8 to wide char.
+ * @param[in]	in	UTF-8 string.
+ * @return			Wide char string.
  */
 inline std::unique_ptr<wchar_t[]> utf82wc(const char *in)
 {
@@ -122,7 +122,7 @@ inline std::unique_ptr<wchar_t[]> utf82wc(const char *in)
 	return pBuf;
 }
 
-/** @brief Auto CoInitializeEx() and CoUninitialize() class.
+/**@brief Auto CoInitializeEx() and CoUninitialize() class.
 */
 class CoInitialize : private noncopyable {
 public:
@@ -137,7 +137,7 @@ public:
 
 namespace std {
 
-/** @brief Hash function object of yappy::util::IdString for std::unordered_map.
+/**@brief Hash function object of yappy::util::IdString for std::unordered_map.
  */
 template <>
 struct hash<yappy::util::IdString> {
