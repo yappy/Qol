@@ -11,7 +11,7 @@ namespace yappy {
 /// Input library.
 namespace input {
 
-/** @brief DirectInput8 wrapper.
+/** @brief DirectInput8 manager.
  */
 class DInput : private util::noncopyable {
 public:
