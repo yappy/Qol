@@ -34,7 +34,7 @@ using error::FrameworkError;
 /// Random number framework.
 namespace random {
 
-/** @brief Generate nondeterministic random number for seed.
+/**@brief Generate nondeterministic random number for seed.
  * @details
  * Uses std::random_device.
  * Probably uses win32 CryptGenRandom().
@@ -43,25 +43,25 @@ namespace random {
  */
 unsigned int generateRandomSeed();
 
-/** @brief Set random seed.
+/**@brief Set random seed.
  * @param[in]	seed	Random seed.
  * @sa @ref generateRandomSeed()
  */
 void setSeed(unsigned int seed);
 
-/** @brief Get next uint32 random number.
+/**@brief Get next uint32 random number.
  * @return [0x00000000, 0xffffffff]
  */
 unsigned int nextRawUInt32();
 
-/** @brief Get next int random number.
+/**@brief Get next int random number.
  * @param[in]	a	min value (inclusive)
  * @param[in]	b	max value (inclusive)
  * @return [a, b]
  */
 int nextInt(int a = 0, int b = std::numeric_limits<int>::max());
 
-/** @brief Get next double random number.
+/**@brief Get next double random number.
  * @param[in]	a	min value (inclusive)
  * @param[in]	b	max value (exclusive)
  * @return [a, b)
@@ -70,9 +70,10 @@ double nextDouble(double a = 0.0, double max = 1.0);
 
 }	// namespace random
 
+/// Scene class.
 namespace scene {
 
-/** @brief Simple scene class base.
+/**@brief Simple scene class base.
  * @details Noncopyable, and has common functions.
  */
 class SceneBase : private util::noncopyable {
@@ -88,24 +89,24 @@ public:
 	virtual void render() = 0;
 };
 
-/** @brief Scene class with an async loading task.
+/**@brief Scene class with an async loading task.
 */
 class AsyncLoadScene : public SceneBase {
 public:
 	/// Constructor (default).
 	AsyncLoadScene() = default;
-	/** @brief Destructor.
+	/**@brief Destructor.
 	 * @details
 	 * If async task is being processed, sets cancel flag to true and
 	 * blocks until task function will return.
 	 */
 	virtual ~AsyncLoadScene() override;
-	/** @brief Check the state of sub thread and then call @ref updateOnMainThread().
+	/**@brief Check the state of sub thread and then call @ref updateOnMainThread().
 	 */
 	virtual void update() final override;
 
 protected:
-	/** @brief User-defined async task.
+	/**@brief User-defined async task.
 	 * @details
 	 * This function will run on a separated thread and
 	 * can take a long time to complete.
@@ -114,15 +115,15 @@ protected:
 	 * @param[in]	cancel	Cancel signal.
 	 */
 	virtual void loadOnSubThread(std::atomic_bool &cancel) = 0;
-	/** @brief Called in @ref update()
+	/**@brief Called in @ref update()
 	 */
 	virtual void updateOnMainThread() = 0;
 
-	/** @brief Starts async load task on another thread.
+	/**@brief Starts async load task on another thread.
 	 * @pre Async task is not running. (@ref isLoading() returns false.)
 	 */
 	void startLoadThread();
-	/** @brief Poll the state of the async task.
+	/**@brief Poll the state of the async task.
 	 * @ref updateLoadStatus() is needed.
 	 */
 	bool isLoading() const;
@@ -137,12 +138,12 @@ private:
 }	// namespace scene
 
 
-/** @brief Command line utility.
+/**@brief Command line utility.
  * @return Parsed result vector. (argc-argv compatible)
  */
 std::vector<std::wstring> parseCommandLine();
 
-/** @brief Get key state by GetAsyncKeyState().
+/**@brief Get key state by GetAsyncKeyState().
  * @param[in]	vKey	VK_XXX
  * @return		true if the key is pressed.
  */
@@ -272,8 +273,8 @@ private:
 	uint32_t m_fpsFrameAcc = 0;
 };
 
-/** @brief Application parameters.
- * @details Each field has default value.
+/**@brief Application parameters.
+ * @details Each field has a default value.
  */
 struct AppParam {
 	/// hInstance from WinMain.
@@ -294,130 +295,130 @@ struct AppParam {
 	bool showCursor = false;
 };
 
-/** @brief User application base, which manages a window and DirectX objects.
+/**@brief User application base, which manages a window and DirectX objects.
  * @details Please inherit this class and override protected methods.
  */
 class Application : private util::noncopyable {
 public:
-	/** @brief Constructor.
+	/**@brief Constructor.
 	 * @details This needs AppParam and graphics::GraphicsParam.
 	 * Valid resource serId is: 0 .. resSetCount-1.
-	 * @param[in] appParam		%Application parameters.
-	 * @param[in] graphParam	Graphics parameters.
-	 * @param[in] resSetCount	Count of resource set.
+	 * @param[in]	appParam		%Application parameters.
+	 * @param[in]	graphParam	Graphics parameters.
+	 * @param[in]	resSetCount	Count of resource set.
 	 */
 	Application(const AppParam &appParam, const graphics::GraphicsParam &graphParam,
 		size_t resSetCount);
-	/** @brief Destructor.
+	/**@brief Destructor.
 	 */
 	virtual ~Application();
-	/** @brief Start main loop.
+	/**@brief Start main loop.
 	 * @details Call init() .
 	 * @return msg.wParam, which should be returned from WinMain().
 	 */
 	int run();
 
-	/** @brief Get HWND of the window managed by this class.
+	/**@brief Get HWND of the window managed by this class.
 	 */
 	HWND getHWnd() { return m_hWnd; }
-	/** @brief Get graphics parameters.
+	/**@brief Get graphics parameters.
 	 */
 	void getGraphicsParam(graphics::GraphicsParam *param) { *param = m_graphParam; }
-	/** @brief Get DirectGraphics manager.
+	/**@brief Get DirectGraphics manager.
 	 */
 	graphics::DGraphics &graph() { return *m_dg.get(); }
-	/** @brief Get XAudio2 manager.
+	/**@brief Get XAudio2 manager.
 	 */
 	sound::XAudio2 &sound() { return *m_ds.get(); }
-	/** @brief Get DirectInput manager.
+	/**@brief Get DirectInput manager.
 	 */
 	input::DInput &input() { return *m_di.get(); }
 
-	/** @brief Register texture image resource.
-	 * @param[in] setId	%Resource set ID.
-	 * @param[in] resId	%Resource ID.
-	 * @param[in] path	File path.
+	/**@brief Register texture image resource.
+	 * @param[in]	setId	%Resource set ID.
+	 * @param[in]	resId	%Resource ID.
+	 * @param[in]	path	File path.
 	 */
 	void addTextureResource(size_t setId, const char *resId, const wchar_t *path);
-	/** @brief Register font image resource.
-	 * @param[in] setId		%Resource set ID.
-	 * @param[in] resId		%Resource ID.
-	 * @param[in] fontName	Font family name.
-	 * @param[in] startChar	The first character.
-	 * @param[in] endChar	The last character.
-	 * @param[in] w			Font image width.
-	 * @param[in] h			Font image height.
+	/**@brief Register font image resource.
+	 * @param[in]	setId		%Resource set ID.
+	 * @param[in]	resId		%Resource ID.
+	 * @param[in]	fontName	Font family name.
+	 * @param[in]	startChar	The first character.
+	 * @param[in]	endChar	The last character.
+	 * @param[in]	w			Font image width.
+	 * @param[in]	h			Font image height.
 	 */
 	void addFontResource(size_t setId, const char *resId,
 		const wchar_t *fontName, uint32_t startChar, uint32_t endChar,
 		uint32_t w, uint32_t h);
-	/** @brief Register sound effect resource.
-	 * @param[in] setId	%Resource set ID.
-	 * @param[in] resId	%Resource ID.
-	 * @param[in] path	File path.
+	/**@brief Register sound effect resource.
+	 * @param[in]	setId	%Resource set ID.
+	 * @param[in]	resId	%Resource ID.
+	 * @param[in]	path	File path.
 	 */
 	void addSeResource(size_t setId, const char *resId, const wchar_t *path);
-	/** @brief Register BGM resource.
-	 * @param[in] setId	%Resource set ID.
-	 * @param[in] resId	%Resource ID.
-	 * @param[in] path	File path.
+	/**@brief Register BGM resource.
+	 * @param[in]	setId	%Resource set ID.
+	 * @param[in]	resId	%Resource ID.
+	 * @param[in]	path	File path.
 	 */
 	void addBgmResource(size_t setId, const char *resId, const wchar_t *path);
 
-	/** @brief Set the lock state of resources.
+	/**@brief Set the lock state of resources.
 	 * @details If resource manager is sealed, addXXXResource() will be failed.
-	 * @param[in] seal	new state.
+	 * @param[in]	seal	new state.
 	 * @sa @ref UnsealResource
 	 */
 	void sealResource(bool seal);
 
-	/** @brief Load resources by resource set ID.
+	/**@brief Load resources by resource set ID.
 	 * @details This function blocks until all resource is loaded.
 	 * Processing can be cancelled by writing true to cancel from another thread.
-	 * @param[in] setId		%Resource set ID.
-	 * @param[in] cancel	async cancel atomic
+	 * @param[in]	setId		%Resource set ID.
+	 * @param[in]	cancel	async cancel atomic
 	 */
 	void loadResourceSet(size_t setId, std::atomic_bool &cancel);
-	/** @brief Unload resources by resource set ID.
-	 * @param[in] setId	%Resource set ID.
+	/**@brief Unload resources by resource set ID.
+	 * @param[in]	setId	%Resource set ID.
 	 */
 	void unloadResourceSet(size_t setId);
 
-	/** @brief Get texture resource pointer.
-	 * @param[in] setId	%Resource set ID.
-	 * @param[in] resId	%Resource ID.
+	/**@brief Get texture resource pointer.
+	 * @param[in]	setId	%Resource set ID.
+	 * @param[in]	resId	%Resource ID.
 	 */
 	const graphics::DGraphics::TextureResourcePtr getTexture(
 		size_t setId, const char *resId) const;
-	/** @brief Get font resource pointer.
-	 * @param[in] setId	%Resource set ID.
-	 * @param[in] resId	%Resource ID.
+	/**@brief Get font resource pointer.
+	 * @param[in]	setId	%Resource set ID.
+	 * @param[in]	resId	%Resource ID.
 	 */
 	const graphics::DGraphics::FontResourcePtr getFont(
 		size_t setId, const char *resId) const;
-	/** @brief Get sound effect resource pointer.
-	 * @param[in] setId	%Resource set ID.
-	 * @param[in] resId	%Resource ID.
+	/**@brief Get sound effect resource pointer.
+	 * @param[in]	setId	%Resource set ID.
+	 * @param[in]	resId	%Resource ID.
 	 */
 	const sound::XAudio2::SeResourcePtr getSoundEffect(
 		size_t setId, const char *resId) const;
-	/** @brief Get BGM resource pointer.
-	 * @param[in] setId	%Resource set ID.
-	 * @param[in] resId	%Resource ID.
+	/**@brief Get BGM resource pointer.
+	 * @param[in]	setId	%Resource set ID.
+	 * @param[in]	resId	%Resource ID.
 	 */
 	const sound::XAudio2::BgmResourcePtr getBgm(
 		size_t setId, const char *resId) const;
 
 protected:
-	/** @brief User initialization code.
+	/**@brief User initialization code.
 	 * @details Called at the beginning of @ref run().
 	 */
 	virtual void init() = 0;
-	/** @brief Process frame.
+	/**@brief Process frame.
 	 * @details Called at the beginning of every frame.
 	 */
 	virtual void update() = 0;
-	/** @brief Process rendering.
+	/**@brief Process rendering.
 	 * @details Called after @ref update(), unless frame skipping.
 	 */
 	virtual void render() = 0;
@@ -444,7 +445,7 @@ private:
 	void renderInternal();
 };
 
-/** @brief Auto re-seal helper
+/**@brief Auto re-seal helper
  * @sa @ref Application::sealResource()
  */
 class UnsealResource : util::noncopyable {

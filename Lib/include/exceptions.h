@@ -8,13 +8,13 @@ namespace yappy {
 /// Exceptions and utilities.
 namespace error {
 
-/** @brief Returns (msg + stacktrace) string.
+/**@brief Returns (msg + stacktrace) string.
  * @param[in]	msg	Original string.
  * @return			msg + stacktrace.
  */
 std::string createStackTraceMsg(const std::string &msg);
 
-/** @brief Throw exception with (msg + stacktrace) message.
+/**@brief Throw exception with (msg + stacktrace) message.
  * @details
  * This function calls the constructor of exception class E as:
  * @code

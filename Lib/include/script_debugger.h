@@ -8,34 +8,34 @@ namespace lua {
 /// Lua script debugger.
 namespace debugger {
 
-/** @brief Lua debugger.
+/**@brief Lua debugger.
  * @details Used in @ref Lua class.
  * @sa @ref yappy::lua::Lua
  */
 class LuaDebugger : private util::noncopyable {
 public:
-	/** @brief Constructor.
-	 * @param[in] L				Lua state.
-	 * @param[in] debugEnable	Debug hook enabled switch.
-	 * @param[in] instLimit		Lua bytecode instruction count limit. (no limit if 0)
-	 * @param[in] heapSize		Heap size for mem command.
+	/**@brief Constructor.
+	 * @param[in]	L			Lua state.
+	 * @param[in]	debugEnable	Debug hook enabled switch.
+	 * @param[in]	instLimit	Lua bytecode instruction count limit. (no limit if 0)
+	 * @param[in]	heapSize	Heap size for mem command.
 	 */
 	LuaDebugger(lua_State *L, bool debugEnable, int instLimit, size_t heapSize);
 
-	/** @brief Get Lua state.
+	/**@brief Get Lua state.
 	 * @return Lua state.
 	 */
 	lua_State *getLuaState() const;
-	/** @brief Load debug info from chunk name and source string.
-	 * @param[in] name	Chunk name (file name)
-	 * @param[in] src	Source string.
-	 * @param[in] size	Source string size.
+	/**@brief Load debug info from chunk name and source string.
+	 * @param[in]	name	Chunk name (file name)
+	 * @param[in]	src		Source string.
+	 * @param[in]	size	Source string size.
 	 */
 	void loadDebugInfo(const char *name, const char *src, size_t size);
-	/** @brief Prepare and call lua_pcall().
-	 * @param[in] narg		Arguments count.
-	 * @param[in] nret		Return values count.
-	 * @param[in] autoBreak	Debug break at the first line.
+	/**@brief Prepare and call lua_pcall().
+	 * @param[in]	narg		Arguments count.
+	 * @param[in]	nret		Return values count.
+	 * @param[in]	autoBreak	Debug break at the first line.
 	 */
 	void pcall(int narg, int nret, bool autoBreak);
 

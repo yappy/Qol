@@ -21,8 +21,9 @@ private:
 	std::string m_what;
 };
 
-/** @brief Lua state manager.
- * @details Each Lua object manages one lua_State.
+/**@brief Lua state manager.
+ * @details
+ * Each Lua object manages one lua_State.
  * If debugEnable at the constructor is true, full debug hook will be enabled.
  * This may be heavy.
  * If debugEnable is false, debug hook mask is only instruction count.
@@ -32,7 +33,7 @@ private:
  */
 class Lua : private util::noncopyable {
 public:
-	/** @brief Create new lua_State and open standard libs.
+	/**@brief Create new lua_State and open standard libs.
 	 * @param[in]	debugEnable		Enable debug feature.
 	 * @param[in]	maxHeapSize		Max memory usage.
 	 *								(only virtual address range will be reserved at first)
@@ -41,11 +42,11 @@ public:
 	 */
 	Lua(bool debugEnable, size_t maxHeapSize, size_t initHeapSize = 1024 * 1024,
 		int instLimit = 10 * 10000);
-	/** @brief Destruct lua_State.
+	/**@brief Destruct lua_State.
 	 */
 	~Lua();
 
-	/** @brief Returns lua_State which this object has.
+	/**@brief Returns lua_State which this object has.
 	 * @return lua_State
 	 */
 	lua_State *getLuaState() const;
@@ -57,10 +58,10 @@ public:
 	void loadGraphLib(framework::Application *app);
 	void loadSoundLib(framework::Application *app);
 
-	/** @brief Load script file and eval it.
-	 * @param[in] fileName	Script file name.
-	 * @param[in] autoBreak	Debug break at the first line.
-	 * @param[in] prot		Use pcall() if true. (false is include from Lua only)
+	/**@brief Load script file and eval it.
+	 * @param[in]	fileName	Script file name.
+	 * @param[in]	autoBreak	Debug break at the first line.
+	 * @param[in]	prot		Use pcall() if true. (false is include from Lua only)
 	 */
 	void loadFile(const wchar_t *fileName, bool autoBreak, bool prot = true);
 
@@ -68,7 +69,7 @@ public:
 		void operator ()(lua_State *L) {}
 	};
 
-	/** @brief Calls global function.
+	/**@brief Calls global function.
 	 * @details pushParamFunc and getRetFunc must be able to be called by:
 	 * @code
 	 * pushParamFunc(lua_State *);
@@ -81,12 +82,12 @@ public:
 	 * }
 	 * @endcode
 	 *
-	 * @param[in] funcName		Function name.
-	 * @param[in] autoBreak		Break by debugger at the first LINE event if true.
-	 * @param[in] pushArgFunc	Will be called just before lua_pcall().
-	 * @param[in] narg			Arguments count.
-	 * @param[in] getRetFunc	Will be called just after lua_pcall().
-	 * @param[in] nret			Return values count.
+	 * @param[in]	funcName	Function name.
+	 * @param[in]	autoBreak	Break by debugger at the first LINE event if true.
+	 * @param[in]	pushArgFunc	Will be called just before lua_pcall().
+	 * @param[in]	narg		Arguments count.
+	 * @param[in]	getRetFunc	Will be called just after lua_pcall().
+	 * @param[in]	nret		Return values count.
 	 */
 	template <class ParamFunc = doNothing, class RetFunc = doNothing>
 	void callGlobal(const char *funcName, bool autoBreak,

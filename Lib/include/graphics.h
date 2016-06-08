@@ -11,8 +11,10 @@ namespace yappy {
 /// Graphics library.
 namespace graphics {
 
+/// Texture resource.
 struct Texture : private util::noncopyable {
 	using RvPtr = util::ComPtr<ID3D11ShaderResourceView>;
+
 	RvPtr pRV;
 	uint32_t w, h;
 
@@ -22,9 +24,11 @@ struct Texture : private util::noncopyable {
 	~Texture() = default;
 };
 
+/// Font resource.
 struct FontTexture : private util::noncopyable {
 	using TexPtr = util::ComPtr<ID3D11Texture2D>;
 	using RvPtr = util::ComPtr<ID3D11ShaderResourceView>;
+
 	std::vector<TexPtr> pTexList;
 	std::vector<RvPtr> pRVList;
 	uint32_t w, h;
@@ -38,6 +42,7 @@ struct FontTexture : private util::noncopyable {
 
 struct DrawTask {
 	using RvPtr = Texture::RvPtr;
+
 	const RvPtr &pRV;
 	uint32_t texW, texH;
 	int dx, dy;
@@ -66,16 +71,28 @@ struct DrawTask {
 	~DrawTask() = default;
 };
 
+/**@brief DirectGraphics parameters.
+ * @details Each field has a default value.
+ */
 struct GraphicsParam {
+	/// Window handle.
 	HWND hWnd = nullptr;
+	/// Viewport size width.
 	int w = 1024;
+	/// Viewport size height.
 	int h = 768;
+	/// Refresh rate. (fps)
 	uint32_t refreshRate = 60;
+	/// Full-screen mode.
 	bool fullScreen = false;
+	/// Enable V-SYNC.
 	bool vsync = true;
 };
 
-/** @brief DirectGraphics manager.
+/**@brief DirectGraphics manager.
+ * @details
+ * drawXXX() functions don't execute actual drawing.
+ * They just queues DrawTask and @ref render() function executes GPU drawing.
  */
 class DGraphics : private util::noncopyable {
 public:
@@ -89,65 +106,106 @@ public:
 	 */
 	static const int SrcSizeDefault = -1;
 
+	/**@brief Initialize DirectGraphics.
+	 * @param[in]	param	Graphics parameters.
+	 */
 	explicit DGraphics(const GraphicsParam &param);
+	/// Finalize DirectGraphics.
 	~DGraphics();
 
+	/**@brief Renders a frame and wait for vsync (if enabled).
+	 */
 	void render();
+
+	/**@brief Application must call this function when WM_SIZE message is received.
+	 */
 	LRESULT onSize(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-	/**@brief Load a texture.
-	 * @param[in] path file path
+	/// @name Texture
+	//@{
+	/**@brief Load a texture resource.
+	 * @details This function may take time.
+	 * @param[in]	path	File path.
+	 * @return				shared_ptr to texture resource.
+	 * @sa yappy::file
 	 */
 	TextureResourcePtr loadTexture(const wchar_t *path);
 
-	/** @brief Draw texture.
-	 * @param[in] texture	texture resource
-	 * @param[in] dx		destination X (center pos)
-	 * @param[in] dy		destination Y (center pos)
-	 * @param[in] lrInv		left-right invert
-	 * @param[in] udInv		up-down invert
-	 * @param[in] sx		source X
-	 * @param[in] sy		source Y
-	 * @param[in] sw		source width (texture size if SRC_SIZE_DEFAULT)
-	 * @param[in] sh		source height (texture size if SRC_SIZE_DEFAULT)
-	 * @param[in] cx		center X from (sx, sy)
-	 * @param[in] cy		center Y from (sx, sy)
-	 * @param[in] angle		rotation angle [rad] (using center pos)
-	 * @param[in] scaleX	size scaling factor X
-	 * @param[in] scaleY	size scaling factor Y
-	 * @param[in] alpha		alpha value
+	/**@brief Draw a texture.
+	 * @param[in]	texture	Texture resource.
+	 * @param[in]	dx		Destination X. (center pos)
+	 * @param[in]	dy		Destination Y. (center pos)
+	 * @param[in]	lrInv	Left-right invert.
+	 * @param[in]	udInv	Up-down invert.
+	 * @param[in]	sx		Source X.
+	 * @param[in]	sy		Source Y.
+	 * @param[in]	sw		Source width. (texture size if SRC_SIZE_DEFAULT)
+	 * @param[in]	sh		Source height. (texture size if SRC_SIZE_DEFAULT)
+	 * @param[in]	cx		Center X from (sx, sy).
+	 * @param[in]	cy		Center Y from (sx, sy).
+	 * @param[in]	angle	Rotation angle [rad]. (using center pos)
+	 * @param[in]	scaleX	Size scaling factor X.
+	 * @param[in]	scaleY	Size scaling factor Y.
+	 * @param[in]	alpha	Alpha value.
 	 */
 	void drawTexture(const TextureResourcePtr &texture,
 		int dx, int dy, bool lrInv = false, bool udInv = false,
 		int sx = 0, int sy = 0, int sw = SrcSizeDefault, int sh = SrcSizeDefault,
 		int cx = 0, int cy = 0, float angle = 0.0f,
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f);
+	//@}
 
+	/// @name Font
+	//@{
+	/**@brief Load a font resource.
+	 * @details
+	 * startChar <= character_code <= endChar will be available.
+	 * This function may take time.
+	 * @param[in]	fontName	Font name.
+	 * @param[in]	startChar	The first character code to be available.
+	 * @param[in]	endChar		The last character code to be available.
+ 	 * @param[in]	w			Size width.
+  	 * @param[in]	h			Size height.
+	 * @return					shared_ptr to font resource.
+	 */
 	FontResourcePtr loadFont(const wchar_t *fontName,
 		uint32_t startChar, uint32_t endChar, uint32_t w, uint32_t h);
 
+	/**@brief Draw a character.
+	 * @param[in]	font	Font resource.
+	 * @param[in]	c		Character code. (UTF-16)
+	 * @param[in]	dx		Destination X. (center pos)
+	 * @param[in]	dy		Destination X. (center pos)
+	 * @param[in]	color	Text color. (0xRRGGBB)
+	 * @param[in]	scaleX	Scaling factor X.
+	 * @param[in]	scaleY	Scaling factor Y.
+	 * @param[in]	alpha	Alpha value.
+	 * @param[out]	nextx	X of next column.
+	 * @param[out]	nexty	Y of next row.
+	 */
 	void drawChar(const FontResourcePtr &font, wchar_t c, int dx, int dy,
 		uint32_t color = 0x000000,
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f,
 		int *nextx = nullptr, int *nexty = nullptr);
 
-	/** @brief Draw string.
-	 * @param[in] font		font resource
-	 * @param[in] str		text to be drawn
-	 * @param[in] dx		destination X (center pos)
-	 * @param[in] dy		destination Y (center pos)
-	 * @param[in] color		text color (0xRRGGBB)
-	 * @param[in] ajustX	ajust char-to-char space
-	 * @param[in] scaleX	scaling factor X
-	 * @param[in] scaleY	scaling factor Y
-	 * @param[in] alpha		alpha value
-	 * @param[in] nextx		X of next column
-	 * @param[in] nexty		Y of next row
+	/**@brief Draw a string.
+	 * @param[in]	font	Font resource.
+	 * @param[in]	str		Text string to be drawn.
+	 * @param[in]	dx		Destination X. (center pos)
+	 * @param[in]	dy		Destination Y. (center pos)
+	 * @param[in]	color	Text color. (0xRRGGBB)
+	 * @param[in]	ajustX	Ajust char-to-char space.
+	 * @param[in]	scaleX	Scaling factor X.
+	 * @param[in]	scaleY	Scaling factor Y.
+	 * @param[in]	alpha	Alpha value.
+	 * @param[out]	nextx	X of next column.
+	 * @param[out]	nexty	Y of next row.
 	 */
 	void drawString(const FontResourcePtr &font, const wchar_t *str, int dx, int dy,
 		uint32_t color = 0x000000, int ajustX = 0,
 		float scaleX = 1.0f, float scaleY = 1.0f, float alpha = 1.0f,
 		int *nextx = nullptr, int *nexty = nullptr);
+	//@}
 
 private:
 	const DXGI_FORMAT BufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
