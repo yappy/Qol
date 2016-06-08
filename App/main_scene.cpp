@@ -3,29 +3,71 @@
 
 using framework::keyPressedAsync;
 
-MainScene::MainScene(MyApp *app, bool debugEnable) :
-	m_app(app),
-	m_lua(debugEnable, LuaHeapSize)
+const wchar_t *const LuaSrcFile = L"../sampledata/test.lua";
+
+MainScene::MainScene(MyApp *app, bool luaDebug) :
+	m_app(app), m_luaDebug(luaDebug)
 {
-	m_lua.loadTraceLib();
-	m_lua.loadSysLib();
-	m_lua.loadRandLib();
-	m_lua.loadResourceLib(m_app);
-	m_lua.loadGraphLib(m_app);
-	m_lua.loadSoundLib(m_app);
+	initializeLua();
 
+	// === If LuaError occured, throw it and exit application ===
+	// compile and exec chunk
 	bool dbg = keyPressedAsync(VK_F12);
-	m_lua.loadFile(L"../sampledata/test.lua", dbg);
-
+	m_lua->loadFile(LuaSrcFile, dbg);
+	// exec load()
 	{
 		framework::UnsealResource autoSeal(*m_app);
-		m_lua.callGlobal("load", dbg);
+		bool dbg = keyPressedAsync(VK_F12);
+		m_lua->callGlobal("load", dbg);
 	}
+}
+
+void MainScene::initializeLua()
+{
+	// destruct if m_lua != nullptr
+	m_lua.reset(new lua::Lua(m_luaDebug, LuaHeapSize));
+
+	m_lua->loadTraceLib();
+	m_lua->loadSysLib();
+	m_lua->loadRandLib();
+	m_lua->loadResourceLib(m_app);
+	m_lua->loadGraphLib(m_app);
+	m_lua->loadSoundLib(m_app);
+}
+
+void MainScene::reloadLua()
+{
+	initializeLua();
+
+	bool dbg = keyPressedAsync(VK_F12);
+	try {
+		m_lua->loadFile(LuaSrcFile, dbg);
+	}
+	catch(lua::LuaError &err) {
+		luaErrorHandler(err, L"compile and exec chunk");
+	}
+}
+
+void MainScene::luaErrorHandler(const lua::LuaError &err, const wchar_t *msg)
+{
+	debug::writef("Lua error: %s", msg);
+	debug::writeLine(err.what());
+	// go to lua error state (m_lua == nullptr)
+	m_lua.reset();
 }
 
 void MainScene::setup()
 {
-	m_loading = true;
+	bool dbg = keyPressedAsync(VK_F12);
+	// exec start()
+	if (m_lua != nullptr) {
+		try {
+			m_lua->callGlobal("start", dbg);
+		}
+		catch(lua::LuaError &err) {
+			luaErrorHandler(err, L"exec start()");
+		}
+	}
 	startLoadThread();
 }
 
@@ -41,36 +83,43 @@ void MainScene::loadOnSubThread(std::atomic_bool &cancel)
 
 void MainScene::updateOnMainThread()
 {
+	if (isLoading()) {
+		return;
+	}
+
+	bool reload = keyPressedAsync(VK_F5);
 	bool dbg = keyPressedAsync(VK_F12);
 
-	if (m_loading) {
-		if (!isLoading()) {
-			m_loading = false;
-			m_lua.callGlobal("start", dbg);
-		}
-		else {
-			return;
-		}
+	if (reload) {
+		reloadLua();
+	}
+	if (m_lua == nullptr) {
+		// Lua error state, do nothing
+		return;
 	}
 
 	auto keys = m_app->input().getKeys();
-
-	m_lua.callGlobal("update", dbg,
-		[&keys](lua_State *L) {
-		// arg1: key input table str->bool
-		const int Count = static_cast<int>(keys.size());
-		lua_createtable(L, 0, Count);
-		for (int i = 0; i < Count; i++) {
-			// key = dir2str(i), value = keys[i]
-			lua_pushstring(L, input::dikToString(i));
-			lua_pushboolean(L, keys[i]);
-			lua_settable(L, -3);
-		}
-	}, 1);
+	try {
+		m_lua->callGlobal("update", dbg,
+			[&keys](lua_State *L) {
+				// arg1: key input table str->bool
+				const int Count = static_cast<int>(keys.size());
+				lua_createtable(L, 0, Count);
+				for (int i = 0; i < Count; i++) {
+					// key = dir2str(i), value = keys[i]
+					lua_pushstring(L, input::dikToString(i));
+					lua_pushboolean(L, keys[i]);
+					lua_settable(L, -3);
+				}
+			}, 1);
+	}
+	catch(lua::LuaError &err) {
+		luaErrorHandler(err, L"exec update()");
+	}
 
 	if (keys[DIK_SPACE]) {
 		// SPACE to sub scene
-		m_lua.callGlobal("exit", dbg);
+		m_lua->callGlobal("exit", dbg);
 		auto *next = m_app->getSceneAs<SubScene>(SceneId::Sub);
 		next->setup();
 		next->update();
@@ -84,6 +133,16 @@ void MainScene::render()
 		// Loading screen
 		return;
 	}
+	if (m_lua == nullptr) {
+		// Lua error state, do nothing
+		return;
+	}
+
 	bool dbg = keyPressedAsync(VK_F12);
-	m_lua.callGlobal("draw", dbg);
+	try {
+		m_lua->callGlobal("draw", dbg);
+	}
+	catch(lua::LuaError &err) {
+		luaErrorHandler(err, L"exec draw()");
+	}
 }

@@ -53,7 +53,7 @@ private:
 
 class MainScene : public framework::scene::AsyncLoadScene {
 public:
-	MainScene(MyApp *app, bool debugEnable);
+	MainScene(MyApp *app, bool luaDebug);
 	~MainScene() = default;
 
 	// Scene specific initialization at scene start
@@ -71,8 +71,13 @@ private:
 	static const int LuaInstLimit = 100000;
 
 	MyApp *m_app;
-	bool m_loading = false;
-	lua::Lua m_lua;
+	// nullptr indicates lua error state
+	std::unique_ptr<lua::Lua> m_lua;
+	bool m_luaDebug;
+
+	void initializeLua();
+	void reloadLua();
+	void luaErrorHandler(const lua::LuaError &err, const wchar_t *msg);
 };
 
 class SubScene : public framework::scene::SceneBase {
