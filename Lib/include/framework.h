@@ -70,6 +70,7 @@ double nextDouble(double a = 0.0, double max = 1.0);
 
 }	// namespace random
 
+/// Scene class.
 namespace scene {
 
 /** @brief Simple scene class base.
@@ -273,7 +274,7 @@ private:
 };
 
 /** @brief Application parameters.
- * @details Each field has default value.
+ * @details Each field has a default value.
  */
 struct AppParam {
 	/// hInstance from WinMain.
