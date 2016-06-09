@@ -93,6 +93,9 @@ void MainScene::updateOnMainThread()
 	}
 
 	if (reload) {
+		m_luaStartCalled = false;
+		m_app->sound().stopAllSoundEffect();
+		m_app->sound().stopBgm();
 		reloadLua();
 	}
 	if (m_lua == nullptr) {
