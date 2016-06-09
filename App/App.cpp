@@ -135,7 +135,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		graphics::GraphicsParam graphParam;
 		appParam.hInstance = hInstance;
 		appParam.wndClsName = L"TestAppClass";
-		appParam.title = L"Test App (F12: Launch Lua Debugger)";
+		appParam.title = L"Test App (0-9: Change speed, F5: Reload script, F12: Lua Debugger)";
 		appParam.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP));
 		appParam.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
 		appParam.nCmdShow = nCmdShow;

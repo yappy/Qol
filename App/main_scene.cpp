@@ -86,6 +86,11 @@ void MainScene::updateOnMainThread()
 
 	bool reload = keyPressedAsync(VK_F5);
 	bool dbg = keyPressedAsync(VK_F12);
+	for (int num = 0; num <= 9; num++) {
+		if (keyPressedAsync('0' + num)) {
+			m_speed = num;
+		}
+	}
 
 	if (reload) {
 		reloadLua();
@@ -109,8 +114,9 @@ void MainScene::updateOnMainThread()
 
 	auto keys = m_app->input().getKeys();
 	try {
-		m_lua->callGlobal("update", dbg,
-			[&keys](lua_State *L) {
+		for (int i = 0; i < m_speed; i++) {
+			m_lua->callGlobal("update", dbg,
+				[&keys](lua_State *L) {
 				// arg1: key input table str->bool
 				const int Count = static_cast<int>(keys.size());
 				lua_createtable(L, 0, Count);
@@ -121,6 +127,7 @@ void MainScene::updateOnMainThread()
 					lua_settable(L, -3);
 				}
 			}, 1);
+		}
 	}
 	catch(lua::LuaError &err) {
 		luaErrorHandler(err, L"exec update()");

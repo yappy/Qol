@@ -74,6 +74,7 @@ private:
 	MyApp *m_app;
 	// The first update() call after setup()
 	bool m_luaStartCalled = false;
+	int m_speed = 1;
 	// nullptr indicates lua error state
 	std::unique_ptr<lua::Lua> m_lua;
 	bool m_luaDebug;
