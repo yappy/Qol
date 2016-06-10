@@ -23,16 +23,16 @@ SOFTWARE.
 ===============================================================================
 
 * sampledata
-See sampledata/LICENSE.txt.
+See sampledata/license.txt
 
 * libogg
-See libogg/COPYING.
+See libogg/COPYING
 
 * libvorbis
-See libvorbis/COPYING.
+See libvorbis/COPYING
 
 * Lua
-See lua/doc/readme.html.
+See lua/doc/readme.html
 
 * Doxygen
 It is distributed under GPL.
