@@ -19,3 +19,21 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+===============================================================================
+
+* sampledata
+See sampledata/LICENSE.txt.
+
+* libogg
+See libogg/COPYING.
+
+* libvorbis
+See libvorbis/COPYING.
+
+* Lua
+See lua/doc/readme.html.
+
+* Doxygen
+It is distributed under GPL.
+This project just uses it as a separated binary.
