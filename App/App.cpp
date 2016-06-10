@@ -22,14 +22,14 @@ MyApp::MyApp(const framework::AppParam &appParam,
 	: Application(appParam, graphParam, ResSetId::Count)
 {}
 
-std::unique_ptr<framework::scene::SceneBase> &MyApp::getScene(SceneId id)
+framework::scene::SceneBase *MyApp::getScene(SceneId id)
 {
-	return m_scenes[static_cast<uint32_t>(id)];
+	return m_scenes[static_cast<uint32_t>(id)].get();
 }
 
-void MyApp::setScene(SceneId id)
+void MyApp::setNextScene(SceneId id)
 {
-	m_pCurrentScene = getScene(id).get();
+	m_pNextScene = getScene(id);
 }
 
 void MyApp::init()
@@ -51,16 +51,24 @@ void MyApp::init()
 	// set initial scene
 	auto mainScene = getSceneAs<MainScene>(SceneId::Main);
 	mainScene->setup();
-	setScene(SceneId::Main);
+	setNextScene(SceneId::Main);
 }
 
 void MyApp::update()
 {
+	// go to next scene returned by previous update()
+	if (m_pNextScene != nullptr) {
+		m_pCurrentScene = m_pNextScene;
+		m_pNextScene = nullptr;
+	}
+
 	m_pCurrentScene->update();
+	// m_pNextScene may be set
 }
 
 void MyApp::render()
 {
+	// render by current scene even if next scene was returned
 	m_pCurrentScene->render();
 }
 

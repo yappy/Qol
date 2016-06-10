@@ -149,7 +149,7 @@ void MainScene::updateOnMainThread()
 		auto *next = m_app->getSceneAs<SubScene>(SceneId::Sub);
 		next->setup();
 		next->update();
-		m_app->setScene(SceneId::Sub);
+		m_app->setNextScene(SceneId::Sub);
 	}
 }
 

@@ -14,6 +14,7 @@ enum class SceneId {
 	Sub,
 	Count
 };
+const size_t SceneCount = static_cast<size_t>(SceneId::Count);
 
 struct ResSetId {
 	ResSetId() = delete;
@@ -31,13 +32,13 @@ public:
 		const graphics::GraphicsParam &graphParam);
 	~MyApp() = default;
 
-	std::unique_ptr<framework::scene::SceneBase> &getScene(SceneId id);
+	framework::scene::SceneBase *getScene(SceneId id);
 	template <class T>
 	T *getSceneAs(SceneId id)
 	{
-		return static_cast<T *>(getScene(id).get());
+		return static_cast<T *>(getScene(id));
 	}
-	void setScene(SceneId id);
+	void setNextScene(SceneId id);
 
 protected:
 	void init() override;
@@ -46,10 +47,11 @@ protected:
 
 private:
 	// scene instance array
-	std::array<std::unique_ptr<framework::scene::SceneBase>,
-		static_cast<size_t>(SceneId::Count)> m_scenes;
+	std::array<std::unique_ptr<framework::scene::SceneBase>, SceneCount> m_scenes;
 	// current scene
 	framework::scene::SceneBase *m_pCurrentScene = nullptr;
+	// next scene (no change if nullptr)
+	framework::scene::SceneBase *m_pNextScene = nullptr;
 };
 
 class MainScene : public framework::scene::AsyncLoadScene {
