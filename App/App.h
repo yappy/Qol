@@ -14,12 +14,14 @@ enum class SceneId {
 	Sub,
 	Count
 };
+const size_t SceneCount = static_cast<size_t>(SceneId::Count);
 
 struct ResSetId {
 	ResSetId() = delete;
 	enum {
 		Common,
 		Main,
+		Sub,
 		Count
 	};
 };
@@ -30,13 +32,13 @@ public:
 		const graphics::GraphicsParam &graphParam);
 	~MyApp() = default;
 
-	std::unique_ptr<framework::scene::SceneBase> &getScene(SceneId id);
+	framework::scene::SceneBase *getScene(SceneId id);
 	template <class T>
 	T *getSceneAs(SceneId id)
 	{
-		return static_cast<T *>(getScene(id).get());
+		return static_cast<T *>(getScene(id));
 	}
-	void setScene(SceneId id);
+	void setNextScene(SceneId id);
 
 protected:
 	void init() override;
@@ -45,15 +47,16 @@ protected:
 
 private:
 	// scene instance array
-	std::array<std::unique_ptr<framework::scene::SceneBase>,
-		static_cast<size_t>(SceneId::Count)> m_scenes;
+	std::array<std::unique_ptr<framework::scene::SceneBase>, SceneCount> m_scenes;
 	// current scene
 	framework::scene::SceneBase *m_pCurrentScene = nullptr;
+	// next scene (no change if nullptr)
+	framework::scene::SceneBase *m_pNextScene = nullptr;
 };
 
 class MainScene : public framework::scene::AsyncLoadScene {
 public:
-	MainScene(MyApp *app, bool debugEnable);
+	MainScene(MyApp *app, bool luaDebug);
 	~MainScene() = default;
 
 	// Scene specific initialization at scene start
@@ -71,8 +74,16 @@ private:
 	static const int LuaInstLimit = 100000;
 
 	MyApp *m_app;
-	bool m_loading = false;
-	lua::Lua m_lua;
+	// The first update() call after setup()
+	bool m_luaStartCalled = false;
+	int m_speed = 1;
+	// nullptr indicates lua error state
+	std::unique_ptr<lua::Lua> m_lua;
+	bool m_luaDebug;
+
+	void initializeLua();
+	void reloadLua();
+	void luaErrorHandler(const lua::LuaError &err, const wchar_t *msg);
 };
 
 class SubScene : public framework::scene::SceneBase {

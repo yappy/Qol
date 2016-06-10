@@ -276,6 +276,13 @@ void XAudio2::stopBgm()
 	// DestroyVoice(), stop playing, set nullptr
 	m_pBgmVoice.reset();
 	// release reference to ogg bin
+	if (m_playingBgm != nullptr) {
+		OggVorbis_File *fp = m_playingBgm->ovFp();
+		int ret = ::ov_raw_seek(fp, 0);
+		if (ret < 0) {
+			throwTrace<OggVorbisError>("ov_raw_seek() failed", ret);
+		}
+	}
 	m_playingBgm.reset();
 
 	debug::writeLine(L"stopBgm OK");
@@ -313,9 +320,9 @@ void XAudio2::processFrameBgm()
 		if (size == 0) {
 			// stream end; seek to loop point
 			// TODO: loop point
-			int ret = ::ov_time_seek(fp, 0.0);
+			int ret = ::ov_raw_seek(fp, 0);
 			if (ret < 0) {
-				throwTrace<OggVorbisError>("ov_time_seek() failed", ret);
+				throwTrace<OggVorbisError>("ov_raw_seek() failed", ret);
 			}
 		}
 	}
