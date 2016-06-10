@@ -3,11 +3,6 @@
 
 SubScene::SubScene(MyApp *app) : m_app(app)
 {
-	{
-		framework::UnsealResource autoSeal(*m_app);
-		m_app->addSeResource(1, "testse", L"/C:/Windows/Media/chimes.wav");
-	}
-	m_app->loadResourceSet(1, std::atomic_bool());
 }
 
 void SubScene::setup()

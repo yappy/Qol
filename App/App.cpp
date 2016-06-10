@@ -22,14 +22,14 @@ MyApp::MyApp(const framework::AppParam &appParam,
 	: Application(appParam, graphParam, ResSetId::Count)
 {}
 
-std::unique_ptr<framework::scene::SceneBase> &MyApp::getScene(SceneId id)
+framework::scene::SceneBase *MyApp::getScene(SceneId id)
 {
-	return m_scenes[static_cast<uint32_t>(id)];
+	return m_scenes[static_cast<uint32_t>(id)].get();
 }
 
-void MyApp::setScene(SceneId id)
+void MyApp::setNextScene(SceneId id)
 {
-	m_pCurrentScene = getScene(id).get();
+	m_pNextScene = getScene(id);
 }
 
 void MyApp::init()
@@ -40,7 +40,6 @@ void MyApp::init()
 		addFontResource(ResSetId::Common, "e", L"ＭＳ 明朝", 0x00, 0xff, 16, 32);
 		addFontResource(ResSetId::Common, "j", L"メイリオ", L'あ', L'ん', 128, 128);
 		addSeResource(ResSetId::Common, "testse", L"/C:/Windows/Media/chord.wav");
-		addBgmResource(ResSetId::Common, "testbgm", L"../sampledata/Epoq-Lepidoptera.ogg");
 	}
 	loadResourceSet(ResSetId::Common, std::atomic_bool());
 
@@ -52,16 +51,24 @@ void MyApp::init()
 	// set initial scene
 	auto mainScene = getSceneAs<MainScene>(SceneId::Main);
 	mainScene->setup();
-	setScene(SceneId::Main);
+	setNextScene(SceneId::Main);
 }
 
 void MyApp::update()
 {
+	// go to next scene returned by previous update()
+	if (m_pNextScene != nullptr) {
+		m_pCurrentScene = m_pNextScene;
+		m_pNextScene = nullptr;
+	}
+
 	m_pCurrentScene->update();
+	// m_pNextScene may be set
 }
 
 void MyApp::render()
 {
+	// render by current scene even if next scene was returned
 	m_pCurrentScene->render();
 }
 
@@ -136,7 +143,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		graphics::GraphicsParam graphParam;
 		appParam.hInstance = hInstance;
 		appParam.wndClsName = L"TestAppClass";
-		appParam.title = L"Test App (F12: Launch Lua Debugger)";
+		appParam.title = L"Test App (0-9: Change speed, F5: Reload script, F12: Lua Debugger)";
 		appParam.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APP));
 		appParam.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
 		appParam.nCmdShow = nCmdShow;
