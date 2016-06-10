@@ -1,3 +1,6 @@
 Epoq-Lepidoptera.ogg
 sample ogg file
 http://www.vorbis.com/music/
+
+Others
+See LICENSE.txt of top directory.
